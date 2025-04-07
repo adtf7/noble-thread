@@ -1,0 +1,490 @@
+<%- include('../../views/partials/user/header.ejs')%>
+<style>
+.shop__sidebar__category h5 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.shop__sidebar__category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.shop__sidebar__category li {
+    margin-bottom: 8px;
+}
+
+.category-label {
+    display: block;
+    color: #6c757d; /* Muted text */
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.category-label:hover {
+    color: black;
+}
+
+.active-category {
+    font-weight: bold;
+    color: black;
+}
+
+.clear-category {
+    display: block;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #6c757d; ;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.3s ease;
+}
+
+.clear-category:hover {
+    color: black;
+}
+
+.white {
+    background-color: white;
+    border: 1px solid #ccc; /* Adjust as needed */
+    width: 30px; /* Adjust as needed */
+    height: 30px; /* Adjust as needed */
+    display: inline-block;
+    cursor: pointer;
+}
+
+.product__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.product__pagination a {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+.active-size {
+    font-weight: bold;
+    color: red; /* Highlight the selected size */
+}
+
+.active-category {
+    font-weight: bold;
+    color: blue; /* Highlight selected category */
+}
+
+.active-price {
+    font-weight: bold;
+    color: #ff4500; /* Use your theme color */
+    text-decoration: underline blue 2px;
+}
+
+.shop__sidebar__price a:hover {
+    color: #ff4500; /* Use your theme color */
+    text-decoration: underline;
+}
+
+.product__pagination a:hover,
+.product__pagination a.active {
+    background-color: #ff4500; /* Change to your theme color */
+    color: #fff;
+    border-color: #ff4500;
+}
+
+.product__pagination span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #888;
+}
+
+.product__pagination a {
+    margin: 0 5px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+}
+
+.product__pagination a.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.product__pagination a:hover:not(.active) {
+    background-color: #ddd;
+}
+
+.shop__sidebar__color {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.color-label {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.color-label:hover {
+    border: 2px solid black;
+}
+
+.active-color {
+    border: 2px solid black;
+}
+
+#selectedColorInput {
+    margin-left: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 120px;
+    text-align: center;
+}
+
+.clear-color {
+    font-size: 16px;
+    color: #007bff;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.clear-color:hover {
+    color: black;
+}
+</style>
+
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Shop</h4>
+                    <div class="breadcrumb__links">
+                        <a href="/">Home</a>
+                        <span>Shop</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="shop spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="shop__sidebar">
+                    <div class="shop__sidebar__search">
+                        <form action="/shop" method="GET">
+                            <input type="text" name="search" placeholder="Search products..." value="<%= searchQuery %>">
+                            <button type="submit"><span class="icon_search"></span></button>
+                        </form>
+                    </div>
+                    <div class="shop__sidebar__accordion">
+                        <div class="accordion" id="accordionExample">
+                            <div class="card">
+                                <div class="card-heading">
+                                    <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
+                                </div>
+                                <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <div class="shop__sidebar__category">
+                                            <ul>
+                                                <% if (categories.length > 0) { %>
+                                                    <% categories.forEach(cat => { %>
+                                                        <% if(cat.isListed){%>
+                                                            <li>
+                                                                <label class="category-label <%= selectedCategory === cat._id.toString() ? 'active-category' : '' %>"
+                                                                       onclick="applyCategoryFilter('<%= cat._id %>')">
+                                                                    <%= cat.name %>
+                                                                </label>
+                                                            </li>
+                                                        <%}%>
+                                                    <% }); %>
+                                                <% } else { %>
+                                                    <li><p>No categories available</p></li>
+                                                <% } %>
+                                            </ul>
+                                            <label class="clear-category" onclick="clearCategoryFilter()">Clear</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-heading">
+                                    <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
+                                </div>
+                                <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <div class="shop__sidebar__price">
+                                            <ul>
+                                                <li>
+                                                    <a href="<%= buildUrl({ minPrice: 0, maxPrice: 1000, page: 1 }) %>" 
+                                                       class="<%= (minPrice == 0 && maxPrice == 1000) ? 'active-price' : '' %>">
+                                                        ₹ 0 - ₹ 1,000.00
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="<%= buildUrl({ minPrice: 1000, maxPrice: 5000, page: 1 }) %>" 
+                                                       class="<%= (minPrice == 1000 && maxPrice == 5000) ? 'active-price' : '' %>">
+                                                        ₹ 1,000.00 - ₹ 5,000.00
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="<%= buildUrl({ minPrice: 5000, maxPrice: 10000, page: 1 }) %>" 
+                                                       class="<%= (minPrice == 5000 && maxPrice == 10000) ? 'active-price' : '' %>">
+                                                        ₹ 5,000.00 - ₹ 10,000.00
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="<%= buildUrl({ minPrice: 10000, maxPrice: 15000, page: 1 }) %>" 
+                                                       class="<%= (minPrice == 10000 && maxPrice == 15000) ? 'active-price' : '' %>">
+                                                        ₹ 10,000.00 - ₹ 15,000.00
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="<%= buildUrl({ minPrice: 15000, maxPrice: 25999, page: 1 }) %>" 
+                                                       class="<%= (minPrice == 15000 && maxPrice == 25999) ? 'active-price' : '' %>">
+                                                        ₹ 15,000.00 - ₹ 25,999.00
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="<%= buildUrl({ minPrice: 25999, page: 1 }) %>" 
+                                                       class="<%= (minPrice == 25999 && !maxPrice) ? 'active-price' : '' %>">
+                                                        ₹ 25,999.00 +
+                                                    </a>
+                                                </li>
+                                                <li><a href="/shop">Clear</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="card">
+                                <div class="card-heading">
+                                    <a data-toggle="collapse" data-target="#collapseFour">Size</a>
+                                </div>
+                                <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <div class="shop__sidebar__size">
+                                            <% if (allSizes.length > 0) { %>
+                                                <% allSizes.forEach(s => { %>
+                                                    <label for="size-<%= s %>" class="<%= selectedSize === s ? 'active-size' : '' %>">
+                                                        <input type="radio" id="size-<%= s %>" name="size" value="<%= s %>"
+                                                               onchange="applyFilter()"
+                                                               <%= selectedSize === s ? 'checked' : '' %> >
+                                                        <%= s %>
+                                                    </label>
+                                                <% }); %>
+                                                <label onclick="clearSizeFilter()" id="size">Clear</label>
+                                            <% } else { %>
+                                                <p>No sizes available</p>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+                            
+                            <!-- <div class="card">
+                                <div class="card-heading">
+                                    <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
+                                </div>
+                                <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <div class="shop__sidebar__color">
+                                            <% for (let i = 0; i < allColors.length; i++) { %>
+                                                <label class="color-label <%= selectedColor === allColors[i] ? 'active-color' : '' %>"
+                                                       onclick="applyColorFilter('<%= allColors[i] %>')"
+                                                       style="background-color:<%= allColors[i].toLowerCase() %>">
+                                                </label>
+                                            <% } %>
+                                            <a href="/shop"><label>Clear</label></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="shop__product__option">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shop__product__option__left">
+                                <p>Showing <%= start %>–<%= end %> of <%= totalProducts %> results</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shop__product__option__right">
+                                <form id="sortForm">
+                                    <label for="sort">Sort By:</label>
+                                    <select name="sort" id="sort" onchange="applySort()">
+                                        <option value="">Default</option>
+                                        <option value="price-asc" <%= (sort === 'price-asc') ? 'selected' : '' %>>Price: Low to High</option>
+                                        <option value="price-desc" <%= (sort === 'price-desc') ? 'selected' : '' %>>Price: High to Low</option>
+                                        <option value="name-asc" <%= (sort === 'name-asc') ? 'selected' : '' %>>Name: A to Z</option>
+                                        <option value="name-desc" <%= (sort === 'name-desc') ? 'selected' : '' %>>Name: Z to A</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <% for(let i=0; i<product.length; i++){ %>
+                        <%if(!product[i].isBlocked ){%>
+                            <div class="col-lg-3 col-md-6 col-sm-6 mix hot-sales">
+                                <div class="product__item">
+                                    <div class="product__item__pic">
+                                        <a href="/product?id=<%= product[i]._id %>">
+                                            <img src="<%= product[i].productImage[0] %>" alt="Product Image" style="width:100%; height:auto;">
+                                        </a>
+                                        <ul class="product__hover">
+                                            <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
+                                            <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
+                                            <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="product__item__text">
+                                        <h6><%= product[i].productName %></h6>
+                                        <a href="#" class="add-cart"><%= product[i].productName %></a>
+                                        <div class="rating">
+                                            <i class="fa fa-star-o"></i>
+                                            <i class="fa fa-star-o"></i>
+                                            <i class="fa fa-star-o"></i>
+                                            <i class="fa fa-star-o"></i>
+                                            <i class="fa fa-star-o"></i>
+                                        </div>
+                                        <h5>₹ <%= product[i].salePrice %></h5>
+                                        <div class="product__color__select">
+                                            <label for="pc-<%= i %>" class="color-label" style="background-color: <%= product[i].color.toLowerCase() %>">
+                                                <input type="radio" name="color-<%= i %>" id="pc-<%= i %>-<%= i %>">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <%}%>
+                    <% } %>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="product__pagination">
+                            <% if (currentPage > 1) { %>
+                                <a href="?page=<%= currentPage - 1 %>">«</a>
+                            <% } %>
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <% if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
+                                    <a href="?page=<%= i %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                                <% } else if (i === currentPage - 2 || i === currentPage + 2) { %>
+                                    <span>...</span>
+                                <% } %>
+                            <% } %>
+                            <% if (currentPage < totalPages) { %>
+                                <a href="?page=<%= currentPage + 1 %>">»</a>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<script>
+function applySort() {
+    const selectedSort = document.getElementById('sort').value;
+    const url = new URL(window.location.href);
+    if (selectedSort) {
+        url.searchParams.set('sort', selectedSort);
+    } else {
+        url.searchParams.delete('sort');
+    }
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function applyCategoryFilter(categoryId) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('category') === categoryId) {
+        url.searchParams.delete('category');
+    } else {
+        url.searchParams.set('category', categoryId);
+    }
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function clearCategoryFilter() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('category');
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function applyColorFilter(color) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('color') === color) {
+        url.searchParams.delete('color');
+    } else {
+        url.searchParams.set('color', color);
+    }
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function clearColorFilter() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('color');
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function applySizeFilter(size) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('size') === size) {
+        url.searchParams.delete('size');
+    } else {
+        url.searchParams.set('size', size);
+    }
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function clearSizeFilter() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('size');
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function applyFilter() {
+    const selectedSize = document.querySelector('input[name="size"]:checked');
+    if (selectedSize) {
+        applySizeFilter(selectedSize.value);
+    }
+}
+</script>
+
+<%- include('../../views/partials/user/footer.ejs')%>

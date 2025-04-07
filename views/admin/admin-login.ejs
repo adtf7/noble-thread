@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noble Threads - Admin Login</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Custom Font for Brand Name */
+        @import url('https://fonts.googleapis.com/css2?family=Lacquer&display=swap');
+        .brand {
+            font-family: 'Lacquer', cursive;
+            color: black;
+        }
+        
+        /* Error Message Styling */
+        .errormsg {
+            color: red;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .errormsg.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
+        <!-- Brand Name -->
+        <h1 class="text-3xl font-extrabold text-center text-black-600 mb-2 brand">Noble Threads</h1>
+        <h2 class="text-xl font-semibold text-center mb-6">Admin Login</h2>
+
+        <!-- Admin Login Image -->
+        
+        <% if (message) { %>
+            <div class="errormsg show text-center" role="alert"><%= message %></div>
+        <% } %>
+
+        <form action="/admin/loginverify" method="POST" id="loginForm">
+            <!-- Email Field -->
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div id="erroremail" class="errormsg"></div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" name="password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div id="errorpassword" class="errormsg"></div>
+            </div>
+
+            <!-- Login Button --> 
+            <button type="submit" class="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-dark-700 hover:text-white transition-colors">
+                Login
+            </button>
+        </form>
+    </div>
+
+    <script>
+        let emailid = document.getElementById('email');
+        let passwordid = document.getElementById('password');
+        let erroremail = document.getElementById('erroremail');
+        let errorpassword = document.getElementById('errorpassword');
+        let loginForm = document.getElementById('loginForm');
+
+        function emailValidatecheck() {
+            let emailval = emailid.value.trim();
+            let emailpattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailval === '') {
+                erroremail.textContent = 'Please enter your email';
+                erroremail.classList.add('show');
+            } else if (!emailpattern.test(emailval)) {
+                erroremail.textContent = 'Please enter a valid email address';
+                erroremail.classList.add('show');
+            } else {
+                erroremail.textContent = '';
+                erroremail.classList.remove('show');
+            }
+        }
+
+        function passwordValidatecheck() {
+            let passwordval = passwordid.value.trim();
+            if (passwordval === '') {
+                errorpassword.textContent = 'Please enter your password';
+                errorpassword.classList.add('show');
+            } else {
+                errorpassword.textContent = '';
+                errorpassword.classList.remove('show');
+            }
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            emailValidatecheck();
+            passwordValidatecheck();
+            if (erroremail.textContent || errorpassword.textContent) {
+                e.preventDefault();
+            }
+        });
+
+     
+    // Disable backward navigation
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = function () {
+        window.history.pushState(null, null, window.location.href);
+    };
+
+    // Prevent cached pages from showing after logout
+    if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+        window.location.href = '/admin/admin-login';
+    }
+
+
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Noble Threads</title>
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lacquer&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Shadow */
+        .custom-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Brand Styling */
+        .brand {
+            font-family: 'Lacquer', cursive !important;
+            letter-spacing: 5px;  /* Increases space between letters */
+            writing-mode: vertical-rl; /* Rotates text to vertical */
+            text-orientation: upright; /* Keeps letters upright */
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap; /* Prevents text from wrapping */
+        }
+
+        /* Error Message Styling */
+        .errormsg {
+            color: red;
+            font-size: 0.875rem; /* Tailwind's text-sm */
+            margin-top: 0.25rem; /* Tailwind's mt-1 */
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full grid md:grid-cols-2 gap-8 items-center">
+            <!-- Left Side - Image -->
+            <div class="hidden md:block h-full rounded-l-2xl overflow-hidden relative">
+                <img src="/img/loginimage.jpg" alt="Fashion Model" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black opacity-10"></div>
+
+                <!-- Brand text positioned vertically on the right -->
+                <div class="brand text-white text-3xl font-bold">
+                    NOBLE THREADS 
+                </div>
+            </div>
+
+            <!-- Right Side - Sign Up Form -->
+            <div class="bg-gray-300 p-8 rounded-2xl custom-shadow h-full flex items-center">
+                <div class="w-full">
+                    <div class="mb-8 text-center">
+                        <h1 class="text-3xl font-bold mb-2">Sign Up</h1>
+                    </div>
+
+                    <form action="/signup" method="POST" id="signform">
+                        <div class="space-y-6">
+
+                            <div style="color: red;">
+                                
+                                <%-message-%></div>
+                            <!-- Full Name -->
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <input 
+                                    type="text" 
+                                    id="name" 
+                                    name="name" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                >
+                                <div id="errorname" class="errormsg"></div>
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                >
+                                <div id="erroremail" class="errormsg"></div>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                <input 
+                                    type="tel" 
+                                    id="phone" 
+                                    name="phone" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                >
+                                <div id="errorphone" class="errormsg"></div>
+                            </div>
+
+                            <!-- Password -->
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    name="password" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                >
+                                <div id="errorpassword" class="errormsg"></div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div>
+                                <label for="confpassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                                <input 
+                                    type="password" 
+                                    id="confpassword" 
+                                    name="confpassword" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                >
+                                <div id="errorconfpassword" class="errormsg"></div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button 
+                                type="submit"
+                                class="w-full bg-gray-700 text-white py-3 rounded-lg bg-muted transition-colors flex items-center justify-center"
+
+                            >
+                                Sign Up
+                            </button>
+
+                            <!-- Sign Up with Google Button -->
+                            <a
+                                href="/auth/google"
+                                onclick="window.location.href='/auth/google'"
+                                class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors mt-4 flex items-center justify-center"
+                            >
+                            Sign Up with Google
+                            </a>
+
+                        <!-- Login Link -->
+                        <p class="text-center text-sm text-gray-600 mt-4">
+                            Already have an account? 
+                            <a href="/login" class="text-blue-600 hover:text-blue-700 font-medium">Login</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        let nameid = document.getElementById('name');
+        let emailid = document.getElementById('email');
+        let phoneid = document.getElementById('phone');
+        let passwordid = document.getElementById('password');
+        let confpasswordid = document.getElementById('confpassword');
+        let errorname = document.getElementById('errorname');
+        let erroremail = document.getElementById('erroremail');
+        let errorphone = document.getElementById('errorphone');
+        let errorpassword = document.getElementById('errorpassword');
+        let errorconfpassword = document.getElementById('errorconfpassword');
+        let signform = document.getElementById('signform');
+
+        function nameValidatechecking() {
+            let nameval = nameid.value;
+            let namepattern = /^[A-Za-z\s]+$/;
+            if (nameval.trim() == '') {
+                errorname.style.display = 'block';
+                errorname.innerHTML = 'Please enter valid name';
+            } else if (!namepattern.test(nameval)) {
+                errorname.style.display = 'block';
+                errorname.innerHTML = 'Name can only contain alphabets and spaces';
+            } else {
+                errorname.style.display = 'none';
+                errorname.innerHTML = '';
+            }
+        }
+
+        function emailValidatecheck() {
+            let emailval = emailid.value;
+            let emailpattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailval.trim() == '') {
+                erroremail.style.display = 'block';
+                erroremail.innerHTML = 'Please enter valid email';
+            } else if (!emailpattern.test(emailval)) {
+                erroremail.style.display = 'block';
+                erroremail.innerHTML = 'Please enter a valid email address';
+            } else {
+                erroremail.style.display = 'none';
+                erroremail.innerHTML = '';
+            }
+        }
+
+        function phoneValidatecheck() {
+            let phoneval = phoneid.value;
+            let phonepattern = /^[0-9]{10}$/;
+            if (phoneval.trim() == '') {
+                errorphone.style.display = 'block';
+                errorphone.innerHTML = 'Please enter valid phone number';
+            } else if (!phonepattern.test(phoneval)) {
+                errorphone.style.display = 'block';
+                errorphone.innerHTML = 'Phone number must be 10 digits';
+            } else {
+                errorphone.style.display = 'none';
+                errorphone.innerHTML = '';
+            }
+        }
+
+        function passwordValidatecheck() {
+            let passwordval = passwordid.value;
+            let passwordpattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (passwordval.trim() == '') {
+                errorpassword.style.display = 'block';
+                errorpassword.innerHTML = 'Please enter a password';
+            } else if (!passwordpattern.test(passwordval)) {
+                errorpassword.style.display = 'block';
+                errorpassword.innerHTML = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character';
+            } else {
+                errorpassword.style.display = 'none';
+                errorpassword.innerHTML = '';
+            }
+        }
+
+        function confPasswordValidatecheck() {
+            let confpasswordval = confpasswordid.value;
+            if (confpasswordval.trim() == '') {
+                errorconfpassword.style.display = 'block';
+                errorconfpassword.innerHTML = 'Please confirm your password';
+            } else if (confpasswordval !== passwordid.value) {
+                errorconfpassword.style.display = 'block';
+                errorconfpassword.innerHTML = 'Passwords do not match';
+            } else {
+                errorconfpassword.style.display = 'none';
+                errorconfpassword.innerHTML = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            signform.addEventListener('submit', (e) => {
+                nameValidatechecking();
+                emailValidatecheck();
+                phoneValidatecheck();
+                passwordValidatecheck();
+                confPasswordValidatecheck();
+                if (!nameid || !emailid || !phoneid || !passwordid || !confpasswordid || !errorname || !erroremail || !errorphone || !errorpassword || !errorconfpassword || !signform) {
+                    console.error('elements not found');
+                }
+                if (errorname.innerHTML || erroremail.innerHTML || errorphone.innerHTML || errorpassword.innerHTML || errorconfpassword.innerHTML) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #111;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        /* Background animation */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #3498db;
+            border-radius: 50%;
+            animation: float 5s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        /* Checkmark animation */
+        .checkmark {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background-color: green;
+            border-radius: 50%;
+            animation: popIn 0.5s ease-out forwards;
+        }
+        .checkmark i {
+            font-size: 40px;
+            color: white;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards 0.3s;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Buttons */
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        .btn {
+            background: white;
+            color: black;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="particles">
+        <% for(let i = 0; i < 30; i++) { %>
+            <div class="particle" style="left:<%= Math.random() * 100 %>%; top:<%= Math.random() * 100 %>%; animation-duration:<%= Math.random() * 5 + 3 %>s;"></div>
+        <% } %>
+    </div>
+
+    <!-- Checkmark Animation -->
+    <div class="checkmark">
+        <i class="fa fa-check"></i>
+    </div>
+
+    <h1>Order Placed Successfully!</h1>
+    <p>Thank you for your purchase.</p>
+
+    <!-- Buttons -->
+    <div class="buttons">
+        <a href="/shop" class="btn">Go to Shop</a>
+        <a href="/order-history" class="btn">View Order Details</a>
+    </div>
+</body>
+</html>

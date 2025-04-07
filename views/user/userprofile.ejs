@@ -1,0 +1,93 @@
+<%- include('../../views/partials/user/header.ejs') %>
+<%- include('../../views/partials/user/aside.ejs') %>
+
+<div class="main-content">
+    <!-- Profile Page (profile.ejs) -->
+      <h2>User Profile</h2>
+      <div class="profile-card">
+          <h3><%= user.name %></h3>
+          <p><strong>Email:</strong> <%= user.email %></p>
+          <p><strong>Phone:</strong> <%= user.phone || "No Phone Number" %></p>
+          <button class="btn" onclick="openSwal()">Edit Profile</button>
+        <a href="/change-password"><button class="btn" >Change password</button></a>
+      </div>
+   
+    </div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+ function openSwal() {
+    Swal.fire({
+      title: 'Edit Profile',
+      html:
+        `<input id="swal-name" class="swal2-input" placeholder="Name" value="<%= (user.name) %>">` +
+        `<input id="swal-phone" class="swal2-input" placeholder="Phone" value="<%= (user.phone || '') %>">`,
+      showCancelButton: true,
+      confirmButtonText: 'Save Changes',
+      focusConfirm: false, // Prevent auto-focus on the confirm button
+      customClass: {
+        container: 'swal2-container', // Custom container class
+        popup: 'swal2-popup', // Custom popup class
+        input: 'swal2-input', // Custom input class
+      },
+      preConfirm: () => {
+        const name = document.getElementById('swal-name').value;
+        const phone = document.getElementById('swal-phone').value;
+        return fetch('/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Updated!', 'Your profile has been updated.', 'success')
+            .then(() => location.reload());
+          } else {
+            Swal.fire('Error!', data.error || 'Something went wrong.', 'error');
+          }
+        })
+        .catch(() => {
+          Swal.fire('Error!', 'Failed to update profile.', 'error');
+        });
+      }
+    });
+  }
+
+</script>
+
+<style>
+      .swal2-input {
+    width: 100% !important; /* Ensure inputs take full width */
+    margin: 10px 0 !important; /* Add spacing between inputs */
+    padding: 10px !important; /* Add padding for better appearance */
+    border: 1px solid #ccc !important; /* Add a border */
+    border-radius: 5px !important; /* Rounded corners */
+  }
+
+  /* Center the SweetAlert2 modal */
+  .swal2-popup {
+    width: 400px !important; /* Set a fixed width */
+    padding: 20px !important; /* Add padding inside the modal */
+  }
+
+  /* Style the Save Changes button */
+  .swal2-confirm {
+    background-color: #4CAF50 !important; /* Green background */
+    border: none !important; /* Remove border */
+    padding: 10px 20px !important; /* Add padding */
+    border-radius: 5px !important; /* Rounded corners */
+  }
+
+  /* Style the Cancel button */
+  .swal2-cancel {
+    background-color: #f44336 !important; /* Red background */
+    border: none !important; /* Remove border */
+    padding: 10px 20px !important; /* Add padding */
+    border-radius: 5px !important; /* Rounded corners */
+  }
+
+</style>
+
+<%- include('../../views/partials/user/footer.ejs') %>

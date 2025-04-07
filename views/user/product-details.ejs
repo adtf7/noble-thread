@@ -1,0 +1,625 @@
+<%- include('../../views/partials/user/header.ejs') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drift-zoom/dist/drift.min.css">
+<script src="https://cdn.jsdelivr.net/npm/drift-zoom/dist/Drift.min.js"></script>
+<style>
+.product__details__pic__item {
+    position: relative;
+    width: 600px;  /* Increase width */
+    height: 600px; /* Increase height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+ 
+}
+
+.product__details__pic__item img {
+    width: 100%; /* Ensures image fills container */
+    height: 100%;
+    object-fit: contain; /* Keeps image properly scaled */
+    transition: transform 0.3s ease; /* Smooth zoom transition */
+}
+
+/* Zoom Container */
+.zoom-container {
+    position: relative;
+    width: 600px; /* Adjust width as needed */
+    height: 600px; /* Adjust height as needed */
+    overflow: hidden;
+}
+
+/* Main Image */
+.main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Ensures the image fits properly */
+    transition: transform 0.3s ease; /* Smooth transition for zoom effect */
+}
+
+/* Zoom Lens (Magnifying Glass) */
+.zoom-lens {
+    position: absolute;
+    width: 150px; /* Size of the zoom lens */
+    height: 150px;
+    border: 2px solid #ccc; /* Lens border */
+    border-radius: 50%; /* Circular lens */
+    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent background */
+    pointer-events: none; /* Ensures the lens doesn't interfere with mouse events */
+    display: none; /* Hidden by default */
+}
+
+/* Show lens on hover */
+.zoom-container:hover .zoom-lens {
+    display: block;
+}
+    .thumbnail-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .thumbnail-img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .thumbnail-img.active {
+        border: 2px solid #000;
+    }
+   
+    .related-products {
+    margin-top: 50px;
+    padding: 0 20px;
+}
+
+.related-products h3 {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.related-products__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+}
+
+.related-product-card {
+    width: 280px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.related-product-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.related-product-image img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+}
+
+.related-product-info {
+    padding: 15px;
+}
+
+.related-product-info h4 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.related-product-info a {
+    text-decoration: none;
+    color: #333;
+}
+
+.related-product-info .price {
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+    margin-bottom: 10px;
+}
+
+.add-to-cart-btn {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #0056b3;
+}
+
+</style>
+
+<section class="shop-details">
+    <div class="product__details__pic">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="product__details__breadcrumb">
+                        <a href="/">Home</a>
+                        <a href="/shop">Shop</a>
+                        <span>Product Details</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Thumbnail Navigation -->
+                    <div class="col-lg-2 col-md-3">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <% for (let i = 0; i < productImages.length; i++) { %>
+                                <li class="nav-item">
+                                    <a class="nav-link <%= i === 0 ? 'active' : '' %>" data-toggle="tab" href="#tab-<%= i %>" role="tab">
+                                        <div class="product__thumb__pic">
+                                            <img src="<%= productImages[i] %>" alt="Thumbnail">
+                                        </div>
+                                    </a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </div>
+                
+                    <div class="col-lg-8 col-md-9"> <!-- Changed from col-lg-6 to col-lg-8 -->
+
+
+                      <div class="tab-content">
+                        <% for (let i = 0; i < productImages.length; i++) { %>
+                            <div class="tab-pane fade <%= i === 0 ? 'show active' : '' %>" id="tab-<%= i %>" role="tabpanel">
+                                <div class="zoom-container">
+                                    <img class="main-image" src="<%= productImages[i] %>" alt="Product Image">
+                                    <div class="zoom-lens"></div> <!-- Zoom lens for magnifying effect -->
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    </div>
+                </div>
+                
+                <!-- Product details -->
+                <div class="col-lg-4">
+                    <div class="product__details__text">
+                        <h4><%= product.productName %></h4>
+                       <%if(discountedPrice){%> 
+                          <h5><s>₹<%= product.salePrice.toFixed(2) %></s></h5>
+                          <h4>  ₹<%= discountedPrice.toFixed(2)%></h4>
+                          <%}else{%>
+                            <h4>₹<%= product.salePrice.toFixed(2) %></h4>
+                           <%}%> 
+                        <p><%= product.description %></p>
+
+                        <!-- Size Selection -->
+                        <div class="product__details__option">
+                            <div class="product__details__option__size">
+                                <span>Size:</span>
+                                <label for="<%= product.size %>"><%= product.size %>
+                                    <input type="radio" id="<%= product.size %>">
+                                </label>
+                            </div>
+
+                            <!-- Color Selection -->
+                            <div class="product__details__option__color">
+                                <span>Color:</span>
+                                <label for="pc-0" class="color-label" style="background-color: <%= product.color.toLowerCase() %>">
+                                    <input type="radio" name="color" id="pc-0-0">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Add to cart -->
+                        <div class="product__details__cart__option">
+                            <div class="quantity">
+                                <div class="pro-qty">
+                                    <input type="text" value="1">
+                                </div>
+                            </div>
+                            <!-- Use a button with a data attribute for the product id -->
+                            <button id="addToCartBtn" class="primary-btn" data-product-id="<%= product._id %>">Add to cart</button>
+                        </div>
+
+                        <!-- Wishlist & Compare -->
+                        <div class="product__details__btns__option">
+                          <button onclick="addToWishlist('<%= product._id %>')">
+                            <i class="fa fa-heart"></i> Add to Wishlist
+                          </button>
+                                              <a href="#"><i class="fa fa-exchange"></i> Add to Compare</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description Tab -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="product__details__tab">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="tabs-5" role="tabpanel">
+                                <div class="product__details__tab__content">
+                                    <div class="product__details__tab__content__item">
+                                     
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          
+        </div>
+    </div>
+</section>
+<% 
+  // Filter out the current product from the related products
+  let relatedProducts = allproduct.filter(rel => rel._id.toString() !== product._id.toString());
+  // Limit to a maximum of 3 related products
+  relatedProducts = relatedProducts.slice(0, 3);
+%>
+<section class="related-products">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h3 class="section-title">Related Products</h3>
+      </div>
+    </div>
+    <!-- Center the product cards -->
+    <div class="row justify-content-center">
+      <% relatedProducts.forEach(related => { %>
+        <div class="col-lg-3 col-md-6 col-sm-6 mix hot-sales">
+          <div class="product__item">
+            <div class="product__item__pic">
+              <!-- Wrap image inside an anchor tag -->
+              <a href="/product?id=<%= related._id %>">
+                <img src="<%= related.productImage[0] %>" alt="Product Image" style="width:100%; height:auto;">
+              </a>
+              <ul class="product__hover">
+                <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
+                <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
+                <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
+              </ul>
+            </div>
+            <div class="product__item__text text-center">
+              <h6><%= related.productName %></h6>
+              <a href="#" class="add-cart"><%= related.productName %></a>
+              <div class="rating">
+                <i class="fa fa-star-o"></i>
+                <i class="fa fa-star-o"></i>
+                <i class="fa fa-star-o"></i>
+                <i class="fa fa-star-o"></i>
+                <i class="fa fa-star-o"></i>
+              </div>
+             
+                <h5>₹<%= related.salePrice %></h5>
+                
+
+              <div class="product__color__select">
+                <label for="pc-<%= related._id %>" class="color-label" style="background-color: <%= related.color.toLowerCase() %>">
+                  <input type="radio" name="color-<%= related._id %>" id="pc-<%= related._id %>-<%= related._id %>">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="customer-reviews" style="margin-top: 50px;">
+  <div class="container">
+    <h3 class="section-title text-center">Customer Reviews</h3>
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <!-- Review 1 -->
+        <div class="review" style="padding: 20px; border: 1px solid #ddd; margin-bottom: 20px;">
+          <h5>John Doe</h5>
+          <div class="rating" style="color: #f1c40f;">
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star-o"></i>
+          </div>
+          <p>This product is amazing! Great quality and worth every penny.</p>
+        </div>
+        <!-- Review 2 -->
+        <div class="review" style="padding: 20px; border: 1px solid #ddd; margin-bottom: 20px;">
+          <h5>Jane Smith</h5>
+          <div class="rating" style="color: #f1c40f;">
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star-half-o"></i>
+            <i class="fa fa-star-o"></i>
+          </div>
+          <p>Good product overall but could improve in packaging.</p>
+        </div>
+        <!-- Review 3 -->
+        <div class="review" style="padding: 20px; border: 1px solid #ddd;">
+          <h5>Bob Johnson</h5>
+          <div class="rating" style="color: #f1c40f;">
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star-o"></i>
+            <i class="fa fa-star-o"></i>
+            <i class="fa fa-star-o"></i>
+          </div>
+          <p>Not very satisfied. The product did not meet my expectations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let mainImages = document.querySelectorAll(".main-image");
+    let zoomImages = document.querySelectorAll(".zoom-image");
+
+    mainImages.forEach((mainImage, index) => {
+        let zoomImage = zoomImages[index];
+
+        mainImage.addEventListener("mousemove", function (e) {
+            let rect = this.getBoundingClientRect();
+            let x = ((e.clientX - rect.left) / rect.width) * 100;
+            let y = ((e.clientY - rect.top) / rect.height) * 100;
+
+            zoomImage.style.transformOrigin = `${x}% ${y}%`;
+            zoomImage.style.transform = "scale(2)";
+        });
+
+        mainImage.addEventListener("mouseenter", function () {
+            zoomImage.style.display = "block";
+        });
+
+        mainImage.addEventListener("mouseleave", function () {
+            zoomImage.style.display = "none";
+            zoomImage.style.transform = "scale(1)";
+        });
+    });
+
+    // Add-to-cart functionality with quantity validation
+ 
+document.addEventListener("DOMContentLoaded", function () {
+    const addToCartBtn = document.getElementById('addToCartBtn');
+
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            addToCartBtn.disabled = true; // Prevent double-clicks
+
+            const productId = this.getAttribute("data-product-id");
+
+            // Check product status and stock injected from server-side
+            const productStatus = "<%= product.status %>";
+            const productStock = <%= product.quantity %>;
+
+            if (productStatus.toLowerCase() !== 'available' || productStock < 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Out of Stock',
+                    text: 'This product is currently out of stock.'
+                });
+                addToCartBtn.disabled = false;
+                return;
+            }
+
+            // Get quantity from the input field
+            const qtyInput = document.querySelector(".pro-qty input");
+            let quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+
+            // Validate quantity
+            if (isNaN(quantity) || quantity < 1) {
+                Swal.fire({ icon: 'error', title: 'Quantity Error', text: 'Minimum quantity is 1.' });
+                addToCartBtn.disabled = false;
+                return;
+            }
+            if (quantity > 5) {
+                Swal.fire({ icon: 'error', title: 'Quantity Error', text: 'You cannot add more than 5 products at a time.' });
+                addToCartBtn.disabled = false;
+                return;
+            }
+
+            try {
+                // Send a POST request to add the product to the cart.
+                const response = await fetch('/add-to-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, quantity })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'There was an issue adding the product to your cart. Please try again.');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Product added to cart!',
+                    text: data.message || "",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+            } finally {
+                addToCartBtn.disabled = false; // Re-enable button after request completion
+            }
+        });
+    }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const addToCartBtn = document.getElementById("addToCartBtn");
+  if (addToCartBtn) {
+    addToCartBtn.addEventListener("click", async function (e) {
+      e.preventDefault();
+      addToCartBtn.disabled = true; // Prevent double clicks
+
+      const productId = this.getAttribute("data-product-id");
+      // Check product status and stock injected from server-side
+      const productStatus = "<%= product.status %>";
+      const productStock = <%= product.quantity %>;
+      if (productStatus.toLowerCase() !== "available" || productStock < 1) {
+        Swal.fire({
+          icon: "error",
+          title: "Out of Stock",
+          text: "This product is currently out of stock."
+        });
+        addToCartBtn.disabled = false;
+        return;
+      }
+
+      // Get quantity from the input field
+      const qtyInput = document.querySelector(".pro-qty input");
+      let quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+      if (isNaN(quantity) || quantity < 1) {
+        Swal.fire({
+          icon: "error",
+          title: "Quantity Error",
+          text: "Minimum quantity is 1."
+        });
+        addToCartBtn.disabled = false;
+        return;
+      }
+      if (quantity > 5) {
+        Swal.fire({
+          icon: "error",
+          title: "Quantity Error",
+          text: "You cannot add more than 5 products at a time."
+        });
+        addToCartBtn.disabled = false;
+        return;
+      }
+
+      try {
+        const response = await fetch("/add-to-cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, quantity })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || "There was an issue adding the product to your cart. Please try again.");
+        }
+        Swal.fire({
+          icon: "success",
+          title: "Product added to cart!",
+          text: data.message || "",
+          showConfirmButton: false,
+          timer: 1500
+        });
+      } catch (error) {
+        Swal.fire({ icon: "error", title: "Error", text: error.message });
+      } finally {
+        addToCartBtn.disabled = false;
+      }
+    });
+  }
+});
+
+async function addToWishlist(productId) {
+  try {
+    const response = await fetch('/addwishlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Product added to wishlist!',
+        text: data.message || "",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: data.message || 'Failed to add product to wishlist.',
+      });
+    }
+  } catch (error) {
+    console.error('Error adding product to wishlist:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Server error. Please try again later.',
+    });
+  }
+}
+document.addEventListener('DOMContentLoaded', function () {
+    const zoomContainers = document.querySelectorAll('.zoom-container');
+
+    zoomContainers.forEach(container => {
+        const mainImage = container.querySelector('.main-image');
+        const zoomLens = container.querySelector('.zoom-lens');
+
+        container.addEventListener('mousemove', (e) => {
+            const { left, top, width, height } = container.getBoundingClientRect();
+            const x = e.clientX - left; // Mouse X position relative to the container
+            const y = e.clientY - top; // Mouse Y position relative to the container
+
+            // Ensure the lens stays within the container
+            const lensWidth = zoomLens.offsetWidth;
+            const lensHeight = zoomLens.offsetHeight;
+            const lensX = Math.min(Math.max(x - lensWidth / 2, 0), width - lensWidth);
+            const lensY = Math.min(Math.max(y - lensHeight / 2, 0), height - lensHeight);
+
+            // Move the lens
+            zoomLens.style.left = `${lensX}px`;
+            zoomLens.style.top = `${lensY}px`;
+
+            // Calculate zoomed image position
+            const zoomLevel = 2; // Adjust zoom level as needed
+            const imageWidth = mainImage.offsetWidth;
+            const imageHeight = mainImage.offsetHeight;
+            const bgX = (lensX / width) * (imageWidth * zoomLevel - width);
+            const bgY = (lensY / height) * (imageHeight * zoomLevel - height);
+
+            // Apply zoom effect
+            mainImage.style.transform = `scale(${zoomLevel})`;
+            mainImage.style.transformOrigin = `${(x / width) * 100}% ${(y / height) * 100}%`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            // Reset zoom effect when mouse leaves
+            mainImage.style.transform = 'scale(1)';
+            zoomLens.style.display = 'none';
+        });
+
+        container.addEventListener('mouseenter', () => {
+            // Show lens when mouse enters
+            zoomLens.style.display = 'block';
+        });
+    });
+});
+</script>
+<%- include('../../views/partials/user/footer.ejs') %>

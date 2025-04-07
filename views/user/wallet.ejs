@@ -1,0 +1,574 @@
+<%- include('../../views/partials/user/header.ejs') %>
+
+<style>
+    /* MAIN LAYOUT STYLES */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f4f5f7;
+        color: #444;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .dashboard {
+        display: flex;
+        min-height: 100vh;
+    }
+    
+    /* SIDEBAR STYLES */
+    .sidebar {
+        width: 250px;
+        background-color: #ffffff;
+        color: #444;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+    
+    .sidebar .profile-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar h3 {
+        margin: 10px 0 5px;
+        font-size: 20px;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .sidebar p {
+        font-size: 14px;
+        opacity: 0.85;
+        text-align: center;
+        margin: 0;
+    }
+    
+    .sidebar .nav-links {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+        width: 100%;
+    }
+    
+    .sidebar .nav-links li {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .sidebar .nav-links a {
+        display: block;
+        padding: 12px;
+        color: #444;
+        text-decoration: none;
+        transition: 0.3s;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .sidebar .nav-links a:hover {
+        background-color: #e5e5e7;
+    }
+    
+    .nav-links a.active {
+        background-color: #3182ce;
+        color: white;
+        font-weight: bold;
+    }
+    
+    /* MAIN CONTENT STYLES */
+    .main-content {
+        flex: 1;
+        padding: 40px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        margin: 20px;
+        box-shadow: 0px 6px 15px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        height: calc(100vh - 40px);
+    }
+    
+    /* WALLET SPECIFIC STYLES */
+    .wallet-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .wallet-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .wallet-header h1 {
+        font-size: 32px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .wallet-header p {
+        font-size: 16px;
+        color: #777;
+    }
+    
+    .wallet-info {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .wallet-info h2 {
+        font-size: 48px;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    
+    .wallet-info p {
+        font-size: 18px;
+        color: #555;
+    }
+    
+    .transaction-history {
+        margin-top: 30px;
+    }
+    
+    .transaction-history h3 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+    }
+    
+    .transaction-scroll-container {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-top: 20px;
+        padding-right: 10px;
+    }
+    
+    .transaction-history table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .transaction-history th, .transaction-history td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .transaction-history th {
+        background-color: #007bff;
+        color: #fff;
+        font-weight: bold;
+    }
+    
+    .transaction-history tr:hover {
+        background-color: #f1f1f1;
+        transition: background-color 0.3s ease;
+    }
+    
+    .transaction-history td {
+        color: #555;
+    }
+    
+    .status-completed {
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .status-pending {
+        color: #ffc107;
+        font-weight: bold;
+    }
+    
+    .add-funds-btn {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .add-funds-btn:hover {
+        background-color: #0056b3;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .pagination a {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    
+    .pagination a.active {
+        background-color: #0056b3;
+    }
+    
+    .pagination a:hover:not(.active) {
+        background-color: #0069d9;
+    }
+    
+    /* Custom scrollbar styling */
+    .transaction-scroll-container::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .transaction-scroll-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .transaction-scroll-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    
+    .transaction-scroll-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* SweetAlert Modal Styling */
+    .swal2-popup {
+        font-family: 'Poppins', sans-serif !important;
+        width: 400px !important;
+    }
+    
+    .swal2-input, .swal2-file {
+        width: 100% !important;
+    }
+    
+    .swal2-file {
+        border: 1px solid #ddd;
+        padding: 8px;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="dashboard">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+       
+        <ul class="nav-links">
+            <li><a href="/profile" class="<%= currentPage === 'profile' ? 'active' : '' %>">User Details</a></li>
+            <li><a href="/address" class="<%= currentPage === 'addresses' ? 'active' : '' %>">Manage Addresses</a></li>
+            <li><a href="/order-history" class="<%= currentPage === 'orders' ? 'active' : '' %>">Order History</a></li>
+            <li><a href="/wallet" class="<%= currentPage === 'wallet' ? 'active' : '' %>">Wallet</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="wallet-container">
+            <!-- Wallet Header -->
+            <div class="wallet-header">
+                <h1>Welcome To Your Wallet</h1>
+            </div>
+
+            <!-- Wallet Info -->
+            <div class="wallet-info">
+                <h2>₹<%= balance.toFixed(2) %></h2>
+                <p>Your current wallet balance.</p>
+                <button class="add-funds-btn" onclick="addFunds()">Add Funds</button>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transaction-history">
+                <h3>Transaction History</h3>
+                <div class="transaction-scroll-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% transactions.forEach(transaction => { %>
+                                <tr>
+                                    <td><%= transaction.date.toLocaleDateString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) %></td>
+                                    <td><%= transaction.description %></td>
+                                    <td>₹<%= transaction.amount.toFixed(2) %></td>
+                                    <td><%= transaction.type %></td>
+                                    <td class="status-<%= transaction.status.toLowerCase() %>"><%= transaction.status %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div class="pagination">
+                    <% if (page > 1) { %>
+                        <a href="/wallet?page=<%= page - 1 %>&limit=<%= limit %>">Previous</a>
+                    <% } %>
+                    
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <a href="/wallet?page=<%= i %>&limit=<%= limit %>" class="<%= page === i ? 'active' : '' %>"><%= i %></a>
+                    <% } %>
+                    
+                    <% if (page < totalPages) { %>
+                        <a href="/wallet?page=<%= page + 1 %>&limit=<%= limit %>">Next</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Footer Section -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="footer__about">
+                    <div class="footer__logo">
+                        <a href="/" class="brand footer-brand" style="color: white;">NOBLE THREADS</a>
+                    </div>
+                    <p>The customer is at the heart of our unique business model, which includes design.</p>
+                    <a href="#"><img src="/img/payment.png" alt="Payment Methods"></a>
+                </div>
+            </div>
+            <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
+                <div class="footer__widget">
+                    <h6>Shopping</h6>
+                    <ul>
+                        <li><a href="#">Clothing Store</a></li>
+                        <li><a href="#">Trending Shoes</a></li>
+                        <li><a href="#">Sale</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <div class="footer__widget">
+                    <h6>Shopping</h6>
+                    <ul>
+                        <li><a href="/contact">Contact Us</a></li>
+                        <li><a href="#">Payment Methods</a></li>
+                        <li><a href="#">Delivery</a></li>
+                        <li><a href="#">Return & Exchanges</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
+                <div class="footer__widget">
+                    <h6 class="brand">NOBLE THREADS</h6>
+                    <div class="footer__newsletter">
+                        <p>Be the first to know about new arrivals, look books, sales & promos!</p>
+                        <form action="#">
+                            <input type="text" placeholder="Your email">
+                            <button type="submit"><span class="icon_mail_alt"></span></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="footer__copyright__text">
+                    <p>&copy; <script>document.write(new Date().getFullYear());</script> All rights reserved  <i class="fa fa-heart-o" aria-hidden="true"></i>  <a href="#" class="brand" target="_blank">NOBLE THREADS</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Search Begin -->
+<div class="search-model">
+    <div class="h-100 d-flex align-items-center justify-content-center">
+        <div class="search-close-switch">+</div>
+        <form class="search-model-form">
+            <input type="text" id="search-input" placeholder="Search here.....">
+        </form>
+    </div>
+</div>
+<!-- Search End -->
+
+<!-- Js Plugins -->
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery.nice-select.min.js"></script>
+<script src="/js/jquery.nicescroll.min.js"></script>
+<script src="/js/jquery.magnific-popup.min.js"></script>
+<script src="/js/jquery.countdown.min.js"></script>
+<script src="/js/jquery.slicknav.js"></script>
+<script src="/js/mixitup.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function addFunds() {
+        Swal.fire({
+            title: 'Add Funds to Wallet',
+            input: 'number',
+            inputLabel: 'Enter the amount to add (₹)',
+            inputPlaceholder: 'Amount',
+            showCancelButton: true,
+            confirmButtonText: 'Add',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#007bff',
+            cancelButtonColor: '#dc3545',
+            inputValidator: (value) => {
+                if (!value || value <= 0) {
+                    return 'Please enter a valid amount!';
+                }
+            },
+            customClass: {
+                popup: 'custom-swal-popup',
+                title: 'custom-swal-title',
+                input: 'custom-swal-input',
+                confirmButton: 'custom-swal-confirm-button',
+                cancelButton: 'custom-swal-cancel-button',
+                actions: 'custom-swal-actions',
+                validationMessage: 'custom-swal-validation-message'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const amount = result.value;
+
+                fetch('/create-razorpay-orderonwallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ amount: amount }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const order = data.order;
+                    const options = {
+                        key: 'rzp_test_JQ4XKaeQP0R8PZ',
+                        amount: order.amount,
+                        currency: order.currency,
+                        name: 'NOBLE THREADs',
+                        description: 'Add Funds to Wallet',
+                        order_id: order.id,
+                        handler: function (response) {
+                            fetch('/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: amount
+                                }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: 'Funds added to your wallet.',
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: data.message || 'Payment verification failed.',
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred. Please try again.',
+                                });
+                            });
+                        },
+                        prefill: {
+                            name: '<%=user.name%>',
+                            email: '<%=user.email%>',
+                            contact: '<%=user.phone%>',
+                        },
+                        theme: {
+                            color: '#007bff'
+                        }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                    });
+                });
+            }
+        });
+    }
+</script>
+
+<style>
+    /* Custom SweetAlert styles */
+    .custom-swal-popup {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .custom-swal-title {
+        font-size: 24px;
+        color: #333;
+    }
+    .custom-swal-input {
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        font-size: 16px;
+        width: 80%;
+        margin: 10px auto;
+        display: block;
+    }
+    .custom-swal-confirm-button {
+        background-color: #007bff;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .custom-swal-cancel-button {
+        background-color: #dc3545;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+</style>

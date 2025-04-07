@@ -7,26 +7,84 @@
     <meta name="keywords" content="Male_Fashion, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Male-Fashion | Template</title>
+    <title>NOBLE THREADS</title>
 
     <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
-    rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lacquer&display=swap" rel="stylesheet">
 
     <!-- Css Styles -->
-    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
-    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css">
-    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
-    <link rel="stylesheet" href="css/nice-select.css" type="text/css">
-    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
-    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
-    <link rel="stylesheet" href="css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="/css/elegant-icons.css" type="text/css">
+    <link rel="stylesheet" href="/css/magnific-popup.css" type="text/css">
+    <link rel="stylesheet" href="/css/nice-select.css" type="text/css">
+    <link rel="stylesheet" href="/css/owl.carousel.min.css" type="text/css">
+    <link rel="stylesheet" href="/css/slicknav.min.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+    <style>
+        .brand {
+            font-family: 'Lacquer', cursive !important;
+            letter-spacing: 2px;  /* Adjust the letter spacing */
+            font-size: 1.5rem; /* Adjust the font size */
+            color: black; /* Change the color to black */
+            white-space: nowrap; /* Prevents text from wrapping */
+        }
+        /* Dropdown Container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    text-align: center; /* Center content */
+}
+
+/* Dropdown Button */
+.sign-in-link {
+    padding: 10px 15px;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Dropdown Content */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    border-radius: 5px;
+    top: 100%; /* Position below the user name */
+    left: 50%;
+    transform: translateX(-50%); /* Center dropdown */
+}
+
+/* Show on Hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Dropdown Links */
+.dropdown-content a {
+    color: black;
+    padding: 10px 15px;
+    display: block;
+    text-decoration: none;
+    text-align: left; /* Align text inside the dropdown */
+}
+
+/* Hover Effect */
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+    </style>
 </head>
 
 <body>
-    <!-- Page Preloder -->
-    <div id="preloder">
+    <!-- Page Preloader -->
+    <div id="preloader">
         <div class="loader"></div>
     </div>
 
@@ -35,23 +93,34 @@
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
             <div class="offcanvas__links">
-                <a href="#">Sign in</a>
-                <a href="#">FAQs</a>
+                <% if (user) { %>
+                    <div class="dropdown">
+                        <a href="#" class="sign-in-link"><%= user.name %> ▼</a>
+                        <div class="dropdown-content">
+                            <a href="/profile">Profile</a> 
+                            <a href="/logout" >Logout</a> 
+                        </div>
+                    </div>
+                <% } else { %>
+                    <a href="/signup">Sign up</a>
+                    <a href="/login">Sign in</a>
+                <% } %>
             </div>
-            <div class="offcanvas__top__hover">
-                <span>Usd <i class="arrow_carrot-down"></i></span>
-                <ul>
-                    <li>USD</li>
-                    <li>EUR</li>
-                    <li>USD</li>
-                </ul>
-            </div>
+           
         </div>
         <div class="offcanvas__nav__option">
-            <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
-            <a href="#"><img src="img/icon/heart.png" alt=""></a>
-            <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
-            <div class="price">$0.00</div>
+  
+            <a href="/wishlist"><img src="/img/icon/heart.png" alt="Favorites"></a>
+            <a href="/cart"><img src="/img/icon/cart.png" alt="Cart"> <span>
+                
+              
+                        <% if (cartcount && cartcount.length > 0) { %>
+                            <%= cartcount[0].totalQuantity %>
+                        <% } else { %>
+                            0
+                        <% } %>
+                  </a>
+            
         </div>
         <div id="mobile-menu-wrap"></div>
         <div class="offcanvas__text">
@@ -73,17 +142,20 @@
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <a href="#">Sign in</a>
-                                <a href="#">FAQs</a>
-                            </div>
-                            <div class="header__top__hover">
-                                <span>Usd <i class="arrow_carrot-down"></i></span>
-                                <ul>
-                                    <li>USD</li>
-                                    <li>EUR</li>
-                                    <li>USD</li>
-                                </ul>
-                            </div>
+                                <% if (user) { %>
+                                    <div class="dropdown">
+                                        <a href="#" class="sign-in-link"><%= user.name %> ▼</a>
+                                        <div class="dropdown-content">
+                                            <a href="/profile">Profile</a> 
+                                            <a href="/logout" >Logout</a> 
+                                        </div>
+                                    </div>
+                                <% } else { %>
+                                    <a href="/signup">Sign up</a>
+                                    <a href="/login">Sign in</a>
+                                <% } %>
+                                
+                                                          </div>
                         </div>
                     </div>
                 </div>
@@ -93,34 +165,29 @@
             <div class="row">
                 <div class="col-lg-3 col-md-3">
                     <div class="header__logo">
-                        <a href="./index.html"><img src="img/logo.png" alt=""></a>
+                        <a href="/" class="brand">NOBLE THREADS</a>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <nav class="header__menu mobile-menu">
                         <ul>
-                            <li class="active"><a href="./index.html">Home</a></li>
-                            <li><a href="./shop.html">Shop</a></li>
-                            <li><a href="#">Pages</a>
-                                <ul class="dropdown">
-                                    <li><a href="./about.html">About Us</a></li>
-                                    <li><a href="./shop-details.html">Shop Details</a></li>
-                                    <li><a href="./shopping-cart.html">Shopping Cart</a></li>
-                                    <li><a href="./checkout.html">Check Out</a></li>
-                                    <li><a href="./blog-details.html">Blog Details</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="./blog.html">Blog</a></li>
-                            <li><a href="./contact.html">Contacts</a></li>
+                            <li class="<%= currentPage === 'home' ? 'active' : '' %>"><a href="/">Home</a></li>
+                            <li class="<%= currentPage === 'shop' ? 'active' : '' %>"><a href="/shop">Shop</a></li>
+                            <li class="<%= currentPage === 'contact' ? 'active' : '' %>"><a href="/contact">Contacts</a></li>
                         </ul>
                     </nav>
                 </div>
                 <div class="col-lg-3 col-md-3">
                     <div class="header__nav__option">
-                        <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
-                        <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
-                        <div class="price">$0.00</div>
+                        
+                        <a href="/wishlist"><img src="/img/icon/heart.png" alt="Favorites"></a>
+                        <a href="/cart"><img src="/img/icon/cart.png" alt="Cart"> <span>
+                            <% if (cartcount && cartcount.length > 0) { %>
+                                <%= cartcount[0].totalItems %>
+                            <% } else { %>
+                                0
+                            <% } %></span></a>
+                      
                     </div>
                 </div>
             </div>
@@ -128,3 +195,5 @@
         </div>
     </header>
     <!-- Header Section End -->
+</body>
+</html>

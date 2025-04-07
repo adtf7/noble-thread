@@ -1,0 +1,418 @@
+<%- include('../../views/partials/admin/header.ejs') %>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<style>
+    /* General Styles */
+    * {
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    html, body {
+        height: 100%;
+        width: 91%;
+        background-color: #f4f5f7;
+        color: #444;
+        margin-left: 3.2cm;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 1050px;
+        margin: 20px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-details {
+        margin-bottom: 20px;
+    }
+
+    .order-details h2 {
+        margin-bottom: 10px;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .order-details p {
+        margin: 5px 0;
+        font-size: 16px;
+    }
+
+    .order-items {
+        margin-top: 20px;
+    }
+
+    .order-items table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .order-items th, .order-items td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .order-items th {
+        background: #222;
+        color: white;
+    }
+
+    .product-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+
+    .back-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    /* Status Styles */
+    .status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        animation: statusChange 1s ease-in-out;
+    }
+
+    .status-pending {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .status-processing {
+        background-color: #e67e22;
+    }
+
+    .status-shipped {
+        background-color: #17a2b8;
+    }
+
+    .status-delivered {
+        background-color: #28a745;
+    }
+
+    .status-cancelled {
+        background-color: #dc3545;
+    }
+
+    .status-return-request {
+        background-color: #ff9800;
+    }
+
+    .status-returned {
+        background-color: #9c27b0;
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 5px;
+    }
+
+    .approve-btn {
+        background-color: #28a745;
+    }
+
+    .approve-btn:hover {
+        background-color: #218838;
+    }
+
+    .reject-btn {
+        background-color: #dc3545;
+    }
+
+    .reject-btn:hover {
+        background-color: #c82333;
+    }
+
+    /* Status Dropdown */
+    .status-select {
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    /* SweetAlert2 Custom Styles */
+    .swal2-popup-custom {
+        border-radius: 10px;
+        padding: 20px;
+    }
+    .swal2-confirm-custom {
+        background-color: #28a745 !important;
+        border-radius: 5px;
+        font-size: 16px;
+        padding: 8px 20px;
+    }
+    .swal2-cancel-custom {
+        background-color: #dc3545 !important;
+        border-radius: 5px;
+        font-size: 16px;
+        padding: 8px 20px;
+    }
+    .swal2-confirm-custom:hover {
+        background-color: #218838 !important;
+    }
+    .swal2-cancel-custom:hover {
+        background-color: #c82333 !important;
+    }
+
+    @keyframes statusChange {
+        0% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="order-details">
+        <h2>Order Details</h2>
+        <% if (order.address) { %>
+            <p><strong>Order ID:</strong> <%= order.orderId %></p>
+            <p><strong>Customer:</strong> <%= order.userId?.name || "Unknown" %></p>
+            <p><strong>Email:</strong> <%= order.userId?.email || "Unknown" %></p>
+            <p><strong>Address:</strong> <% if (order.address && order.address.address.length > 0) { %>
+                <% order.address.address.forEach(address => { %>
+                    <%= address.name %>, <%= address.city %>, <%= address.pincode %><br>
+                    <%= address.state %>, - <%= address.phone %>
+                <% }); %>
+            <% } else { %>
+                <span>No address available.</span>
+            <% } %> </p>
+            <p><strong>Phone:</strong> <%= order.address.phone || "N/A" %></p>
+            <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-US') %></p>
+            <p><strong>Payment Method:</strong> <%= order.shoppingMethod %></p>
+            <p><strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
+            <p><strong>Discount:</strong> ₹<%= (order.totalAmount - order.finalAmount).toFixed(2) %></p>
+            <p><strong>Final Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
+            <p><strong>Status:</strong> 
+                <span class="status 
+                    <%= order.status === 'Pending' ? 'status-pending' : '' %>
+                    <%= order.status === 'Processing' ? 'status-processing' : '' %>
+                    <%= order.status === 'Shipped' ? 'status-shipped' : '' %>
+                    <%= order.status === 'Delivered' ? 'status-delivered' : '' %>
+                    <%= order.status === 'Cancelled' ? 'status-cancelled' : '' %>
+                    <%= order.status === 'Return Request' ? 'status-return-request' : '' %>
+                    <%= order.status === 'Returned' ? 'status-returned' : '' %>">
+                    <%= order.status %>
+                </span>
+            </p>
+        <% } else { %>
+            <p><strong>Address:</strong> No address available.</p>
+        <% } %>
+    </div>
+
+    <div class="order-items">
+        <h2>Order Items</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Image</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% order.orderItems.forEach(item => { %>
+                    <% if (item.product) { %>
+                        <tr>
+                            <td><%= item.product.productName %></td>
+                            <td>
+                                <img src="<%= item.product.productImage?.[0] || '/images/default.jpg' %>" 
+                                     alt="Product Image" 
+                                     class="product-img">
+                            </td>
+                            <td><%= item.quantity %></td>
+                            <td>₹<%= item.price.toFixed(2) %></td>
+                            <td>
+                                <select class="status-select" 
+                                        onchange="updateItemStatus('<%= order._id %>', '<%= item._id %>', this.value)">
+                                    <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Processing" <%= item.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    <option value="Return Request" <%= item.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+                                    <option value="Returned" <%= item.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                </select>
+                            </td>
+                            <td>
+                                <% if (item.status === 'Return Request') { %>
+                                    <button class="action-btn approve-btn" 
+                                            onclick="handleReturn('<%= order._id %>', '<%= item._id %>', 'approve')">
+                                        Approve
+                                    </button>
+                                    <button class="action-btn reject-btn" 
+                                            onclick="handleReturn('<%= order._id %>', '<%= item._id %>', 'reject')">
+                                        Reject
+                                    </button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% } %>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <a href="/admin/orders" class="back-btn">Back to Orders</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function updateItemStatus(orderId, itemId, newStatus) {
+        Swal.fire({
+            title: "Confirm Status Change",
+            text: `Are you sure you want to change the status to ${newStatus}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "No, cancel",
+            customClass: {
+                popup: 'swal2-popup-custom',
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/admin/update-item-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, itemId, status: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: data.message,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                            customClass: { confirmButton: 'swal2-confirm-custom' }
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Error!",
+                            text: data.message,
+                            icon: "error",
+                            confirmButtonText: "OK",
+                            customClass: { confirmButton: 'swal2-confirm-custom' }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Server error. Please try again later.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                        customClass: { confirmButton: 'swal2-confirm-custom' }
+                    });
+                });
+            }
+        });
+    }
+
+    function handleReturn(orderId, itemId, action) {
+        Swal.fire({
+            title: `Confirm ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+            text: `Are you sure you want to ${action} this return request?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, proceed!",
+            cancelButtonText: "No, cancel",
+            customClass: {
+                popup: 'swal2-popup-custom',
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/admin/singlehandle-return-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, itemId, action })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: data.message,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                            customClass: { confirmButton: 'swal2-confirm-custom' }
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Error!",
+                            text: data.message,
+                            icon: "error",
+                            confirmButtonText: "OK",
+                            customClass: { confirmButton: 'swal2-confirm-custom' }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Server error. Please try again later.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                        customClass: { confirmButton: 'swal2-confirm-custom' }
+                    });
+                });
+            }
+        });
+    }
+</script>

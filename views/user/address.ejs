@@ -1,0 +1,293 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Manage Addresses</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f5f7;
+      color: #444;
+    }
+    /* Sidebar styles */
+    .sidebar {
+      width: 250px;
+      background-color: #ffffff;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+    .nav-links li {
+      margin-bottom: 10px;
+    }
+    .nav-links a {
+      display: block;
+      padding: 12px;
+      color: #444;
+      text-decoration: none;
+      border-radius: 8px;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+    .nav-links a:hover {
+      background-color: #e5e5e7;
+    }
+    .nav-links a.active {
+      background-color: #3182ce;
+      color: white;
+      font-weight: bold;
+    }
+    /* SweetAlert customization */
+    .swal2-popup-custom {
+      width: 400px !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+  <%- include('../../views/partials/user/header.ejs') %>
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <ul class="nav-links">
+        <li><a href="/profile" class="<%= currentPage === 'profile' ? 'active' : '' %>">User Details</a></li>
+        <li><a href="/address" class="<%= currentPage === 'addresses' ? 'active' : '' %>">Manage Addresses</a></li>
+        <li><a href="/order-history" class="<%= currentPage === 'orders' ? 'active' : '' %>">Order History</a></li>
+        <li><a href="/wallet" class="<%= currentPage === 'wallet' ? 'active' : '' %>">Wallet</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-auto">
+      <!-- Dashboard Section -->
+     
+
+      <!-- Address Management Section -->
+      <section class="bg-white shadow rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold text-gray-700">Your Addresses</h2>
+          <button id="addAddressBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            + Add Address
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <% if (addresses && addresses.length) { %>
+            <% addresses.forEach(addressItem => { %>
+              <div class="border rounded p-4 bg-gray-50">
+                <p class="text-lg font-medium text-gray-800"><%= addressItem.address[0].name %></p>
+                <p class="text-gray-600">
+                  <%= addressItem.address[0].addressType %>, <%= addressItem.address[0].city %>
+                </p>
+                <p class="text-gray-600">State: <%= addressItem.address[0].state %></p>
+                <p class="text-gray-600">Postal Code: <%= addressItem.address[0].pincode %></p>
+                <p class="text-gray-600">Landmark: <%= addressItem.address[0].landMark %></p>
+                <p class="text-gray-600">Phone: <%= addressItem.address[0].phone %></p>
+                <% if(addressItem.country){ %>
+                  <p class="text-gray-600">Country: <%= addressItem.country %></p>
+                <% } %>
+                <div class="mt-4 flex space-x-3">
+                  <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                          onclick="editAddress('<%= addressItem._id %>')">
+                    Edit
+                  </button>
+                  <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                          onclick="deleteAddress('<%= addressItem._id %>')">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-gray-600 col-span-1 md:col-span-2">You have no saved addresses.</p>
+          <% } %>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <%- include('../../views/partials/user/footer.ejs') %>
+
+  <!-- JavaScript for Address Modals -->
+  <script>
+    // Helper function to validate address fields.
+    function validateAddressFields({ name, addressLine1, city, state, postalCode, Phone, landmark }) {
+      if (name.length < 2) return "Name must be at least 2 characters long.";
+      if (addressLine1.length < 5) return "Address must be at least 5 characters long.";
+      if (city.length < 2) return "City must be at least 2 characters long.";
+      if (state.length < 2) return "State must be at least 2 characters long.";
+      if (!/^\d+$/.test(postalCode) || postalCode.length < 4 || postalCode.length > 10)
+         return "Postal Code must be a number between 4 and 10 digits.";
+      if (!/^\d{10}$/.test(Phone)) return "Phone must be a 10-digit number.";
+      if (landmark.length < 2) return "Landmark must be at least 2 characters long.";
+      return null;
+    }
+
+    // Function to display the "Add New Address" modal.
+    function addAddress() {
+      Swal.fire({
+        title: 'Add New Address',
+        html: `
+          <input type="text" id="name" class="swal2-input" placeholder="Name">
+          <input type="text" id="addressLine1" class="swal2-input" placeholder="Address">
+          <input type="text" id="city" class="swal2-input" placeholder="City">
+          <input type="text" id="state" class="swal2-input" placeholder="State">
+          <input type="text" id="postalCode" class="swal2-input" placeholder="Postal Code">
+          <input type="text" id="Phone" class="swal2-input" placeholder="Phone">
+          <input type="text" id="landmark" class="swal2-input" placeholder="Landmark">
+        `,
+        customClass: { popup: 'swal2-popup-custom' },
+        confirmButtonText: 'Add',
+        preConfirm: () => {
+          const name = document.getElementById('name').value.trim();
+          const addressLine1 = document.getElementById('addressLine1').value.trim();
+          const city = document.getElementById('city').value.trim();
+          const stateInput = document.getElementById('state').value.trim();
+          const postalCode = document.getElementById('postalCode').value.trim();
+          const Phone = document.getElementById('Phone').value.trim();
+          const landmark = document.getElementById('landmark').value.trim();
+          if (!name || !addressLine1 || !city || !stateInput || !postalCode || !Phone || !landmark) {
+            Swal.showValidationMessage('Please fill all required fields');
+            return;
+          }
+          const error = validateAddressFields({ name, addressLine1, city, state: stateInput, postalCode, Phone, landmark });
+          if (error) {
+            Swal.showValidationMessage(error);
+            return;
+          }
+          return { name, addressLine1, city, state: stateInput, postalCode, Phone, landmark };
+        }
+      }).then(result => {
+        if(result.isConfirmed) {
+          fetch('/add-address', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(result.value)
+          })
+          .then(response => {
+            if(!response.ok) throw new Error('Failed to add address');
+            return response.json();
+          })
+          .then(data => {
+            Swal.fire({ icon: 'success', title: 'Address added successfully!', showConfirmButton: false, timer: 1500 })
+            .then(() => location.reload());
+          })
+          .catch(err => {
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message });
+          });
+        }
+      });
+    }
+
+    // Function to display the "Edit Address" modal.
+   
+
+    // Function to delete an address.
+    function deleteAddress(id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!'
+      }).then(result => {
+        if(result.isConfirmed) {
+          fetch(`/addressesdelete/${id}`, { method: 'POST' })
+          .then(response => {
+            if(!response.ok) throw new Error('Failed to delete address');
+            return response.json();
+          })
+          .then(data => {
+            Swal.fire({ icon: 'success', title: 'Address deleted successfully!', showConfirmButton: false, timer: 1500 })
+            .then(() => location.reload());
+          })
+          .catch(err => {
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message });
+          });
+        }
+      });
+    }
+
+    document.getElementById('addAddressBtn').addEventListener('click', addAddress);
+  </script>
+  <script>
+  function editAddress(id) {
+    console.log(id)
+    fetch(`/editaddresses/${id}`)
+  
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to fetch address details');
+        return response.json();
+      })
+      .then(data => {
+        // Use data.address (the first element of the array) to pre-fill the modal.
+        const addr = data.address;
+        Swal.fire({
+          title: 'Edit Address',
+          html: `
+            <input type="text" id="name" class="swal2-input" placeholder="Name" value="${addr.name}">
+            <input type="text" id="addressLine1" class="swal2-input" placeholder="Address" value="${addr.addressType}">
+            <input type="text" id="city" class="swal2-input" placeholder="City" value="${addr.city}">
+            <input type="text" id="state" class="swal2-input" placeholder="State" value="${addr.state}">
+            <input type="text" id="postalCode" class="swal2-input" placeholder="Postal Code" value="${addr.pincode}">
+            <input type="text" id="Phone" class="swal2-input" placeholder="Phone" value="${addr.phone}">
+            <input type="text" id="landmark" class="swal2-input" placeholder="Landmark" value="${addr.landMark}">
+          `,
+          confirmButtonText: 'Update',
+          preConfirm: () => {
+            const name = document.getElementById('name').value.trim();
+            const addressLine1 = document.getElementById('addressLine1').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const stateVal = document.getElementById('state').value.trim();
+            const postalCode = document.getElementById('postalCode').value.trim();
+            const Phone = document.getElementById('Phone').value.trim();
+            const landmark = document.getElementById('landmark').value.trim();
+  
+            if (!name || !addressLine1 || !city || !stateVal || !postalCode || !Phone || !landmark) {
+              Swal.showValidationMessage('Please fill all fields');
+              return;
+            }
+  
+            // Return the flat payload. The backend will map these keys to update the nested address array
+            return { name, addressLine1, city, state: stateVal, postalCode, Phone, landmark };
+          }
+        }).then(result => {
+          if (result.isConfirmed) {
+            fetch(`/editaddresses/${id}`, { // no trailing slash
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(result.value)
+              })
+
+              .then(resp => {
+                if (!resp.ok) throw new Error('Failed to update address');
+                return resp.json();
+              })
+              .then(data => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Address updated successfully!',
+                  showConfirmButton: false,
+                  timer: 1500
+                }).then(() => location.reload());
+              })
+              .catch(error => {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+              });
+          }
+        });
+      })
+      .catch(error => {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to fetch address details' });
+      });
+  }
+</script>
+</body>
+</html>

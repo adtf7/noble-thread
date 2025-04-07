@@ -1,0 +1,316 @@
+<%- include('../../views/partials/admin/header.ejs')%>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Cropper.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+<style>
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    .thumbnails-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .thumbnail img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    
+    .content-header h2 {
+        font-weight: bold;
+    }
+    .form-control {
+        border-radius: 5px;
+    }
+    .image-cropper {
+        display: none;
+        width: 100%;
+        max-width: 700px;
+        height: 700px;
+        margin-bottom: 20px;
+    }
+    .cropper-container {
+        width: 100%;
+        height: 100%;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+</style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Container -->
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold text-center mb-6">Add New Product</h1>
+
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto">
+            <form id="addProductForm" action="/admin/productadd" method="POST" enctype="multipart/form-data" onsubmit="validateAndSubmit(event)">                <div class="mb-4">
+                    <label for="product_name" class="block text-gray-700 font-bold mb-2">Product Name</label>
+                    <input type="text" placeholder="Type here" name="productName" class="form-control border w-full px-3 py-2" id="product_name">
+                    <div id="productName-error" class="error-message"></div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Full Description</label>
+                    <textarea placeholder="Type here" id="descriptionid" name="description" class="form-control border w-full px-3 py-2" rows="4"></textarea>
+                    <div id="description-error" class="error-message"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Regular Price</label>
+                        <input placeholder="INR" name="regularPrice" type="text" class="form-control border w-full px-3 py-2">
+                        <div id="regularPrice-error" class="error-message"></div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Sale Price</label>
+                        <input placeholder="INR" name="salePrice" type="text" class="form-control border w-full px-3 py-2">
+                        <div id="salePrice-error" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Quantity</label>
+                    <input placeholder="" name="quantity" type="text" class="form-control border w-full px-3 py-2">
+                    <div id="quantity-error" class="error-message"></div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Color</label>
+                    <input name="color" type="text" class="form-control border w-full px-3 py-2">
+                    <div id="color-error" class="error-message"></div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Category</label>
+                    <select class="form-select border w-full px-3 py-2" name="category">
+                        <option value="">Select Category</option>
+                        <% categories.forEach(category => { %>
+                            <option value="<%= category._id %>"><%= category.name %></option>
+                        <% }) %>
+                    </select>
+                    <div id="category-error" class="error-message"></div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Size</label>
+                    <input name="size" type="text" class="form-control border w-full px-3 py-2">
+                    <div id="size-error" class="error-message"></div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="text-gray-700 font-bold mb-2">Choose Images</h4>
+                    </div>
+                    <div class="border p-3">
+                        <div id="addedImagesContainer" class="thumbnails-container"></div>
+                        <div class="space-y-4">
+                            <div class="flex flex-col space-y-2">
+                                <input class="form-control border w-full px-3 py-2" type="file" name="productImage" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 1)">
+                                <div class="image-cropper" id="cropperContainer1">
+                                    <img src="" id="cropImage1" alt="">
+                                    <div class="flex space-x-2">
+                                        <button type="button" id="saveButton1" class="btn-primary" onclick="saveCroppedImage(1)">Save</button>
+                                        <button type="button" id="cancelButton1" class="btn-secondary" onclick="cancelCrop(1)">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <input class="form-control border w-full px-3 py-2" type="file" name="productImage" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 2)">
+                                <div class="image-cropper" id="cropperContainer2">
+                                    <img src="" id="cropImage2" alt="">
+                                    <div class="flex space-x-2">
+                                        <button type="button" id="saveButton2" class="btn-primary" onclick="saveCroppedImage(2)">Save</button>
+                                        <button type="button" id="cancelButton2" class="btn-secondary" onclick="cancelCrop(2)">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <input class="form-control border w-full px-3 py-2" type="file" name="productImage" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 3)">
+                                <div class="image-cropper" id="cropperContainer3">
+                                    <img src="" id="cropImage3" alt="">
+                                    <div class="flex space-x-2">
+                                        <button type="button" id="saveButton3" class="btn-primary" onclick="saveCroppedImage(3)">Save</button>
+                                        <button type="button" id="cancelButton3" class="btn-secondary" onclick="cancelCrop(3)">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+    let cropper1, cropper2, cropper3;
+    
+    function validateAndSubmit(event) {
+        event.preventDefault();
+        if (validateForm()) {
+            Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Product details are valid. Submitting form...",
+                showConfirmButton: false,
+                timer: 2000
+            }).then(() => {
+                document.getElementById('addProductForm').submit();
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Validation Failed",
+                text: "Please fill all required fields correctly and add all images",
+                confirmButtonColor: '#d33'
+            });
+        }
+    }
+    
+    function viewImage(event, index) {
+        const input = event.target;
+        const reader = new FileReader();
+        reader.onload = function() {
+            const img = document.getElementById(`cropImage${index}`);
+            img.src = reader.result;
+            img.style.display = 'block';
+            document.getElementById(`cropperContainer${index}`).style.display = 'block';
+            if (index === 1) {
+                cropper1 = new Cropper(img, { aspectRatio: 1, viewMode: 1 });
+            } else if (index === 2) {
+                cropper2 = new Cropper(img, { aspectRatio: 1, viewMode: 1 });
+            } else if (index === 3) {
+                cropper3 = new Cropper(img, { aspectRatio: 1, viewMode: 1 });
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+    
+    function saveCroppedImage(index) {
+        let cropper;
+        if (index === 1) cropper = cropper1;
+        else if (index === 2) cropper = cropper2;
+        else if (index === 3) cropper = cropper3;
+        
+        const canvas = cropper.getCroppedCanvas();
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const img = document.createElement('img');
+            img.src = url;
+            img.classList.add('thumbnail');
+            document.getElementById('addedImagesContainer').appendChild(img);
+            document.getElementById(`cropperContainer${index}`).style.display = 'none';
+            // Removed the file input modification code
+        });
+    }
+    
+    function cancelCrop(index) {
+        document.getElementById(`cropperContainer${index}`).style.display = 'none';
+        document.getElementById(`cropImage${index}`).src = '';
+        if (index === 1) cropper1.destroy();
+        else if (index === 2) cropper2.destroy();
+        else if (index === 3) cropper3.destroy();
+    }
+    
+    function validateForm() {
+        clearErrorMessages();
+        const name = document.getElementsByName('productName')[0].value;
+        const description = document.getElementById('descriptionid').value;
+        const salePrice = document.getElementsByName('salePrice')[0].value;
+        const quantity = document.getElementsByName('quantity')[0].value;
+        const color = document.getElementsByName('color')[0].value;
+        const category = document.getElementsByName('category')[0].value;
+        const imageInputs = [
+            document.getElementById('input1'),
+            document.getElementById('input2'),
+            document.getElementById('input3')
+        ];
+        let isValid = true;
+    
+        // Basic field validations
+        if (!name.trim()) {
+            displayErrorMessage('productName-error', 'Please enter a product name.');
+            isValid = false;
+        }
+        if (!description.trim()) {
+            displayErrorMessage('description-error', 'Please enter a description.');
+            isValid = false;
+        }
+        if (!salePrice.trim() || parseFloat(salePrice) <= 0) {
+            displayErrorMessage('salePrice-error', 'Sale price must be greater than 0.');
+            isValid = false;
+        }
+        if (!quantity.trim() || parseInt(quantity) <= 0) {
+            displayErrorMessage('quantity-error', 'Please enter a valid quantity.');
+            isValid = false;
+        }
+        if (!color.trim()) {
+            displayErrorMessage('color-error', 'Please enter a color.');
+            isValid = false;
+        }
+        if (!category.trim()) {
+            displayErrorMessage('category-error', 'Please select a category.');
+            isValid = false;
+        }
+    
+        // Image validation
+        const validImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+        imageInputs.forEach((input, index) => {
+            if (!input.files || input.files.length === 0) {
+                displayErrorMessage('images-error', `Please upload Image ${index + 1}`);
+                isValid = false;
+            } else {
+                const file = input.files[0];
+                if (!validImageTypes.includes(file.type)) {
+                    displayErrorMessage('images-error', `Image ${index + 1} must be PNG, JPEG, or JPG`);
+                    isValid = false;
+                }
+            }
+        });
+    
+        return isValid;
+    }
+    
+    function displayErrorMessage(elementId, message) {
+        let errorElement = document.getElementById(elementId);
+        if (!errorElement && elementId === 'images-error') {
+            errorElement = document.createElement('div');
+            errorElement.id = 'images-error';
+            errorElement.className = 'error-message';
+            document.querySelector('.card.mb-4').appendChild(errorElement);
+        }
+        if (errorElement) errorElement.innerText = message;
+    }
+    
+    function clearErrorMessages() {
+        document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - Noble Threads</title>
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lacquer&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+            <h2 class="text-2xl font-bold mb-4 text-center">Forgot Password?</h2>
+            <% if (message) { %>
+                <div class="text-red-600 bg-red-100 border border-red-400 rounded-lg p-4 mb-4">
+                    <%= message %>
+                </div>
+            <% } %>
+            <p class="text-gray-600 text-center mb-4">Enter your email, and we’ll send you a link to reset your password.</p>
+            
+            <form action="/forgotpasswordemail" method="get"> <!-- Ensure method is GET -->
+                <label for="email" class="block text-gray-700 font-medium">Email Address</label>
+                <input type="email" id="email" name="email" required 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300 mt-2" 
+                    placeholder="Enter your email">
+                
+                <button type="submit" 
+                    class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4">
+                    Send Reset OTP
+                </button>
+            </form>
+
+            <p class="text-center text-sm text-gray-600 mt-4">
+                <a href="/login" class="text-blue-600 hover:text-blue-700">Back to Login</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

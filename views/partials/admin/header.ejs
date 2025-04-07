@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noble Threads - Admin Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lacquer&display=swap');
+        .brand {
+            font-family: 'Lacquer', cursive;
+        }
+        .active {
+            background-color: #4A5568; /* Tailwind's gray-700 */
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<script>
+    // Prevent navigating to previous pages after logout
+    if (window.history && window.history.pushState) {
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, null, window.location.href);
+        };
+    }
+</script>
+
+<body class="bg-white text-black">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-900 text-white min-h-screen p-5 sidebar">
+            <h1 class="text-2xl font-bold brand text-red-500 mb-6">Noble Threads</h1>
+            <ul class="space-y-3">
+                <li class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
+                    <a href="/admin/dashboard" class="block p-2 rounded hover:bg-gray-700">Dashboard</a>
+                </li>
+                <li class="<%= currentPage === 'customers' ? 'active' : '' %>">
+                    <a href="/admin/customers" class="block p-2 rounded hover:bg-gray-700">Customers</a>
+                </li>
+                <li class="<%= currentPage === 'category' ? 'active' : '' %>">
+                    <a href="/admin/category" class="block p-2 rounded hover:bg-gray-700">Category</a>
+                </li>
+                <li class="<%= currentPage === 'add-product' ? 'active' : '' %>">
+                    <a href="/admin/productadd" class="block p-2 rounded hover:bg-gray-700">Add Product</a>
+                </li>
+                <li class="<%= currentPage === 'products' ? 'active' : '' %>">
+                    <a href="/admin/product" class="block p-2 rounded hover:bg-gray-700">Products</a>
+                </li>
+                 <li class="<%= currentPage === 'coupon' ? 'active' : '' %>">
+                    <a href="/admin/coupon" class="block p-2 rounded hover:bg-gray-700">Coupon</a>
+                </li>
+                <!-- <li class="<%= currentPage === 'banner' ? 'active' : '' %>">
+                    <a href="/banner" class="block p-2 rounded hover:bg-gray-700">Banner</a>
+                </li> --> 
+                <li class="<%= currentPage === 'orders' ? 'active' : '' %>">
+                    <a href="/admin/orders" class="block p-2 rounded hover:bg-gray-700">Orders</a>
+                </li>
+                <li class="<%= currentPage === 'salesreport' ? 'active' : '' %>">
+                    <a href="/admin/salesreport" class="block p-2 rounded hover:bg-gray-700">Sales Report</a>
+                </li>
+                <li>
+                    <a href="/admin/logout" class="block p-2 rounded hover:bg-gray-700" style="color: red;">Logout</a>
+                </li>
+            </ul>
+        </div>
+        
