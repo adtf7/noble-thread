@@ -49,20 +49,6 @@ let loginAdmin = async (req, res) => {
     }
 };
 
-let loadDashboard = async (req, res) => {
-    try {
-        if (!req.session.admin) {
-            return res.redirect('/admin/admin-login');
-        }
-        else{
-          
-        res.render('admin/dashboard', { currentPage: 'dashboard' });}
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        res.status(500).render('admin/pageerror');
-    }
-};
-
 let logout=async(req,res)=>{
     try{
     req.session.destroy((error)=>{
@@ -81,7 +67,6 @@ let logout=async(req,res)=>{
 module.exports = {
     loadlogin,
     loginAdmin,
-    loadDashboard,
     
     pageerror,
     logout

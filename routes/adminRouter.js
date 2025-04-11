@@ -12,10 +12,11 @@ const upload = multer({ storage: storage });
 const orderControllers = require('../controllers/admin/ordercontroller');
 let couponControllers = require('../controllers/admin/couponController')
 let salesreportControllers = require('../controllers/admin/salesreportController')
+let dashboardControllers = require('../controllers/admin/dashboardController')
 
 router.get('/admin-login', adminControllers.loadlogin);
 router.post('/loginverify', adminControllers.loginAdmin);
-router.get('/dashboard', adminauth, adminControllers.loadDashboard);
+router.get('/dashboard', adminauth, dashboardControllers.loadDashboard);
 router.get('/pageerror', adminControllers.pageerror);
 router.get('/logout', adminControllers.logout);
 

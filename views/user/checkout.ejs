@@ -535,6 +535,21 @@ html, body {
                         });
                         return;
                     }
+                  
+                //     const totalPriceElement = document.getElementById('total-price');
+                // const totalPriceText = totalPriceElement.textContent.replace('₹', '').trim();
+                // const totalPrice = parseFloat(totalPriceText);
+
+               
+                // if (selectedPayment.value === 'COD' && totalPrice > 1000) {
+                //     Swal.fire({
+                //         icon: 'error',
+                //         title: 'Error',
+                //         text: 'Cash on Delivery is not available for orders above ₹1000. Please choose another payment method.',
+                //         customClass: { popup: 'modern-swal-popup' }
+                //     });
+                //     return;
+                // }
 
                     const orderDetails = {
                         address: selectedAddress.value,
@@ -688,6 +703,8 @@ html, body {
         document.addEventListener("DOMContentLoaded", function() {
             updatePriceDetails();
         });
+
+  
     </script>
     <%- include('../../views/partials/user/footer.ejs') %>
 </body>
