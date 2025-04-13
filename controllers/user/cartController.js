@@ -167,7 +167,14 @@
       
 
       let cart = await Cart.findOne({ userId: new mongoose.Types.ObjectId(userId) })
-                          .populate('items.productId');
+                          .populate({
+                            
+                            path:'items.productId',
+                          populate: {
+                            path: 'category',
+                            model: 'Category'
+                          }
+});
       
       if (!cart) {
         cart = { items: [] };
@@ -684,7 +691,7 @@
 
       const updatedOrder = await order.findByIdAndUpdate(
         orderId,
-        { status: 'Paid', paymentId: razorpay_payment_id },
+        { status: 'Pending', paymentId: razorpay_payment_id }, 
         { new: true }
       );
 

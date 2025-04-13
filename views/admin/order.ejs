@@ -125,28 +125,32 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-4 flex justify-center space-x-2">
-        <% if (currentPage > 1) { %>
-            <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= currentPage - 1 %>" 
-               class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
-               Previous
-            </a>
-        <% } %>
-    
-        <% for (let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= i %>" 
-               class="px-4 py-2 rounded <%= currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400 transition' %>">
-               <%= i %>
-            </a>
-        <% } %>
-    
-        <% if (currentPage < totalPages) { %>
-            <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= currentPage + 1 %>" 
-               class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
-               Next
-            </a>
-        <% } %>
-    </div>
+  <!-- Pagination -->
+<div class="mt-4 flex justify-center space-x-2">
+    <!-- Previous Button -->
+    <% if (currentPage > 1) { %>
+        <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= currentPage - 1 %>" 
+           class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
+           Previous
+        </a>
+    <% } else { %>
+        <span class="bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
+            Previous
+        </span>
+    <% } %>
+
+    <!-- Next Button -->
+    <% if (currentPage < totalPages) { %>
+        <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= currentPage + 1 %>" 
+           class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
+           Next
+        </a>
+    <% } else { %>
+        <span class="bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
+            Next
+        </span>
+    <% } %>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

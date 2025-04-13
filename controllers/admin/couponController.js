@@ -44,19 +44,19 @@ const loadCoupon = async (req, res) => {
   
 const addCoupon = async (req, res) => {
   try {
-      const { name, expire_on, offer_price, minimum_price, max_discount, is_list } = req.body;
-
-      if (!name || !expire_on || !offer_price || !minimum_price || !max_discount) {
+      const { name, expireOn, offerPrice, minimumPrice, maxDiscount, isList } = req.body;
+         console.log('adding coupon ',req.body)
+      if (!name || !expireOn|| !offerPrice|| !minimumPrice || !maxDiscount) {
           return res.status(400).json({ success: false, message: "All fields are required." });
       }
 
-      // Validate percentages (0-100)
-      if (offer_price < 0 || offer_price > 100 || minimum_price < 0 || minimum_price > 100 || max_discount < 0 || max_discount > 100) {
+    
+      if (offerPrice < 0 || offerPrice > 100 || minimumPrice < 0 || minimumPrice > 100 || maxDiscount< 0 || maxDiscount > 100) {
           return res.status(400).json({ success: false, message: "All percentage fields must be between 0 and 100." });
       }
 
-      // Ensure max_discount >= offer_price (both are percentages)
-      if (max_discount < offer_price) {
+  
+      if (maxDiscount < offerPrice) {
           return res.status(400).json({ success: false, message: "Maximum Discount (%) must be greater than or equal to Offer Price (%)." });
       }
 
@@ -67,11 +67,11 @@ const addCoupon = async (req, res) => {
 
       const newCoupon = new coupon({
           name,
-          expireOn: expire_on, 
-          offerPrice: offer_price, 
-          minimumPrice: minimum_price, 
-          maxDiscount: max_discount,  
-          isList: is_list || true, 
+          expireOn: expireOn, 
+          offerPrice: offerPrice, 
+          minimumPrice: minimumPrice, 
+          maxDiscount: maxDiscount,  
+          isList: isList || true, 
       });
 
       await newCoupon.save();

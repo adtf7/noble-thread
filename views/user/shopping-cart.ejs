@@ -248,46 +248,50 @@ document.addEventListener("DOMContentLoaded", function () {
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', async function (e) {
       e.preventDefault();
-      checkoutBtn.disabled = true; // Prevent double-clicks
+      checkoutBtn.disabled = true; 
 
-      let canProceed = true; // Flag to check if all products are available
-      let errorMessage = ''; // Store the error message
+      let canProceed = true; 
+      let errorMessage = '';
 
-      // Iterate over cart items
+     
       for (const item of cartData.items) {
         const productStatus = item.productId.status;
         const productStock = item.productId.quantity;
         const cartQuantity = item.quantity;
         const isblocked = item.productId.isBlocked
+        const isListed=item.productId.category.isListed
        if(item.length==0){
         checkoutBtn.disabled = true;
        }
 
-        // Check if product is available
+     
         if (productStatus.toLowerCase() !== 'available') {
           canProceed = false;
           errorMessage = `The product "${item.productId.productName}" is currently out of stock.`;
-          break; // Exit the loop if any product is out of stock
+          break; 
         }
         if(isblocked){
           canProceed = false;
           errorMessage = `The product "${item.productId.productName}" is currently blocked ,please wait for unblock or remove product from cart.`;
-          break; // Exit the loop if any product is out of stock
+          break;
         }
-        // Check if quantity in cart exceeds available stock
+        if(!isListed) {
+          canProceed = false;
+          errorMessage = `The product "${item.productId.productName}" The category is not listed, please wait for listing or remove product from cart.`;
+          break; 
+        }
         if (productStock < cartQuantity) {
           canProceed = false;
           errorMessage = `The product "${item.productId.productName}" has insufficient stock. Reduce the quantity in your cart.`;
-          break; // Exit the loop if quantity exceeds stock
+          break; 
         }
  
       }
 
       if (canProceed) {
-        // Proceed to checkout if all products are available and stock is sufficient
+        
         window.location.href = "/checkout";
       } else {
-        // Show error message if any product is out of stock or quantity exceeds stock
         Swal.fire({
           icon: 'error',
           title: 'Checkout Failed',

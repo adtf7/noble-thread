@@ -407,7 +407,7 @@ const returnOrder = async (req, res) => {
                         description: `Pending refund for return request of item in order #${order._id}`,
                         amount: item.price * item.quantity,
                         date: new Date(),
-                        status: 'pending', // Mark as pending until approved
+                        status: 'pending', 
                         type: 'credit',
                     },
                 },

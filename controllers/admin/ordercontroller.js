@@ -5,14 +5,19 @@ let wallet=require('../../models/walletSchema')
 
 const listOrders = async (req, res) => {
     try {
-        let { page = 1, limit = 4, search = '', status: selectedStatus = "", sortBy = "date" } = req.query;
+        // Default values for pagination and filters
+        let { page = 1, limit = 4, search = '', status: selectedStatus = '', sortBy = 'date' } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
+
+        // Validate page and limit
+        if (isNaN(page) || page < 1) page = 1;
+        if (isNaN(limit) || limit < 1) limit = 4;
 
         let searchQuery = {};
         if (search) {
             searchQuery.$or = [
-                { orderId: { $regex: search, $options: 'i' } }, 
+                { orderId: { $regex: search, $options: 'i' } },
                 { 'userId.name': { $regex: search, $options: 'i' } },
             ];
         }
@@ -25,25 +30,25 @@ const listOrders = async (req, res) => {
         let sort = {};
         switch (sortBy) {
             case 'orderId':
-                sort = { orderId: 1 }; 
+                sort = { orderId: 1 };
                 break;
             case 'customer':
                 sort = { 'userId.name': 1 };
                 break;
             case 'productName':
-                sort = { 'orderItems.product.productName': 1 }; 
+                sort = { 'orderItems.product.productName': 1 };
                 break;
             case 'date':
-                sort = { createdOn: -1 }; 
+                sort = { createdOn: -1 };
                 break;
             default:
-                sort = { createdOn: -1 }; 
+                sort = { createdOn: -1 };
         }
 
         const totalOrders = await Order.countDocuments(filter);
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Find orders where any item has "Return Request" status
+        // Find orders with return requests
         const returnRequests = await Order.find({
             'orderItems': {
                 $elemMatch: { status: 'Return Request' }
@@ -52,20 +57,22 @@ const listOrders = async (req, res) => {
             .populate('userId', 'name email')
             .populate('orderItems.product');
 
+        // Fetch paginated orders
         const orders = await Order.find(filter)
-            .populate('userId', 'name email') 
-            .populate('address') 
-            .populate('orderItems.product') 
-            .sort(sort) 
-            .skip((page - 1) * limit) 
-            .limit(limit); 
+            .populate('userId', 'name email')
+            .populate('address')
+            .populate('orderItems.product')
+            .sort(sort)
+            .skip((page - 1) * limit)
+            .limit(limit);
 
+        // Render the template with consistent variable names
         return res.render('admin/order', {
             orders,
-            currentPage: 'orders',
+            currentPage: 'orders', // Menu highlight
             totalOrders,
             totalPages,
-            currentPageNumber: page,
+            currentPage: page, // Use 'currentPage' instead of 'currentPageNumber'
             returnRequests,
             search,
             selectedStatus,
@@ -131,11 +138,11 @@ const updateOrderStatus = async (req, res) => {
                 if (newStatus === 'Cancelled' && item.status !== 'Cancelled') {
                     const refundAmount = item.price * item.quantity;
                     order.finalAmount -= refundAmount;
-                    await Product.updateOne(
+                    await product.updateOne(
                         { _id: item.product },
                         { $inc: { quantity: item.quantity } }
                     );
-                    await Wallet.updateOne(
+                    await wallet.updateOne(
                         { user: order.userId },
                         {
                             $inc: { balance: refundAmount },
@@ -156,11 +163,11 @@ const updateOrderStatus = async (req, res) => {
                 } else if (newStatus === 'Returned' && item.status !== 'Returned') {
                     const refundAmount = item.price * item.quantity;
                     order.finalAmount -= refundAmount;
-                    await Product.updateOne(
+                    await product.updateOne(
                         { _id: item.product },
                         { $inc: { quantity: item.quantity } }
                     );
-                    await Wallet.updateOne(
+                    await wallet.updateOne(
                         { user: order.userId },
                         {
                             $inc: { balance: refundAmount },

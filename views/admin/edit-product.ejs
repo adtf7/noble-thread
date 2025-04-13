@@ -1,4 +1,4 @@
-<%- include('../../views/partials/admin/header.ejs')%>
+<%- include('../../views/partials/admin/header.ejs') %>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />    
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
@@ -190,40 +190,40 @@
                     <form id="editProductForm" method="post" enctype="multipart/form-data" onsubmit="validateAndSubmit(event, '<%= product._id %>')">
                         <div class="mb-4">
                             <label for="product_name" class="form-label">Product Name</label>
-                            <input type="text" name="productName" value="<%=product.productName%>" class="form-control border" id="product_name">
+                            <input type="text" name="productName" value="<%= product.productName %>" class="form-control border" id="product_name">
                             <div id="productName-error" class="error-message"></div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Full Description</label>
-                            <input name="descriptionData" value="<%=product.description%>" class="form-control border" rows="4">
+                            <input name="descriptionData" value="<%= product.description %>" class="form-control border" rows="4">
                             <div id="description-error" class="error-message"></div>
                         </div>
                         <div class="row">
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Regular Price</label>
-                                    <input placeholder="$" name="regularPrice" type="text" value="<%= product.regularPrice%>" class="form-control border">
+                                    <input placeholder="$" name="regularPrice" type="text" value="<%= product.regularPrice %>" class="form-control border">
                                     <div id="regularPrice-error" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Sale Price</label>
-                                    <input name="salePrice" type="text" value="<%=product.salePrice%>" class="form-control border">
+                                    <input name="salePrice" type="text" value="<%= product.salePrice %>" class="form-control border">
                                     <div id="salePrice-error" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Quantity</label>
-                                    <input name="quantity" type="text" value="<%=product.quantity%>" class="form-control border">
+                                    <input name="quantity" type="text" value="<%= product.quantity %>" class="form-control border">
                                     <div id="quantity-error" class="error-message"></div>
                                 </div>
                             </div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Color</label>
-                            <input name="color" type="text" value="<%=product.color%>" class="form-control border">
+                            <input name="color" type="text" value="<%= product.color %>" class="form-control border">
                             <div id="color-error" class="error-message"></div>
                         </div>
                         <div class="mb-4">
@@ -339,74 +339,97 @@
         clearErrorMessages();
         let isValid = true;
 
+        // Validate product name
         const name = document.getElementsByName('productName')[0].value.trim();
         if (!name) {
             displayErrorMessage('productName-error', 'Product name is required');
             isValid = false;
         }
 
+        // Validate description
         const description = document.getElementsByName('descriptionData')[0].value.trim();
         if (!description) {
             displayErrorMessage('description-error', 'Description is required');
             isValid = false;
         }
 
+        // Validate regular price
         const price = document.getElementsByName('regularPrice')[0].value;
         if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) <= 0) {
             displayErrorMessage('regularPrice-error', 'Please enter a valid positive price');
             isValid = false;
         }
 
+        // Validate sale price
         const saleprice = document.getElementsByName('salePrice')[0].value;
         if (!saleprice || !/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) <= 0) {
             displayErrorMessage('salePrice-error', 'Please enter a valid positive sale price');
             isValid = false;
         }
 
+        // Validate quantity
         const quantity = document.getElementsByName('quantity')[0].value;
         if (!quantity || !Number.isInteger(Number(quantity)) || parseInt(quantity) < 0) {
             displayErrorMessage('quantity-error', 'Please enter a valid non-negative whole number');
             isValid = false;
         }
 
+        // Validate color
         const color = document.getElementsByName('color')[0].value.trim();
         if (!color) {
             displayErrorMessage('color-error', 'Color is required');
             isValid = false;
         }
 
+        // Validate category
         const category = document.getElementsByName('category')[0].value;
         if (!category) {
             displayErrorMessage('category-error', 'Please select a category');
             isValid = false;
         }
 
-        const existingImages = document.querySelectorAll('[id^="imageDatas"]').length;
-        const newImageInputs = [document.getElementById('input1'), document.getElementById('input2'), document.getElementById('input3')];
+        // Validate images
+        const existingImages = document.querySelectorAll('.thumbnail').length; // Count existing thumbnails
+        const newImageInputs = [
+            document.getElementById('input1'),
+            document.getElementById('input2'),
+            document.getElementById('input3')
+        ];
         let newImageCount = 0;
         const validImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+        let imageValidationPassed = true;
 
+        // Check new image validity (file type)
         newImageInputs.forEach((input, index) => {
             if (input.files.length > 0) {
                 newImageCount++;
                 const file = input.files[0];
                 if (!validImageTypes.includes(file.type)) {
-                    displayErrorMessage('images-error', `Image ${index+1}: Only JPEG, PNG, or JPG allowed`);
+                    displayErrorMessage('images-error', `Image ${index + 1}: Only JPEG, PNG, or JPG allowed`);
+                    imageValidationPassed = false;
                     isValid = false;
                 }
             }
         });
 
+        // Calculate total images
         const totalImages = existingImages + newImageCount;
-        if (totalImages === 0) {
-            displayErrorMessage('images-error', 'At least one image is required');
-            isValid = false;
-        } else if (totalImages > 3) {
+
+        // Check for too many images
+        if (totalImages > 3) {
             displayErrorMessage('images-error', `Maximum of 3 images allowed (${totalImages} selected)`);
+            imageValidationPassed = false;
             isValid = false;
         }
 
-        return isValid;
+        // Only show "At least one image is required" if no images exist and none are uploaded
+        if (totalImages === 0) {
+            displayErrorMessage('images-error', 'At least one image is required');
+            isValid = false;
+        }
+
+        // Ensure isValid reflects image validation
+        return isValid && imageValidationPassed;
     }
 
     function displayErrorMessage(elementId, message) {
