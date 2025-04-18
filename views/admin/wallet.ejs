@@ -1,0 +1,135 @@
+<%- include('../../views/partials/admin/header.ejs') %>
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    .total {
+        margin-left: 25cm;
+    }
+</style>
+<div class="flex-1 p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-3xl font-semibold" style="margin-left: 8cm;">Wallet Transactions</h2>
+    </div>
+
+    <!-- Total Transactions -->
+    <div class="bg-blue-100 text-blue-800 font-semibold px-4 py-2 rounded-lg total shadow-md w-fit mb-4 mx-auto">
+        Total Transactions: <%= totalTransactions %>
+    </div>
+
+    <% if (selectedTransaction) { %>
+        <!-- Transaction Detail View -->
+        <div class="bg-white p-4 shadow rounded-lg" style="margin-left: 10cm;">
+            <h3 class="text-xl font-semibold mb-4">Transaction Details</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="text-gray-600 mb-2"><strong>Transaction ID:</strong> <%= selectedTransaction.transactionId %></p>
+                    <p class="text-gray-600 mb-2"><strong>Date:</strong> <%= new Date(selectedTransaction.date).toLocaleString() %></p>
+                    <p class="text-gray-600 mb-2"><strong>Type:</strong> 
+                        <span class="px-2 py-1 rounded <%= selectedTransaction.type === 'credit' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                            <%= selectedTransaction.type.charAt(0).toUpperCase() + selectedTransaction.type.slice(1) %>
+                        </span>
+                    </p>
+                    <p class="text-gray-600 mb-2"><strong>Amount:</strong> ₹<%= selectedTransaction.amount.toFixed(2) %></p>
+                    <p class="text-gray-600 mb-2"><strong>Status:</strong> <%= selectedTransaction.status.charAt(0).toUpperCase() + selectedTransaction.status.slice(1) %></p>
+                    <p class="text-gray-600 mb-2"><strong>Source:</strong> <%= selectedTransaction.description %></p>
+                    <% if (selectedTransaction.order && selectedTransaction.order.orderId) { %>
+                        <p class="text-gray-600 mb-2">
+                            <strong>Order ID:</strong> <%= selectedTransaction.order.orderId %>
+                            <button onclick="viewOrder('<%= selectedTransaction.order.orderId %>')" class="ml-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-all">
+                                View Order Details
+                            </button>
+                        </p>
+                    <% } %>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">User Details</h4>
+                    <p class="text-gray-600 mb-2"><strong>Name:</strong> <%= selectedTransaction.user.name || 'N/A' %></p>
+                    <p class="text-gray-600 mb-2"><strong>Email:</strong> <%= selectedTransaction.user.email || 'N/A' %></p>
+                    <p class="text-gray-600 mb-2"><strong>Phone:</strong> <%= selectedTransaction.user.phone || 'N/A' %></p>
+                </div>
+            </div>
+            <a href="/admin/wallet" class="mt-4 inline-block bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition-all">
+                Back to Transactions
+            </a>
+        </div>
+    <% } else { %>
+        <!-- Transaction List View -->
+        <div class="bg-white p-4 shadow rounded-lg">
+            <% if (transactions.length === 0) { %>
+                <p class="text-gray-600 text-center">No transactions found.</p>
+            <% } else { %>
+                <table class="w-4/5 mx-auto text-left border-collapse shadow-md rounded-lg overflow-hidden" style="margin-left: 7cm;">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="p-3">#</th>
+                            <th class="p-3">Transaction ID</th>
+                            <th class="p-3">User</th>
+                            <th class="p-3">Type</th>
+                            <th class="p-3">Amount</th>
+                            <th class="p-3">Date</th>
+                            <th class="p-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% transactions.forEach((transaction, index) => { %>
+                            <tr class="border-b hover:bg-gray-100 transition-all duration-300">
+                                <td class="p-3"><%= index + 1 %></td>
+                                <td class="p-3 font-medium text-gray-700"><%= transaction.transactionId %></td>
+                                <td class="p-3 text-gray-600"><%= transaction.user.name || 'N/A' %></td>
+                                <td class="p-3">
+                                    <span class="px-2 py-1 rounded <%= transaction.type === 'credit' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                        <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
+                                    </span>
+                                </td>
+                                <td class="p-3 text-gray-600">₹<%= transaction.amount.toFixed(2) %></td>
+                                <td class="p-3 text-gray-600"><%= new Date(transaction.date).toLocaleDateString('en-US') %></td>
+                                <td class="p-3 flex space-x-2 justify-center">
+                                    <button onclick="viewTransaction('<%= transaction.transactionId %>')" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-all">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } %>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center space-x-2">
+            <% if (currentPage > 1) { %>
+                <a href="/admin/wallet?page=<%= currentPage - 1 %>"
+                   class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
+                    Previous
+                </a>
+            <% } else { %>
+                <span class="bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
+                    Previous
+                </span>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+                <a href="/admin/wallet?page=<%= currentPage + 1 %>"
+                   class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
+                    Next
+                </a>
+            <% } else { %>
+                <span class="bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
+                    Next
+                </span>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+
+<script>
+    // View Transaction
+    function viewTransaction(transactionId) {
+        window.location.href = `/admin/wallet?transactionId=${encodeURIComponent(transactionId)}`;
+    }
+
+    // View Order
+    function viewOrder(orderId) {
+        window.location.href = `/admin/orders/${encodeURIComponent(orderId)}`;
+    }
+</script>

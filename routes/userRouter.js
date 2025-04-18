@@ -41,6 +41,9 @@ router.post('/add-address',userauth,userProfileController.addaddress)
 router.put('/editaddresses/:id', userauth, userProfileController.editAddress);
 router.get('/editaddresses/:id', userauth, userProfileController.seteditAddress);
 router.post('/addressesdelete/:id', userauth, userProfileController.deleteAddress);
+router.get('/download-invoice/:orderId',userauth, userProfileController.downloadInvoice);
+
+
 
 router.post('/add-to-cart', userauth, cartController.addToCart);
 router.get('/cart',userauth,cartController.loadcart)

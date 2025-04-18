@@ -8,6 +8,8 @@ const session = require('express-session');
 const userRouter = require('./routes/userRouter');
 const authRoutes = require('./routes/auth');   
 let adminRouter=require('./routes/adminRouter') 
+const errorHandler = require('./middlewares/errorHandler');
+
 dotenv.config();
 
 db().catch(err => {
@@ -49,6 +51,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', userRouter);
 app.use('/auth', authRoutes);
 app.use('/admin',adminRouter)
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

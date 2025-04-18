@@ -1,0 +1,65 @@
+<%- include('../../views/partials/admin/header.ejs') %>
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+</style>
+<div class="flex-1 p-6">
+    <div class="container bg-white p-6 shadow rounded-lg">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Transaction Details</h2>
+        <% if (transaction) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Transaction Information -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Transaction Information</h3>
+                    <p class="text-gray-600 mb-2"><strong>Transaction ID:</strong> <%= transaction.transactionId %></p>
+                    <p class="text-gray-600 mb-2"><strong>Date:</strong> <%= new Date(transaction.date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) %></p>
+                    <p class="text-gray-600 mb-2"><strong>Type:</strong>
+                        <span class="px-2 py-1 rounded <%= transaction.type === 'credit' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                            <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
+                        </span>
+                    </p>
+                    <p class="text-gray-600 mb-2"><strong>Source:</strong> <%= transaction.description || 'N/A' %></p>
+                    <% if (transaction.order && transaction.order.orderId && /refund|return|canceled/i.test(transaction.description)) { %>
+                        <p class="text-gray-600 mb-2">
+                            <strong>Related Order:</strong> <%= transaction.order.orderId %>
+                            <button onclick="viewOrder('<%= transaction.order.orderId %>')" class="ml-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-all">
+                                View Order Details
+                            </button>
+                        </p>
+                    <% } %>
+                </div>
+                <!-- User Details -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">User Details</h3>
+                    <p class="text-gray-600 mb-2"><strong>Name:</strong> <%= transaction.user.name || 'N/A' %></p>
+                    <p class="text-gray-600 mb-2"><strong>Email:</strong> <%= transaction.user.email || 'N/A' %></p>
+                    <p class="text-gray-600 mb-2"><strong>Phone:</strong> <%= transaction.user.phone || 'N/A' %></p>
+                </div>
+            </div>
+            <div class="mt-6 text-center">
+                <a href="/admin/transactions" class="inline-block bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition-all">
+                    Back to Transactions
+                </a>
+            </div>
+        <% } else { %>
+            <p class="text-gray-600 text-center">Transaction not found.</p>
+            <div class="mt-6 text-center">
+                <a href="/admin/transactions" class="inline-block bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition-all">
+                    Back to Transactions
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    function viewOrder(orderId) {
+        window.location.href = `/admin/orders/${encodeURIComponent(orderId)}`;
+    }
+</script>

@@ -13,6 +13,7 @@ const orderControllers = require('../controllers/admin/ordercontroller');
 let couponControllers = require('../controllers/admin/couponController')
 let salesreportControllers = require('../controllers/admin/salesreportController')
 let dashboardControllers = require('../controllers/admin/dashboardController')
+let walletControllers = require("../controllers/admin/walletController");
 
 router.get('/admin-login', adminControllers.loadlogin);
 router.post('/loginverify', adminControllers.loginAdmin);
@@ -84,4 +85,6 @@ router.get(
   "/download-sales-report-excel",
   salesreportControllers.downloadSalesReportExcel
 );
+
+router.get("/wallet", adminauth, walletControllers.loadwallet);
 module.exports = router; 

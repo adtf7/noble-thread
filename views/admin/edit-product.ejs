@@ -459,6 +459,21 @@
     let croppers = {};
     function viewImage(event, index) {
         let input = event.target;
+        let file = input.files[0];
+        const validImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+
+        // Check if the uploaded file is a valid image
+        if (!validImageTypes.includes(file.type)) {
+            Swal.fire({
+                icon: "error",
+                title: "Invalid File",
+                text: "Only JPEG, PNG, or JPG files are allowed.",
+                confirmButtonColor: '#d33'
+            });
+            input.value = ""; // Reset the file input
+            return;
+        }
+
         let reader = new FileReader();
 
         reader.onload = function() {
@@ -497,7 +512,7 @@
                 cropperContainer.style.display = "none";
             };
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
 
     function deleteSingleImage(encodedImagePath, productId) {

@@ -1,90 +1,111 @@
+```html
 <%- include('../../views/partials/admin/header.ejs') %>
 <div class="flex-1 p-6">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-between items-center mb-6">
         <h2 class="text-3xl font-semibold">Products</h2>
     </div>
 
-    <div class="flex justify-center items-center min-h-[10vh] mb-4">
-        <form action="/admin/product" method="GET" class="relative w-full max-w-lg">
-           
-            <select name="category" class="mt-2 p-2 border rounded w-full">
+    <!-- Filter Form -->
+    <div class="flex justify-center items-center mb-6">
+        <form action="/admin/product" method="GET" class="w-full max-w-md">
+            <div class="flex items-center bg-white border border-gray-300 rounded-full shadow-sm px-4 py-2 focus-within:ring-2 focus-within:ring-gray-700">
+                <input 
+                    type="text" 
+                    name="search" 
+                    placeholder="Search Products..." 
+                    value="<%= search %>" 
+                    class="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400"
+                >
+                <button 
+                    type="submit" 
+                    class="text-gray-700 hover:text-gray-900 transition duration-300"
+                >
+                    🔍
+                </button>
+            </div>
+            <select name="category" class="mt-2 p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">All Categories</option>
                 <% categories.forEach(category => { %>
                     <option value="<%= category._id %>" <%= selectedCategory === category._id ? 'selected' : '' %>><%= category.name %></option>
                 <% }) %>
             </select>
-            <button type="submit" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600 transition-all">Filter</button>
+            <button type="submit" class="mt-2 w-full bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600 transition-all">Filter</button>
         </form>
     </div>
 
-    <div class="bg-blue-100 text-blue-800 font-semibold px-4 py-2 rounded-lg shadow-md w-fit mb-4" style="margin-left: 7.5cm;">
-        Total Products: <%= totalProducts %>
+    <!-- Total Products -->
+    <div class="flex justify-center mb-6">
+        <div class="bg-blue-100 text-blue-800 font-semibold px-4 py-2 rounded-lg shadow-md">
+            Total Products: <%= totalProducts %>
+        </div>
     </div>
 
-    <div class="bg-white p-4 shadow rounded">
-        <table class="w-[80%] ml-auto text-left border-collapse shadow-md rounded-lg overflow-hidden">
+    <!-- Products Table -->
+    <div class="bg-white p-4 shadow rounded-lg overflow-x-auto">
+        <table class="w-[80%] ml-auto text-left border-collapse">
             <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th class="p-3">#</th>
-                    <th class="p-3">Image</th>
-                    <th class="p-3">Name</th>
-                    <th class="p-3">Category</th>
-                    <th class="p-3">Price</th>
-                    <th class="p-3">Offer</th>
-                    <th class="p-3">Stock</th>
-                    <th class="p-3">Stock Status</th>
-                    <th class="p-3">Block Status</th>
-                    <th class="p-3">Actions</th>
-                    <th class="p-3">Action Offer</th>
+                    <th class="p-3 text-sm font-semibold">#</th>
+                    <th class="p-3 text-sm font-semibold">Image</th>
+                    <th class="p-3 text-sm font-semibold">Name</th>
+                    <th class="p-3 text-sm font-semibold">Category</th>
+                    <th class="p-3 text-sm font-semibold">Price</th>
+                    <th class="p-3 text-sm font-semibold">Offer</th>
+                    <th class="p-3 text-sm font-semibold">Stock</th>
+                    <th class="p-3 text-sm font-semibold">Stock Status</th>
+                    <th class="p-3 text-sm font-semibold">Block Status</th>
+                    <th class="p-3 text-sm font-semibold">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <% products.forEach((product, index) => { %>
                     <tr class="border-b hover:bg-gray-100 transition-all duration-300">
-                        <td class="p-3"><%= index + 1 %></td>
+                        <td class="p-3 text-sm"><%= index + 1 %></td>
                         <td class="p-3"><img src="<%= product.productImage[0] %>" alt="Product Image" class="w-16 h-16 object-cover rounded"></td>
-                        <td class="p-3 font-medium text-gray-700"><%= product.productName %></td>
-                        <td class="p-3 text-gray-600"><%= product.category.name %></td>
-                        <td class="p-3 text-right">₹<%= product.salePrice %></td>
-                        <td class="p-3">
+                        <td class="p-3 font-medium text-gray-700 text-sm"><%= product.productName %></td>
+                        <td class="p-3 text-gray-600 text-sm"><%= product.category.name %></td>
+                        <td class="p-3 text-right text-sm">₹<%= product.salePrice %></td>
+                        <td class="p-3 text-center">
                             <% if (product.offer) { %>
-                                <span class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">
                                     <%= product.offer.discountPercentage %>%
                                 </span>
                             <% } else { %>
-                                <span class="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">
+                                <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">
                                     No Offer
                                 </span>
                             <% } %>
                         </td>
-                        <td class="p-3 text-right"><%= product.quantity %></td>
+                        <td class="p-3 text-right text-sm"><%= product.quantity %></td>
                         <td class="p-3 text-center">
                             <% if (product.quantity > 0) { %>
-                                <span class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">In Stock</span>
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">In Stock</span>
                             <% } else { %>
-                                <span class="bg-red-200 text-red-800 px-3 py-1 rounded-full text-sm">Out of Stock</span>
+                                <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">Out of Stock</span>
                             <% } %>
                         </td>
                         <td class="p-3 text-center">
                             <% if (product.isBlocked) { %>
-                                <span class="bg-red-200 text-red-800 px-3 py-1 rounded-full text-sm">Blocked</span>
+                                <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">Blocked</span>
                             <% } else { %>
-                                <span class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">Unblocked</span>
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">Unblocked</span>
                             <% } %> 
                         </td>
                         <td class="p-3 flex space-x-2 justify-center">
-                            <a href="/admin/editproduct/?id=<%= product._id %>" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-all">Edit</a>
+                            <a href="/admin/editproduct/?id=<%= product._id %>" class="bg-blue-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-blue-600 transition-all text-xs">Edit</a>
                             <% if (product.isBlocked) { %>
-                                <button class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition-all" onclick="confirmUnblockProduct('<%= product._id %>')">Unblock</button>
+                                <button class="bg-green-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-green-600 transition-all text-xs" onclick="confirmUnblockProduct('<%= product._id %>')">Unblock</button>
                             <% } else { %>
-                                <button class="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition-all" onclick="confirmBlockProduct('<%= product._id %>')">Block</button>
-                            <% } %> </td>
-                            <td><button onclick="addProductOffer('<%= product._id %>')" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition">
+                                <button class="bg-red-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-red-600 transition-all text-xs" onclick="confirmBlockProduct('<%= product._id %>')">Block</button>
+                            <% } %>
+                        </td>
+                        <td class="p-3 flex flex-col space-y-2 items-center">
+                            <button onclick="addProductOffer('<%= product._id %>')" class="bg-green-500 text-white px-2 py-1 rounded-lg shadow hover:bg-green-700 transition text-xs w-full">
                                 Offer
-                            </button><br>
-                            <button onclick="removeProductOffer('<%= product._id %>')" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition">
+                            </button>
+                            <button onclick="removeProductOffer('<%= product._id %>')" class="bg-red-500 text-white px-2 py-1 rounded-lg shadow hover:bg-red-700 transition text-xs w-full">
                                 Remove
-                            </button></td>
+                            </button>
                         </td>
                     </tr>
                 <% }) %>
@@ -93,15 +114,15 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-4 flex justify-center space-x-2">
+    <div class="mt-6 flex justify-center space-x-2">
         <% if (currentPage > 1) { %>
-            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage - 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">Previous</a>
+            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage - 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition text-sm">Previous</a>
         <% } %>
         <% for (let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= i %>" class="px-4 py-2 rounded <%= currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400 transition' %>"><%= i %></a>
+            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= i %>" class="px-4 py-2 rounded text-sm <%= currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400 transition' %>"><%= i %></a>
         <% } %>
         <% if (currentPage < totalPages) { %>
-            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage + 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">Next</a>
+            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage + 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition text-sm">Next</a>
         <% } %>
     </div>
 </div>
@@ -139,17 +160,16 @@ function confirmUnblockProduct(productId) {
         }
     });
 }
+
 function addProductOffer(productId) {
     Swal.fire({
         title: 'Add Product Offer',
         html: `
             <input id="discount-percentage" type="number" min="0" max="100" class="swal2-input" placeholder="Discount Percentage (%)"><br>
-         <label for="start-date">Start Date:</label>
-<input id="start-date" type="date" class="swal2-input" placeholder="Start Date"><br>
-
-<label for="end-date">Expiry Date:</label>
-<input id="end-date" type="date" class="swal2-input" placeholder="End Date">
-
+            <label for="start-date">Start Date:</label>
+            <input id="start-date" type="date" class="swal2-input" placeholder="Start Date"><br>
+            <label for="end-date">Expiry Date:</label>
+            <input id="end-date" type="date" class="swal2-input" placeholder="End Date">
         `,
         showCancelButton: true,
         confirmButtonText: 'Add Offer',
@@ -197,7 +217,7 @@ function addProductOffer(productId) {
             })
             .then((data) => {
                 Swal.fire('Success', 'Product offer added successfully', 'success').then(() => {
-                    location.reload(); // Refresh the page to reflect changes
+                    location.reload();
                 });
             })
             .catch((error) => {
@@ -206,6 +226,7 @@ function addProductOffer(productId) {
         }
     });
 }
+
 async function removeProductOffer(productId) {
     Swal.fire({
         title: 'Are you sure?',
@@ -223,7 +244,7 @@ async function removeProductOffer(productId) {
             const result = await response.json();
             if (result.success) {
                 Swal.fire('Removed!', 'Product offer has been removed.', 'success').then(() => {
-                    location.reload(); // Refresh the page
+                    location.reload();
                 });
             } else {
                 Swal.fire('Error', result.message, 'error');
@@ -232,3 +253,4 @@ async function removeProductOffer(productId) {
     });
 }
 </script>
+```

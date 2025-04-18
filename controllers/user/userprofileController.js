@@ -10,6 +10,8 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 let Cart=require('../../models/cartSchema')
 let mongoose=require('mongoose')
+const PDFDocument = require('pdfkit'); // Import PDFKit
+
 const userProfile = async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/');
@@ -396,24 +398,7 @@ const returnOrder = async (req, res) => {
         item.status = 'Return Request';
         item.returnReason = returnReason;
 
-        // Create a pending transaction record (but don't add to wallet balance yet)
-        await wallet.updateOne(
-            { user: order.userId },
-            {
-                $push: {
-                    transactions: {
-                        order: order._id,
-                        item: item._id,
-                        description: `Pending refund for return request of item in order #${order._id}`,
-                        amount: item.price * item.quantity,
-                        date: new Date(),
-                        status: 'pending', 
-                        type: 'credit',
-                    },
-                },
-            },
-            { upsert: true }
-        );
+     
 
         await order.save();
         return res.json({ success: true, message: "Return request submitted successfully. Refund will be processed after approval." });
@@ -630,7 +615,7 @@ const cancelorder = async (req, res) => {
     
             // Paginate transactions
             const paginatedTransactions = walletdata.transactions
-                .slice((page - 1) * limit, page * limit); // Slice the transactions array for pagination
+                .slice((page - 1) * limit, page * limit); 
     
             // Render the wallet page
             res.render("user/wallet", {
@@ -718,6 +703,143 @@ let verifypayment = async (req, res) => {
     }
 }
 
+const downloadInvoice = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.session.user;
+
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'Order ID is required.' });
+    }
+
+    // Fetch the order details
+    const order = await Order.findOne({_id: orderId, userId })
+      .populate('orderItems.product')
+      .populate('address');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    // Check if address is populated and has at least one address entry
+    if (!order.address || !order.address.address || order.address.address.length === 0) {
+      return res.status(400).json({ success: false, message: 'No address found for this order.' });
+    }
+
+    // Check if all products are populated
+    if (!order.orderItems.every(item => item.product)) {
+      return res.status(400).json({ success: false, message: 'Some products not found for this order.' });
+    }
+
+    // Log the address for debugging
+    console.log('Address:', JSON.stringify(order.address, null, 2));
+
+    // Create a new PDF document
+    const doc = new PDFDocument({ margin: 50 });
+
+    // Set the response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=invoice_${order.orderId}.pdf`);
+
+    // Pipe the PDF document to the response
+    doc.pipe(res);
+
+    // Add a header
+    doc.fontSize(20).text('Invoice', { align: 'center', underline: true });
+    doc.moveDown();
+
+    // Use the first address in the address array
+    const shippingAddress = order.address.address[0]; // Adjust if you need to select a specific address
+
+    // Add order details
+    doc.fontSize(12).text(`Order ID: ${order.orderId}`, { align: 'left' });
+    doc.text(`Order Date: ${order.createdOn.toDateString()}`, { align: 'left' });
+    doc.text(`Invoice Date: ${order.invoiceDate ? order.invoiceDate.toDateString() : 'N/A'}`, { align: 'left' });
+    doc.text(`Customer Name: ${shippingAddress.name || 'N/A'}`, { align: 'left' });
+    doc.text(
+      `Shipping Address: ${shippingAddress.addressType || ''}, ${shippingAddress.city || ''}, ${
+        shippingAddress.state || ''
+      }, ${shippingAddress.pincode || ''}`,
+      { align: 'left' }
+    );
+    doc.text(`Phone: ${shippingAddress.phone || 'N/A'}`, { align: 'left' });
+    doc.moveDown();
+
+    // Add a horizontal line
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+
+    // Define table column widths and positions
+    const table = {
+      x: 50,
+      widths: {
+        item: 250, // Item column
+        quantity: 80, // Quantity column
+        price: 80, // Price column
+        total: 80 // Total column
+      }
+    };
+    const tableTop = doc.y;
+
+    // Add table headers
+    doc.fontSize(12).font('Helvetica-Bold');
+    doc.text('Item', table.x, tableTop, { width: table.widths.item, align: 'left' });
+    doc.text('Quantity', table.x + table.widths.item, tableTop, { width: table.widths.quantity, align: 'right' });
+    doc.text('Price', table.x + table.widths.item + table.widths.quantity, tableTop, { width: table.widths.price, align: 'right' });
+    doc.text('Total', table.x + table.widths.item + table.widths.quantity + table.widths.price, tableTop, { width: table.widths.total, align: 'right' });
+    doc.moveDown(0.5);
+
+    // Draw header line
+    doc.moveTo(table.x, doc.y).lineTo(table.x + 490, doc.y).stroke(); // Adjusted from 500 to 490
+    doc.moveDown(0.5);
+
+    // Add order items
+    doc.font('Helvetica');
+    let itemTotal = 0;
+    order.orderItems.forEach((item, index) => {
+      const y = doc.y;
+      const itemPrice = item.quantity * item.price;
+      itemTotal += itemPrice;
+      doc.text(`${index + 1}. ${item.product.productName || 'Unknown Product'}`, table.x, y, { width: table.widths.item, align: 'left' });
+      doc.text(`${item.quantity}`, table.x + table.widths.item, y, { width: table.widths.quantity, align: 'right' });
+      doc.text(`₹${item.price.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity, y, { width: table.widths.price, align: 'right' });
+      doc.text(`₹${itemPrice.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity + table.widths.price, y, { width: table.widths.total, align: 'right' });
+      doc.moveDown(0.5);
+    });
+
+    // Draw footer line
+    doc.moveTo(table.x, doc.y).lineTo(table.x + 490, doc.y).stroke(); // Adjusted from 500 to 490
+    doc.moveDown(0.5);
+
+    // Add subtotal row
+    doc.font('Helvetica-Bold');
+    doc.text('Subtotal', table.x, doc.y, { width: table.widths.item + table.widths.quantity + table.widths.price, align: 'right' });
+    doc.text(`₹${itemTotal.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity + table.widths.price, doc.y, { width: table.widths.total, align: 'right' });
+    doc.moveDown(0.5);
+
+    // Add discount and final amount
+    if (order.discount > 0) {
+      doc.text('Discount', table.x, doc.y, { width: table.widths.item + table.widths.quantity + table.widths.price, align: 'right' });
+      doc.text(`₹${order.discount.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity + table.widths.price, doc.y, { width: table.widths.total, align: 'right' });
+      doc.moveDown(0.5);
+    }
+    doc.text('Final Amount', table.x, doc.y, { width: table.widths.item + table.widths.quantity + table.widths.price, align: 'right' });
+    doc.text(`₹${order.finalAmount.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity + table.widths.price, doc.y, { width: table.widths.total, align: 'right' });
+    doc.moveDown();
+
+    // Add a footer
+    doc.fontSize(10).font('Helvetica').text('Thank you for shopping with us!', { align: 'center', marginTop: 20 });
+
+    // Finalize the PDF and end the stream
+    doc.end();
+  } catch (error) {
+    console.error('Error generating invoice:', error);
+    res.status(500).json({ success: false, message: 'Server error while generating invoice.' });
+  }
+};
+
+module.exports = downloadInvoice;
+
 module.exports = {
     userProfile,
     edituser,
@@ -734,5 +856,6 @@ module.exports = {
     cancelorder,
     loadwallet,
     createRazorpayOrd,
-    verifypayment
+    verifypayment,
+    downloadInvoice
 };

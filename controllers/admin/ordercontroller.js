@@ -456,7 +456,7 @@ const updateItemStatus = async (req, res) => {
                 { $inc: { quantity: item.quantity } }
             );
 
-            // Add to wallet balance
+          console.log(`Refund amount: ${refundAmount}`);
             await wallet.updateOne(
                 { user: order.userId._id },
                 {
