@@ -524,9 +524,7 @@ const cancelorder = async (req, res) => {
             'orderItems.$[item].status': 'Cancelled',
             'orderItems.$[item].cancelReason': reason,
         };
-        if (refundAmount > 0) {
-            updateFields.finalAmount = order.finalAmount - refundAmount;
-        }
+   
 
         
         await Order.updateOne(

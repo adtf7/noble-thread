@@ -257,7 +257,10 @@ const calculatePriceDetails = async (userId, couponId = null) => {
 const saveFailedOrder = async (userId, orderDetails) => {
   try {
     let { address, orderItems, subtotal, discount, finalTotal, paymentMethod, failureReason, couponId, razorpayOrderId, razorpayPaymentId, requestId } = orderDetails;
-
+  if(paymentMethod=='Wallet'){
+    return { success: true, message: 'Insufficient wallet balance.' }
+  }
+  console.log('paymentMethod=',paymentMethod)
     const allowedReasons = [
       'Payment was cancelled by user',
       'Something went wrong during payment'
@@ -335,6 +338,11 @@ const saveFailedOrderRoute = async (req, res) => {
     }
 
     const { address, orderItems, subtotal, discount, finalTotal, paymentMethod, failureReason, couponId, razorpayOrderId, razorpayPaymentId, requestId } = req.body;
+    if(paymentMethod==='Wallet'){
+         return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
+
+    }
+    console.log('paymentMethod=',paymentMethod)
     console.log('saveFailedOrderRoute received:', {
       userId,
       address,
@@ -877,75 +885,76 @@ const placeOrder = async (req, res) => {
     for (const item of orderItems) {
       const product = await Product.findById(item.productId);
       if (!product) {
-     let res14=   await saveFailedOrder(userId, {
-          address,
-          orderItems,
-          subtotal,
-          discount,
-          finalTotal,
-          paymentMethod,
-          failureReason: `Product not found: ${item.productId}`,
-          couponId,
-          requestId,
-        });
-        if(res14){
-          console.log('res14')
-        }
+    //  let res14=   await saveFailedOrder(userId, {
+    //       address,
+    //       orderItems,
+    //       subtotal,
+    //       discount,
+    //       finalTotal,
+    //       paymentMethod,
+    //       failureReason: `Product not found: ${item.productId}`,
+    //       couponId,
+    //       requestId,
+    //     });
+    //     if(res14){
+    //       console.log('res14')
+    //     }
         return res.status(400).json({ success: false, message: `Product not found: ${item.productId}` });
       }
 
       const quantity = Number(item.quantity);
       if (isNaN(quantity) || quantity <= 0) {
-      let res15=  await saveFailedOrder(userId, {
-          address,
-          orderItems,
-          subtotal,
-          discount,
-          finalTotal,
-          paymentMethod,
-          failureReason: `Invalid quantity for ${product.name}`,
-          couponId,
-          requestId,
-        });
-        if(res15){
-        console.log('res15')
-        }
+      // let res15=  await saveFailedOrder(userId, {
+      //     address,
+      //     orderItems,
+      //     subtotal,
+      //     discount,
+      //     finalTotal,
+      //     paymentMethod,
+      //     failureReason: `Invalid quantity for ${product.name}`,
+      //     couponId,
+      //     requestId,
+      //   });
+      //   if(res15){
+      //   console.log('res15')
+      //   }
         return res.status(400).json({ success: false, message: `Invalid quantity for ${product.name}` });
       }
       if (product.quantity < quantity) {
-     let res16=   await saveFailedOrder(userId, {
-          address,
-          orderItems,
-          subtotal,
-          discount,
-          finalTotal,
-          paymentMethod,
-          failureReason: `Insufficient stock for ${product.name}.`,
-          couponId,
-          requestId,
-        });
-        if(res16){
-          console.log('res16')
-        }
+    //  let res16=   await saveFailedOrder(userId, {
+    //       address,
+    //       orderItems,
+    //       subtotal,
+    //       discount,
+    //       finalTotal,
+    //       paymentMethod,
+    //       failureReason: `Insufficient stock for ${product.name}.`,
+    //       couponId,
+    //       requestId,
+    //     });
+    
+        // if(res16){
+        //   console.log('res16')
+        // }
         return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}.` });
       }
     }
 
     if (paymentMethod === 'COD' && finalTotal > 1000) {
-    let res17=  await saveFailedOrder(userId, {
-        address,
-        orderItems,
-        subtotal,
-        discount,
-        finalTotal,
-        paymentMethod,
-        failureReason: 'Cash on Delivery is not available for orders above ₹1000.',
-        couponId,
-        requestId,
-      });
-      if(res17){
-        console.log('res17')
-      }
+    // let res17=  await saveFailedOrder(userId, {
+    //     address,
+    //     orderItems,
+    //     subtotal,
+    //     discount,
+    //     finalTotal,
+    //     paymentMethod,
+    //     failureReason: 'Cash on Delivery is not available for orders above ₹1000.',
+    //     couponId,
+    //     requestId,
+      // });
+      // if(res17){
+      //   console.log('res17')
+      // }
       return res.status(400).json({ success: false, message: 'Cash on Delivery is not available for orders above ₹1000.' });
     }
 
@@ -971,23 +980,73 @@ const placeOrder = async (req, res) => {
     if (couponId) {
       const couponData = await Coupon.findById(couponId);
       if (!couponData || !couponData.isList) {
-      let res19=  await saveFailedOrder(userId, {
-          address,
-          orderItems,
-          subtotal,
-          discount,
-          finalTotal,
-          paymentMethod,
-          failureReason: 'Invalid or unlisted coupon.',
-          couponId,
-          requestId,
-        });
-        if(res19){
-        console.log('res19')
-        }
+      // let res19=  await saveFailedOrder(userId, {
+      //     address,
+      //     orderItems,
+      //     subtotal,
+      //     discount,
+      //     finalTotal,
+      //     paymentMethod,
+      //     failureReason: 'Invalid or unlisted coupon.',
+      //     couponId,
+      //     requestId,
+      //   });
+      //   if(res19){
+      //   console.log('res19')
+      //   }
         return res.status(400).json({ success: false, message: 'Invalid or unlisted coupon.' });
       }
       await User.findByIdAndUpdate(userId, { $push: { redeemedUser: couponId } });
+    }
+    if(paymentMethod=='Wallet'){
+      const wallet = await Wallet.findOne({ user: userId });
+      if (!wallet) {
+          return res.status(400).json({ success: false, message: 'Wallet not found.' });
+      }
+
+      if (wallet.balance < finalTotal) {
+          return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
+      }
+
+      const newOrder = new Order({
+          userId,
+          orderItems: orderItems.map(item => ({
+              product: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+              status: 'Pending',
+          })),
+          totalAmount: subtotal,
+          discount,
+          finalAmount: finalTotal,
+          address,
+          invoiceDate: new Date(),
+          shoppingMethod: paymentMethod,
+          status: 'Pending',
+          createdOn: new Date(),
+          couponStatus: !!couponId,
+          requestId,
+      });
+
+      await newOrder.save();
+
+      wallet.balance -= finalTotal;
+      wallet.transactions.push({
+          order: newOrder._id,
+          description: `Order payment (Order ID: ${newOrder._id})`,
+          amount: finalTotal,
+          status: 'Pending',
+          type: 'debit'
+      });
+      wallet.updatedAt = new Date();
+      await wallet.save();
+
+      for (const item of orderItems) {
+          await Product.updateOne({ _id: item.productId }, { $inc: { quantity: -item.quantity } });
+      }
+      
+      console.log('Order placed successfully (Wallet):', { orderId: newOrder._id });
+      return res.status(200).json({ success: true, order: newOrder, orderId: newOrder._id });
     }
 
     const newOrder = new Order({
