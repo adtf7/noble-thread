@@ -1,8 +1,7 @@
-```html
 <%- include('../../views/partials/admin/header.ejs') %>
 <div class="flex-1 p-6">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-3xl font-semibold">Products</h2>
+        <h2 class="text-4xl font-semibold">Products</h2>
     </div>
 
     <!-- Filter Form -->
@@ -14,28 +13,28 @@
                     name="search" 
                     placeholder="Search Products..." 
                     value="<%= search %>" 
-                    class="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400"
+                    class="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400 text-lg"
                 >
                 <button 
                     type="submit" 
-                    class="text-gray-700 hover:text-gray-900 transition duration-300"
+                    class="text-gray-700 hover:text-gray-900 transition duration-300 text-2xl"
                 >
                     🔍
                 </button>
             </div>
-            <select name="category" class="mt-2 p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="category" class="mt-2 p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
                 <option value="">All Categories</option>
                 <% categories.forEach(category => { %>
                     <option value="<%= category._id %>" <%= selectedCategory === category._id ? 'selected' : '' %>><%= category.name %></option>
                 <% }) %>
             </select>
-            <button type="submit" class="mt-2 w-full bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600 transition-all">Filter</button>
+            <button type="submit" class="mt-2 w-full bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600 transition-all text-lg">Filter</button>
         </form>
     </div>
 
     <!-- Total Products -->
     <div class="flex justify-center mb-6">
-        <div class="bg-blue-100 text-blue-800 font-semibold px-4 py-2 rounded-lg shadow-md">
+        <div class="bg-blue-100 text-blue-800 font-semibold px-4 py-2 rounded-lg shadow-md text-lg">
             Total Products: <%= totalProducts %>
         </div>
     </div>
@@ -45,65 +44,65 @@
         <table class="w-[80%] ml-auto text-left border-collapse">
             <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th class="p-3 text-sm font-semibold">#</th>
-                    <th class="p-3 text-sm font-semibold">Image</th>
-                    <th class="p-3 text-sm font-semibold">Name</th>
-                    <th class="p-3 text-sm font-semibold">Category</th>
-                    <th class="p-3 text-sm font-semibold">Price</th>
-                    <th class="p-3 text-sm font-semibold">Offer</th>
-                    <th class="p-3 text-sm font-semibold">Stock</th>
-                    <th class="p-3 text-sm font-semibold">Stock Status</th>
-                    <th class="p-3 text-sm font-semibold">Block Status</th>
-                    <th class="p-3 text-sm font-semibold">Actions</th>
+                    <th class="p-3 text-base font-semibold">#</th>
+                    <th class="p-3 text-base font-semibold">Image</th>
+                    <th class="p-3 text-base font-semibold">Name</th>
+                    <th class="p-3 text-base font-semibold">Category</th>
+                    <th class="p-3 text-base font-semibold">Price</th>
+                    <th class="p-3 text-base font-semibold">Offer</th>
+                    <th class="p-3 text-base font-semibold">Stock</th>
+                    <th class="p-3 text-base font-semibold">Stock Status</th>
+                    <th class="p-3 text-base font-semibold">Block Status</th>
+                    <th class="p-3 text-base font-semibold">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <% products.forEach((product, index) => { %>
                     <tr class="border-b hover:bg-gray-100 transition-all duration-300">
-                        <td class="p-3 text-sm"><%= index + 1 %></td>
+                        <td class="p-3 text-base"><%= index + 1 %></td>
                         <td class="p-3"><img src="<%= product.productImage[0] %>" alt="Product Image" class="w-16 h-16 object-cover rounded"></td>
-                        <td class="p-3 font-medium text-gray-700 text-sm"><%= product.productName %></td>
-                        <td class="p-3 text-gray-600 text-sm"><%= product.category.name %></td>
-                        <td class="p-3 text-right text-sm">₹<%= product.salePrice %></td>
+                        <td class="p-3 font-medium text-gray-700 text-base"><%= product.productName %></td>
+                        <td class="p-3 text-gray-600 text-base"><%= product.category.name %></td>
+                        <td class="p-3 text-right text-base">₹<%= product.salePrice %></td>
                         <td class="p-3 text-center">
                             <% if (product.offer) { %>
-                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-sm inline-flex min-w-[80px] justify-center items-center">
                                     <%= product.offer.discountPercentage %>%
                                 </span>
                             <% } else { %>
-                                <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">
+                                <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm inline-flex min-w-[80px] justify-center items-center">
                                     No Offer
                                 </span>
                             <% } %>
                         </td>
-                        <td class="p-3 text-right text-sm"><%= product.quantity %></td>
+                        <td class="p-3 text-right text-base"><%= product.quantity %></td>
                         <td class="p-3 text-center">
                             <% if (product.quantity > 0) { %>
-                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">In Stock</span>
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-sm inline-flex min-w-[80px] justify-center items-center">In Stock</span>
                             <% } else { %>
-                                <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">Out of Stock</span>
+                                <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-sm inline-flex min-w-[80px] justify-center items-center">Out of Stock</span>
                             <% } %>
                         </td>
                         <td class="p-3 text-center">
                             <% if (product.isBlocked) { %>
-                                <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">Blocked</span>
+                                <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-sm inline-flex min-w-[80px] justify-center items-center">Blocked</span>
                             <% } else { %>
-                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs inline-flex min-w-[80px] justify-center items-center">Unblocked</span>
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-sm inline-flex min-w-[80px] justify-center items-center">Unblocked</span>
                             <% } %> 
                         </td>
                         <td class="p-3 flex space-x-2 justify-center">
-                            <a href="/admin/editproduct/?id=<%= product._id %>" class="bg-blue-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-blue-600 transition-all text-xs">Edit</a>
+                            <a href="/admin/editproduct/?id=<%= product._id %>" class="bg-blue-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-blue-600 transition-all text-base">Edit</a>
                             <% if (product.isBlocked) { %>
-                                <button class="bg-green-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-green-600 transition-all text-xs" onclick="confirmUnblockProduct('<%= product._id %>')">Unblock</button>
+                                <button class="bg-green-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-green-600 transition-all text-base" onclick="confirmUnblockProduct('<%= product._id %>')">Unblock</button>
                             <% } else { %>
-                                <button class="bg-red-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-red-600 transition-all text-xs" onclick="confirmBlockProduct('<%= product._id %>')">Block</button>
+                                <button class="bg-red-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-red-600 transition-all text-base" onclick="confirmBlockProduct('<%= product._id %>')">Block</button>
                             <% } %>
                         </td>
                         <td class="p-3 flex flex-col space-y-2 items-center">
-                            <button onclick="addProductOffer('<%= product._id %>')" class="bg-green-500 text-white px-2 py-1 rounded-lg shadow hover:bg-green-700 transition text-xs w-full">
+                            <button onclick="addProductOffer('<%= product._id %>')" class="bg-green-500 text-white px-2 py-1 rounded-lg shadow hover:bg-green-700 transition text-lg w-full">
                                 Offer
                             </button>
-                            <button onclick="removeProductOffer('<%= product._id %>')" class="bg-red-500 text-white px-2 py-1 rounded-lg shadow hover:bg-red-700 transition text-xs w-full">
+                            <button onclick="removeProductOffer('<%= product._id %>')" class="bg-red-500 text-white px-2 py-1 rounded-lg shadow hover:bg-red-700 transition text-base w-full">
                                 Remove
                             </button>
                         </td>
@@ -116,13 +115,13 @@
     <!-- Pagination -->
     <div class="mt-6 flex justify-center space-x-2">
         <% if (currentPage > 1) { %>
-            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage - 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition text-sm">Previous</a>
+            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage - 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition text-base">Previous</a>
         <% } %>
         <% for (let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= i %>" class="px-4 py-2 rounded text-sm <%= currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400 transition' %>"><%= i %></a>
+            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= i %>" class="px-4 py-2 rounded text-base <%= currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400 transition' %>"><%= i %></a>
         <% } %>
         <% if (currentPage < totalPages) { %>
-            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage + 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition text-sm">Next</a>
+            <a href="/admin/product?search=<%= search %>&category=<%= selectedCategory %>&page=<%= currentPage + 1 %>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition text-base">Next</a>
         <% } %>
     </div>
 </div>
@@ -253,4 +252,3 @@ async function removeProductOffer(productId) {
     });
 }
 </script>
-```

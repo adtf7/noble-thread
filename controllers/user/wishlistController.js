@@ -62,7 +62,7 @@ const addwishlist = async (req, res) => {
           return res.status(400).json({ success: false, message: "Product already in wishlist" });
       }
 
-      // Find the user's wishlist
+      
       let wishlist = await Wishlist.findOne({ userId });
 
       if (!wishlist) {
@@ -74,7 +74,7 @@ const addwishlist = async (req, res) => {
 
       console.log('Saved to wishlist:', savewish);
       return res.status(200).json({ success: true, message: 'Product added to wishlist' });
-
+ 
   } catch (error) {
       console.error('Error adding product to wishlist:', error);
       if (!res.headersSent) {

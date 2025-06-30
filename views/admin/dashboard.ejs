@@ -280,7 +280,7 @@
                     <% bestSellingCategories.forEach((category, index) => { %>
                         <tr>
                             <td><%= index + 1 %></td>
-                            <td><%= category._id || 'N/A' %></td>
+                            <td><%= category.categoryName|| 'N/A' %></td>
                             <td><%= category.totalSold %></td>
                         </tr>
                     <% }) %>

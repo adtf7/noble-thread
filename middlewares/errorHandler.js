@@ -1,5 +1,5 @@
 const errorHandler = (err, req, res, next) => {
-    console.error("🔥 Error caught by errorHandler middleware:", err);
+    console.error(" Error caught by errorHandler middleware:", err);
 
     // Set the status code
     const statusCode = err.status || 500;
@@ -17,7 +17,7 @@ const errorHandler = (err, req, res, next) => {
         title: "Error",
         message: err.message || "Something went wrong!",
         statusCode,
-    });
+    }); 
 };
 
 module.exports = errorHandler;

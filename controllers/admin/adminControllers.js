@@ -1,7 +1,7 @@
 const user = require('../../models/userschema');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const User = require('../../models/userschema'); // Ensure you have the correct path to your User model
+const User = require('../../models/userschema'); 
 
 let pageerror=async(req,res)=>{
     res.render('admin/pageerror')
@@ -10,7 +10,7 @@ let pageerror=async(req,res)=>{
 let loadlogin = async (req, res) => {
     try {
         if (req.session.admin) {
-            return res.redirect('/admin/dashboard'); // Redirect if already logged in
+            return res.redirect('/admin/dashboard'); 
         }
         res.render('admin/admin-login', { message: null });
     } catch (error) {
@@ -26,7 +26,7 @@ let loginAdmin = async (req, res) => {
         console.log('email=', email);
         console.log('password', password);
         
-        // Find admin user (ensure `isAdmin: true`)
+        
         let admin = await user.findOne({ email, isAdmin: true });
         console.log('admin', admin);
         
@@ -40,7 +40,7 @@ let loginAdmin = async (req, res) => {
             return res.render('admin/admin-login', { message: 'Incorrect password' });
         }
 
-        req.session.admin = true; // Store session
+        req.session.admin = true;
         return res.redirect('/admin/dashboard'); // Use absolute path
 
     } catch (error) {

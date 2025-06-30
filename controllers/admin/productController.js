@@ -41,7 +41,6 @@ let addProduct = async (req, res)    => {
                     let originalimagepath = req.files[i].path;
                     let resizeimagepath = path.join(__dirname, '../../public/uploads/product-image', Date.now() + '-' + req.files[i].originalname);
                     
-                    // Ensure the directory exists before saving the resized image
                     const dir = path.dirname(resizeimagepath);
                     if (!fs.existsSync(dir)) {
                         fs.mkdirSync(dir, { recursive: true });
@@ -55,9 +54,9 @@ let addProduct = async (req, res)    => {
             let newproducts = new products({
                 productName: product.productName,
                 description: product.description,
-                category: product.category, // Use category ID directly
+                category: product.category, 
                 salePrice: product.salePrice,
-                regularPrice: product.regularPrice, // Include regularPrice
+                regularPrice: product.regularPrice,
                 createdAt: new Date(),
                 quantity: product.quantity,
                 size: product.size,
@@ -215,7 +214,7 @@ let seteditproduct = async (req, res) => {
                     .resize({ width: 440, height: 440 })
                     .toFile(resizedImagePath);
 
-                images.push(`/uploads/product-image/${imageName}`); // Store relative path in DB
+                images.push(`/uploads/product-image/${imageName}`); 
             }
         }
 

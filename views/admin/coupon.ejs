@@ -17,8 +17,8 @@
                     <th class="p-3">Name</th>
                     <th class="p-3">Expire On</th>
                     <th class="p-3">Offer (%)</th>
-                    <th class="p-3">Min Price (%)</th>
-                    <th class="p-3">Max Discount (%)</th>
+                    <th class="p-3">Min Price (₹)</th>
+                    <th class="p-3">Max Discount (₹)</th>
                     <th class="p-3">Status</th>
                     <th class="p-3">Actions</th>
                 </tr>
@@ -30,8 +30,8 @@
                         <td class="p-3"><%= coupon.name %></td>
                         <td class="p-3"><%= coupon.expireOn.toLocaleDateString() %></td>
                         <td class="p-3"><%= coupon.offerPrice %>%</td>
-                        <td class="p-3"><%= coupon.minimumPrice %>%</td>
-                        <td class="p-3"><%= coupon.maxDiscount %>%</td>
+                        <td class="p-3"><%= coupon.minimumPrice %></td>
+                        <td class="p-3"><%= coupon.maxDiscount %></td>
                         <td class="p-3">
                             <% if (coupon.isList) { %>
                                 <span class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">Listed</span>
@@ -95,12 +95,12 @@
                         <input id="offerPrice" name="offerPrice" type="number" min="0" max="100" step="5" class="mt-1 p-2 border rounded w-full" placeholder="Offer Percentage" required>
                     </div>
                     <div class="mb-4">
-                        <label for="minimumPrice" class="block text-sm font-medium text-gray-700">Minimum Price (%)</label>
-                        <input id="minimumPrice" name="minimumPrice" type="number" min="0" max="100" step="5" class="mt-1 p-2 border rounded w-full" placeholder="Minimum Price Percentage" required>
+                        <label for="minimumPrice" class="block text-sm font-medium text-gray-700">Minimum Price (₹)</label>
+                        <input id="minimumPrice" name="minimumPrice" type="number" min="0" step="1" class="mt-1 p-2 border rounded w-full" placeholder="Minimum Price Amount" required>
                     </div>
                     <div class="mb-4">
-                        <label for="maxDiscount" class="block text-sm font-medium text-gray-700">Maximum Discount (%)</label>
-                        <input id="maxDiscount" name="maxDiscount" type="number" min="0" max="100" step="5" class="mt-1 p-2 border rounded w-full" placeholder="Maximum Discount Percentage" required>
+                        <label for="maxDiscount" class="block text-sm font-medium text-gray-700">Maximum Discount (₹)</label>
+                        <input id="maxDiscount" name="maxDiscount" type="number" min="0" step="1" class="mt-1 p-2 border rounded w-full" placeholder="Maximum Discount Amount" required>
                     </div>
                     <div class="mb-4 flex items-center">
                         <input id="isList" name="isList" type="checkbox" class="mr-2 border rounded" checked>
@@ -123,13 +123,23 @@
                     return false;
                 }
 
-                if (offerPrice % 5 !== 0 || minimumPrice % 5 !== 0 || maxDiscount % 5 !== 0) {
-                    Swal.showValidationMessage('Percentages must be multiples of 5');
+                // if (offerPrice % 5 !== 0) {
+                //     Swal.showValidationMessage('Offer Percentage must be a multiple of 5');
+                //     return false;
+                // }
+
+                if (offerPrice < 0 || offerPrice > 100) {
+                    Swal.showValidationMessage('Offer Percentage must be between 0 and 100');
                     return false;
                 }
 
-                if (offerPrice < 0 || offerPrice > 100 || minimumPrice < 0 || minimumPrice > 100 || maxDiscount < 0 || maxDiscount > 100) {
-                    Swal.showValidationMessage('All percentage fields must be between 0 and 100');
+                if (minimumPrice < 0) {
+                    Swal.showValidationMessage('Minimum Price must be a positive amount');
+                    return false;
+                }
+
+                if (maxDiscount < 0) {
+                    Swal.showValidationMessage('Maximum Discount must be a positive amount');
                     return false;
                 }
 
@@ -185,12 +195,12 @@
                         <input id="edit-offer-price" name="offerPrice" type="number" min="0" max="100" step="5" class="mt-1 p-2 border rounded w-full" value="${offerPrice}" required>
                     </div>
                     <div class="mb-4">
-                        <label for="edit-minimum-price" class="block text-sm font-medium text-gray-700">Minimum Price (%)</label>
-                        <input id="edit-minimum-price" name="minimumPrice" type="number" min="0" max="100" step="5" class="mt-1 p-2 border rounded w-full" value="${minimumPrice}" required>
+                        <label for="edit-minimum-price" class="block text-sm font-medium text-gray-700">Minimum Price (₹)</label>
+                        <input id="edit-minimum-price" name="minimumPrice" type="number" min="0" step="1" class="mt-1 p-2 border rounded w-full" value="${minimumPrice}" required>
                     </div>
                     <div class="mb-4">
-                        <label for="edit-max-discount" class="block text-sm font-medium text-gray-700">Maximum Discount (%)</label>
-                        <input id="edit-max-discount" name="maxDiscount" type="number" min="0" max="100" step="5" class="mt-1 p-2 border rounded w-full" value="${maxDiscount}" required>
+                        <label for="edit-max-discount" class="block text-sm font-medium text-gray-700">Maximum Discount (₹)</label>
+                        <input id="edit-max-discount" name="maxDiscount" type="number" min="0" step="1" class="mt-1 p-2 border rounded w-full" value="${maxDiscount}" required>
                     </div>
                     <div class="mb-4 flex items-center">
                         <input id="edit-is-list" name="isList" type="checkbox" class="mr-2 border rounded" ${isList ? 'checked' : ''}>
@@ -213,10 +223,23 @@
                     return false;
                 }
 
-               
+                // if (offerPrice % 5 !== 0) {
+                //     Swal.showValidationMessage('Offer Percentage must be a multiple of 5');
+                //     return false;
+                // }
 
-                if (offerPrice < 0 || offerPrice > 100 || minimumPrice < 0 || minimumPrice > 100 || maxDiscount < 0 || maxDiscount > 100) {
-                    Swal.showValidationMessage('All percentage fields must be between 0 and 100');
+                if (offerPrice < 0 || offerPrice > 100) {
+                    Swal.showValidationMessage('Offer Percentage must be between 0 and 100');
+                    return false;
+                }
+
+                if (minimumPrice < 0) {
+                    Swal.showValidationMessage('Minimum Price must be a positive amount');
+                    return false;
+                }
+
+                if (maxDiscount < 0) {
+                    Swal.showValidationMessage('Maximum Discount must be a positive amount');
                     return false;
                 }
 

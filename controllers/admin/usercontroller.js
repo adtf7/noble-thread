@@ -6,11 +6,11 @@ let customer = async (req, res) => {
             return res.redirect('/admin/admin-login');
         }
        
-        let search = req.query.search || ""; // Get search query from URL
-        let page = parseInt(req.query.page) || 1; // Convert page to number (default: 1)
-        const limit = 5; // Number of users per page
+        let search = req.query.search || ""; 
+        let page = parseInt(req.query.page) || 1; 
+        const limit = 5; 
 
-        // Fetch users based on search query and pagination
+        
         const userData = await User.find({
             isAdmin: false,
             $or: [
@@ -21,7 +21,7 @@ let customer = async (req, res) => {
         .limit(limit)
         .skip((page - 1) * limit);
 
-        // Count total matching users
+        
         const count = await User.countDocuments({
             isAdmin: false,
             $or: [

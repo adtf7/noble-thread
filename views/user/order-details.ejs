@@ -155,6 +155,9 @@
     .order-status.cancelled {
         background-image: linear-gradient(45deg, #494848, #e7c2b7);
     }
+    .order-status.failed{
+          background-image: linear-gradient(45deg, #6e1b1b, #f03030);
+    }
     .modal {
         display: none;
         position: fixed;
@@ -252,7 +255,19 @@
                     <p><strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
                     <p><strong>Discount:</strong> ₹<%= (order.totalAmount - order.finalAmount).toFixed(2) %></p>
                     <p><strong>Final Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
+                    <div style="width: 6cm;">
+                        <% 
+        let isFailed = order.status === 'Failed'; 
+        order.orderItems.forEach(item => {
+            if (item.status === 'Failed') isFailed = true;
+        });
+        if (isFailed) { 
+    %>
+        <button class="btn retry-btn" style="background-color: #46290f;" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
+    <% } %></div>
                 </div>
+
+                
                 <h3>Items Ordered</h3>
                 <% if (order.orderItems && order.orderItems.length > 0) { %>
                     <div class="product-list">
@@ -267,6 +282,7 @@
                                             <span class="order-status <%= item.status.toLowerCase().replace(' ', '-') %>">
                                                 <%= item.status %>
                                             </span>
+                    
                                         </p>
                                         <% if (item.status === 'Pending' || item.status === 'Processing') { %>
                                             <button class="btn cancel-btn" onclick="cancelItem('<%= order._id %>', '<%= item._id %>')">Cancel Item</button>
@@ -274,6 +290,8 @@
                                         <% if (item.status === 'Delivered') { %>
                                             <button class="btn return-btn" onclick="openReturnModal('<%= order._id %>', '<%= item._id %>')">Return Item</button>
                                         <% } %>
+                                            
+                                     
                                     </div>
                                 <% } else { %>
                                     <p>Product details not available.</p>
@@ -317,6 +335,7 @@
     <%- include('../../views/partials/user/footer.ejs') %>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         function openReturnModal(orderId, itemId) {
             document.getElementById('returnOrderId').value = orderId;
@@ -453,6 +472,77 @@
                 }
             });
         }
+        async function retryPayment(orderId, itemId) {
+    const result = await Swal.fire({
+        title: 'Retry Payment',
+        text: 'Do you want to retry payment for this order?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Retry',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            confirmButton: 'swal2-confirm-custom',
+            cancelButton: 'swal2-cancel-custom'
+        }
+    });
+
+    if (result.isConfirmed) {
+        try {
+            // 1. Request backend to create a new Razorpay order for this item/order
+            const response = await fetch('/retry-razorpay-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId, itemId })
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                Swal.fire('Error', data.message || 'Could not initiate payment.', 'error');
+                return;
+            }
+
+            // 2. Open Razorpay payment modal
+           // 2. Open Razorpay payment modal with backend data
+const options = {
+    key: data.razorpayKey,
+    amount: data.razorpayOrder.amount,
+    currency: data.razorpayOrder.currency,
+    order_id: data.razorpayOrder.id,
+    name: 'Noble Thread',
+    description: 'Retry Payment',
+    handler: async function (response) {
+        // Verify payment on backend
+        const verifyRes = await fetch('/reverify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                amount: data.razorpayOrder.amount / 100 // or order.finalAmount, as needed
+            })
+        });
+        const verifyData = await verifyRes.json();
+        if (verifyData.success) {
+            Swal.fire('Success', 'Payment successful! Order updated.', 'success').then(() => location.reload());
+        } else {
+            Swal.fire('Error', verifyData.message || 'Payment verification failed.', 'error');
+        }
+    },
+    modal: {
+        ondismiss: function () {
+            Swal.fire('Info', 'Payment was cancelled.', 'info');
+        }
+    }
+};
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } catch (err) {
+            Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+        }
+    }
+}
     </script>
 </body>
 </html>

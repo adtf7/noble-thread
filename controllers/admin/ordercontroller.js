@@ -5,12 +5,11 @@ let wallet=require('../../models/walletSchema')
 
 const listOrders = async (req, res) => {
     try {
-        // Default values for pagination and filters
         let { page = 1, limit = 4, search = '', status: selectedStatus = '', sortBy = 'date' } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
 
-        // Validate page and limit
+    
         if (isNaN(page) || page < 1) page = 1;
         if (isNaN(limit) || limit < 1) limit = 4;
 
@@ -23,6 +22,9 @@ const listOrders = async (req, res) => {
         }
 
         let filter = { ...searchQuery };
+
+        filter.status = { $ne: 'Failed' };
+
         if (selectedStatus && selectedStatus !== 'all') {
             filter.status = selectedStatus;
         }
@@ -48,7 +50,6 @@ const listOrders = async (req, res) => {
         const totalOrders = await Order.countDocuments(filter);
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Find orders with return requests
         const returnRequests = await Order.find({
             'orderItems': {
                 $elemMatch: { status: 'Return Request' }
@@ -57,7 +58,6 @@ const listOrders = async (req, res) => {
             .populate('userId', 'name email')
             .populate('orderItems.product');
 
-        // Fetch paginated orders
         const orders = await Order.find(filter)
             .populate('userId', 'name email')
             .populate('address')
@@ -66,13 +66,12 @@ const listOrders = async (req, res) => {
             .skip((page - 1) * limit)
             .limit(limit);
 
-        // Render the template with consistent variable names
         return res.render('admin/order', {
             orders,
-            currentPage: 'orders', // Menu highlight
+            currentPage: 'orders', 
             totalOrders,
             totalPages,
-            currentPage: page, // Use 'currentPage' instead of 'currentPageNumber'
+            currentPage: page,
             returnRequests,
             search,
             selectedStatus,
@@ -115,7 +114,7 @@ const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid status value.' });
         }
 
-        // Find the order by orderId and populate necessary fields
+
         const order = await Order.findOne({ orderId: orderId })
             .populate('orderItems.product')
             .populate('userId');
@@ -124,17 +123,16 @@ const updateOrderStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found.' });
         }
 
-        // Store the previous status for comparison
+      
         const previousStatus = order.status;
 
-        // Update the order status
+       
         order.status = newStatus;
 
-        // Update all items' statuses to match the new order.status
+
         for (let i = 0; i < order.orderItems.length; i++) {
             const item = order.orderItems[i];
             if (item.status !== newStatus) {
-                // Handle refund and stock updates for Cancelled or Returned transitions
                 if (newStatus === 'Cancelled' && item.status !== 'Cancelled') {
                     const refundAmount = item.price * item.quantity;
                     order.finalAmount -= refundAmount;
@@ -186,7 +184,7 @@ const updateOrderStatus = async (req, res) => {
                         { upsert: true }
                     );
                 }
-                item.status = newStatus; // Sync item status to order.status
+                item.status = newStatus; 
             }
         }
 
@@ -203,7 +201,7 @@ const updateOrderStatus = async (req, res) => {
 const returnOrder = async (req, res) => {
     try {
         let { orderId, returnReason } = req.body;
-        let userId = req.session.user;
+        let userId = req.session.user || req.body.userId;
      
         if (!orderId || !returnReason) {
             return res.status(400).json({ success: false, message: "Order ID and return reason are required." });
@@ -365,7 +363,7 @@ const singlehandleReturnRequest = async (req, res) => {
             item.status = 'Returned';
             const refundAmount = item.price * item.quantity;
             
-            // Update product stock
+         
             await product.updateOne(
                 { _id: item.product },
                 { $inc: { quantity: item.quantity } }
@@ -391,21 +389,20 @@ const singlehandleReturnRequest = async (req, res) => {
                 { upsert: true }
             );
 
-            // Update user's wallet balance
+          
             await users.updateOne(
                 { _id: order.userId._id },
                 { $inc: { Wallet: refundAmount } }
             );
 
-            // Adjust order total
-            order.finalAmount -= refundAmount;
+           
         } else if (action === 'reject') {
             item.status = 'Delivered';
         } else {
             return res.status(400).json({ success: false, message: "Invalid action." });
         }
 
-        // Update order status based on items
+    
         await updateOrderStatusBasedOnItems(order);
 
         await order.save();
@@ -443,14 +440,13 @@ const updateItemStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: "Item not found in the order." });
         }
 
-        // Store previous status for comparison
+       
         const previousStatus = item.status;
 
-        // Handle status-specific logic
+       
         if (status === 'Returned' && previousStatus !== 'Returned') {
             const refundAmount = item.price * item.quantity;
             
-            // Update product stock
             await product.updateOne(
                 { _id: item.product },
                 { $inc: { quantity: item.quantity } }
@@ -476,21 +472,16 @@ const updateItemStatus = async (req, res) => {
                 { upsert: true }
             );
 
-            // Update user's wallet balance
             await users.updateOne(
                 { _id: order.userId._id },
                 { $inc: { Wallet: refundAmount } }
             );
 
-            // Adjust order total
-            order.finalAmount -= refundAmount;
+           
         } 
-        // Add other status handling as needed...
 
-        // Update the item status
         item.status = status;
 
-        // Update order status based on items
         await updateOrderStatusBasedOnItems(order);
 
         await order.save();
@@ -506,7 +497,7 @@ const updateItemStatus = async (req, res) => {
     }
 };
 
-// Helper function to update order status based on items
+
 const updateOrderStatusBasedOnItems = async (order) => {
     let hasReturnRequest = false;
     let allSameStatus = true;

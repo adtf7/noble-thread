@@ -2,12 +2,10 @@ const Wallet = require('../../models/walletSchema');
 
 const loadwallet = async (req, res, next) => {
     try {
-        // Fetch all wallets, populating user and order fields
         const wallets = await Wallet.find({})
             .populate('user', 'name email phone')
-            .populate('transactions.order', 'orderId');
+            .populate('transactions.order', 'orderId').sort({createdAt:-1});
         
-        // Collect transactions using a for loop
         const transactions = [];
         for (const wallet of wallets) {
             for (const transaction of wallet.transactions) {
@@ -25,7 +23,6 @@ const loadwallet = async (req, res, next) => {
             }
         }
 
-        // Pagination
         const page = parseInt(req.query.page) || 1;
         const limit = 10;
         const startIndex = (page - 1) * limit;

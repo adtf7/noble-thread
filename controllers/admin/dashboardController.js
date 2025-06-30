@@ -40,7 +40,6 @@ let loadDashboard = async (req, res) => {
                 { $project: { name: "$product.productName", totalSold: 1 } }
             ]);
     
-            // Simplified Best Selling Categories (Top 10)
             const bestSellingCategories = await Order.aggregate([
                 { $unwind: "$orderItems" },
                 {
@@ -54,14 +53,30 @@ let loadDashboard = async (req, res) => {
                 { $unwind: "$product" },
                 {
                     $group: {
-                        _id: "$product.category",
+                        _id: "$product.category", 
                         totalSold: { $sum: "$orderItems.quantity" }
                     }
                 },
                 { $sort: { totalSold: -1 } },
-                { $limit: 10 }
-            ]);
-          
+                { $limit: 10 },
+               
+                {
+                    $lookup: {
+                        from: "categories",
+                        localField: "_id",
+                        foreignField: "_id",
+                        as: "category"
+                    }
+                },
+                { $unwind: "$category" },
+                {
+                    $project: {
+                        categoryName: "$category.name",
+                        totalSold: 1
+                    }
+                }
+            ])
+     
         res.render('admin/dashboard', {
              currentPage: 'dashboard',
              totalUsers,

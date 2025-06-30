@@ -20,7 +20,7 @@ const loadHomePage = async (req, res) => {
         }
 
         let cartcount = [];
-        if (userId) {  // Only run aggregation if user is logged in
+        if (userId) {  
             cartcount = await Cart.aggregate([
                 { $match: { userId: new mongoose.Types.ObjectId(userId) } },
                 { $unwind: '$items' }, 
@@ -69,12 +69,11 @@ const loadShopping = async (req, res) => {
               }
             }
         ]);
-
+       console.log('cartcount',cartcount)
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
 
-        // Get all query parameters to maintain them in pagination links
         const queryParams = { ...req.query };
 
         let sortval = req.query.sort;
@@ -88,9 +87,7 @@ const loadShopping = async (req, res) => {
             };
             sortObj = sortOptions[sortval] || {};
         }
-
-        // Filtering setup
-        let filter = { isBlocked: false }; // Only show non-blocked products
+        let filter = { isBlocked: false }; 
         if (req.query.minPrice || req.query.maxPrice) {
             filter.salePrice = {};
             if (req.query.minPrice) filter.salePrice.$gte = parseInt(req.query.minPrice);
@@ -125,15 +122,12 @@ const loadShopping = async (req, res) => {
             userdata = await User.findById(userId);
         }
 
-        // Function to build URL with all current query parameters
         const buildUrl = (newParams = {}) => {
             const params = { ...queryParams, ...newParams };
-            // Remove page if it's 1 to keep URLs clean
             if (params.page === '1') delete params.page;
             return `/shop?${new URLSearchParams(params).toString()}`;
         };
 
-        // Generate pagination links
         const paginationLinks = [];
         for (let i = 1; i <= totalPages; i++) {
             if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
@@ -157,7 +151,7 @@ const loadShopping = async (req, res) => {
             selectedSize: req.query.size || '',
             selectedCategory: req.query.category || '',
             selectedColor: req.query.color || '',
-            currentPageNum: page, // Renamed to avoid conflict with 'currentPage'
+            currentPageNum: page, 
             totalPages,
             searchQuery: req.query.search || '',
             totalProducts,
@@ -166,11 +160,11 @@ const loadShopping = async (req, res) => {
             maxPrice: req.query.maxPrice || '',
             start: totalProducts > 0 ? skip + 1 : 0,
             end: Math.min(skip + limit, totalProducts),
-            cartcount: cartcount.length > 0 ? cartcount[0] : { totalItems: 0, totalQuantity: 0 },
+            cartcount,
             paginationLinks,
             prevPageUrl: page > 1 ? buildUrl({ page: page - 1 }) : null,
             nextPageUrl: page < totalPages ? buildUrl({ page: page + 1 }) : null,
-            buildUrl // Pass the function to the view
+            buildUrl 
         });
 
     } catch (error) {
@@ -218,8 +212,8 @@ const loadContactPage = async (req, res) => {
 
 function generateOtp() {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('Generated OTP:', otp); // Debugging statement
-    return otp;
+    console.log('Generated OTP:', otp); 
+        return otp;
 }
 
 async function sendverificationemail(email, otp) {
@@ -250,7 +244,7 @@ Thank you for your cooperation.
 
 Best regards, NOBLE THREADS`,
         });
-        console.log('Email sent:', info.accepted); // Debugging statement
+        console.log('Email sent:', info.accepted);
         return info.accepted.length > 0;
     } catch (error) {
         console.error('Error sending email:', error);
@@ -279,7 +273,7 @@ const signup = async (req, res) => {
         let otp = generateOtp();
 
         let emailsend = await sendverificationemail(email, otp);
-        console.log('Email send status:', emailsend); // Debugging statement
+        console.log('Email send status:', emailsend); 
 
         if (!emailsend) {
             return res.json({ message: 'Email sending failed' });
@@ -288,9 +282,8 @@ const signup = async (req, res) => {
         req.session.userOtp = otp;
         req.session.userdata = { name, phone, email, password };
 
-        console.log('Session OTP:', req.session.userOtp); // Debugging statement
-        console.log('Session User Data:', req.session.userdata); // Debugging statement
-
+        console.log('Session OTP:', req.session.userOtp); 
+                console.log('Session User Data:', req.session.userdata); 
         res.render('user/verify-otp.ejs', { message: '' });
 
     } catch (error) {
@@ -315,7 +308,6 @@ let verifyOtp = async (req, res) => {
         console.log("Session OTP:", req.session.userOtp);
         console.log("Session Data:", req.session);
 
-        // Ensure both values are treated as strings before comparison
         if (enterotp.toString() === req.session.userOtp.toString()) {
             console.log('OTP matched');
 
@@ -420,7 +412,7 @@ const googleCallback = async (req, res) => {
         req.session.username = req.user.name;
         req.session.email = req.user.email;
 
-        console.log('Google User:', req.user); // Debugging
+        console.log('Google User:', req.user); 
         console.log('Session:', req.session);
 
         res.redirect('/');
@@ -438,7 +430,7 @@ let logout = async (req, res) => {
                     console.log('Error destroying session:', err);
                     return res.status(500).send('Internal Server Error');
                 }
-                res.redirect('/'); // Redirect to login page after logout
+                res.redirect('/');
             });
         
         
@@ -450,7 +442,6 @@ let logout = async (req, res) => {
 
 
 
-// Load all products for listing
 const loadproduct = async (req, res) => {
     try {
         let userId = req.session.user;
@@ -468,7 +459,6 @@ const loadproduct = async (req, res) => {
         let productId = req.query.id;
         console.log("Requested Product ID:", productId);
       
-        // Fetch product details
         let product = await products.findById(productId).populate('category');
         console.log("Product Data:", product);
         
@@ -481,7 +471,7 @@ const loadproduct = async (req, res) => {
         let productOffer = await Offer.findById(product.offer);
         let categoryOffer = await Offer.findById(productCategory.offer);
         let color = await products.distinct('color');
-        let productImages = product.productImage || []; // Ensure it's always an array
+        let productImages = product.productImage || []; 
         let allproduct = await products.find({category:product.category}) 
         console.log(allproduct)
 
@@ -543,13 +533,12 @@ const loadProductDetails = async (req, res) => {
           ]);
         let color = await products.distinct('color');
 
-        // Fetch related products (ensure it always returns an array)
         let relatedProducts = await products.find({
             category: product.category,
             _id: { $ne: product._id }
         }).limit(4).exec();
         
-        console.log("Related Products:", relatedProducts); // Debugging
+        console.log("Related Products:", relatedProducts); 
         let allproduct = await products.find({category:product.category}) 
         console.log(allproduct)
         return res.render('user/product-details', {
@@ -557,7 +546,7 @@ const loadProductDetails = async (req, res) => {
             product,
             color,
             productImages: product.productImages || [],
-            relatedProducts: relatedProducts || [], // Always pass an array
+            relatedProducts: relatedProducts || [], 
             currentPage: 'shop',
             allproduct,
             cartcount
@@ -625,9 +614,9 @@ async function sendverificationemailforgotpass(email, otp) {
 
 let forgotemailpassword = async (req, res) => {
     try {
-        console.log(req.query); // Log the complete req.query
-        let { email } = req.query; // Destructure email from req.query
-        console.log(email); // Log the email for debugging
+        console.log(req.query); 
+        let { email } = req.query; 
+        console.log(email);
         req.session.usermail = email;
         if (typeof email !== 'string' || email.trim() === '') {
             return res.render('user/forgotemail.ejs', { message: '' });
@@ -659,7 +648,7 @@ let forgotemailpassword = async (req, res) => {
 let verifyOtppass = async (req, res) => {
     try {
         if (req.session.userOtp) {
-            let { otp } = req.body; // Use req.body to get the OTP from the POST request
+            let { otp } = req.body; 
             console.log(otp);
             if (req.session.userOtp == otp) {
                 res.render('user/forgotpassword',{message:''});
@@ -690,16 +679,12 @@ let updatepassword = async (req, res) => {
             return res.render('user/forgotemail', { message: 'Session expired. Please start the process again.' });
         }
 
-        // Hash the new password
         let hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update the user's password in the database
         await User.updateOne({ email: mail }, { $set: { password: hashedPassword } });
 
-        // Clear the session
         req.session.destroy();
 
-        // Redirect to login page with success message
         res.render('user/login', { message: 'Password updated successfully. Please log in.' });
     } catch (error) {
         console.error('Error while updating password:', error.message);

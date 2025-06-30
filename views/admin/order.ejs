@@ -85,9 +85,10 @@
                 </tr>
             </thead>
             <tbody>
-                <% orders.forEach((order, index) => { %>
+                <% let visibleIndex = 0; %>
+                <% orders.forEach((order) => { %>
                     <tr class="border-b hover:bg-gray-100 transition-all duration-300">
-                        <td class="p-3"><%= index + 1 %></td>
+                        <td class="p-3"><%= ++visibleIndex %></td>
                         <td class="p-3 font-medium text-gray-700">#<%= order.orderId %></td>
                         <td class="p-3 text-gray-600"><%= order.userId?.name || "Unknown" %></td>
                         <td class="p-3">

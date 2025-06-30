@@ -138,20 +138,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Listen for changes in quantity inputs (manual edits or triggered by the buttons)
   const qtyInputs = document.querySelectorAll(".pro-qty-2 input");
-  qtyInputs.forEach(input => {
+  qtyInputs.forEach((input, idx) => {
     input.addEventListener("change", function () {
       let newQuantity = parseInt(this.value);
       if (isNaN(newQuantity) || newQuantity < 1) {
-        // Ensure minimum quantity is always 1
         this.value = 1;
         newQuantity = 1;
       }
-      if (newQuantity > 5) {
+      // Get productId from row
+      const row = this.closest("tr");
+      const productId = row.getAttribute("data-product-id");
+      // Find the corresponding cart item
+      const cartItem = cartData.items.find(item => item.productId._id === productId);
+      const maxStock = cartItem ? cartItem.productId.quantity : 5;
+      if (newQuantity > maxStock) {
+        Swal.fire({ icon: 'error', title: 'Stock Error', text: `Only ${maxStock} in stock for this product.` });
+        this.value = maxStock;
+        newQuantity = maxStock;
+      } else if (newQuantity > 5) {
         Swal.fire({ icon: 'error', title: 'Quantity Error', text: 'You cannot add more than 5 products at a time.' });
         this.value = 5;
         newQuantity = 5;
       }
-      const row = this.closest("tr");
       const priceElem = row.querySelector(".product__cart__item__text h5");
       if (priceElem) {
         let priceValue = parseFloat(priceElem.textContent.replace('₹', '').trim());

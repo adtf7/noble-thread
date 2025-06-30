@@ -10,7 +10,8 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 let Cart=require('../../models/cartSchema')
 let mongoose=require('mongoose')
-const PDFDocument = require('pdfkit'); // Import PDFKit
+const PDFDocument = require('pdfkit'); 
+const product = require('../../models/productSchema');
 
 const userProfile = async (req, res) => {
     if (!req.session.user) {
@@ -55,7 +56,7 @@ let edituser = async (req, res) => {
             { new: true }
         );
         if (userupdate) {
-            return res.json({ success: true, message: "user updated successfully" }); // ✅ JSON response
+            return res.json({ success: true, message: "user updated successfully" });
         } else {
             return res.status(404).json({ error: "user not found" });
         }
@@ -91,7 +92,7 @@ let changenewpassword = async (req, res) => {
         let updated = await User.updateOne({ _id: userId }, { $set: { password: hashedPassword } });
 
         if (updated.modifiedCount > 0) {
-            return res.json({ success: true, redirect: "/profile" }); // Return JSON instead of redirecting
+            return res.json({ success: true, redirect: "/profile" }); 
         } else {
             return res.json({ success: false, message: "Failed to update password" });
         }
@@ -220,7 +221,7 @@ let editAddress = async (req, res) => {
        
         let { name, addressLine1, city, state, postalCode, Phone, landmark } = req.body;
   
-        // Basic validation.
+    
         if (!name || !addressLine1 || !city || !state || !postalCode || !Phone || !landmark) {
           return res.status(400).json({ success: false, message: "Please fill all required fields" });
         }
@@ -322,8 +323,8 @@ let orderDetails = async (req, res) => {
     let userId = req.session.user;
     
     try {
-      const page = parseInt(req.query.page) || 1; // Default to page 1
-      const limit = parseInt(req.query.limit) || 5; // Default to 5 orders per page
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
       
       let user = await User.findById(userId);
       
@@ -331,7 +332,7 @@ let orderDetails = async (req, res) => {
       const totalOrders = await Order.countDocuments({ userId: userId });
       const totalPages = Math.ceil(totalOrders / limit);
       
-      // Fetch paginated orders
+
       let orders = await Order.find({ userId: req.session.user })
         .sort({ createdOn: -1 })
         .skip((page - 1) * limit)
@@ -373,19 +374,19 @@ const returnOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Order ID, item ID, and return reason are required." });
         }
 
-        // Find the order for the user
+        
         let order = await Order.findOne({ _id: orderId, userId: userId });
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found." });
         }
 
-        // Find the specific item in the order
+
         const item = order.orderItems.find(i => i._id.toString() === itemId);
         if (!item) {
             return res.status(404).json({ success: false, message: "Item not found in the order." });
         }
 
-        // Check if the item is eligible for return
+      
         if (item.status !== 'Delivered') {
             return res.status(400).json({ success: false, message: "Only delivered items can be returned." });
         }
@@ -394,7 +395,7 @@ const returnOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Item is already requested for return or returned." });
         }
 
-        // Update the item's status and reason (DON'T process refund yet)
+      
         item.status = 'Return Request';
         item.returnReason = returnReason;
 
@@ -434,13 +435,12 @@ const handleReturnRequest = async (req, res) => {
             item.status = 'Returned';
             const refundAmount = item.price * item.quantity;
 
-            // Update product stock
+           
             await Product.updateOne(
                 { _id: item.product },
                 { $inc: { quantity: item.quantity } }
             );
 
-            // Only now add the amount to wallet balance
             await wallet.updateOne(
                 { user: order.userId },
                 {
@@ -463,7 +463,7 @@ const handleReturnRequest = async (req, res) => {
         } else if (action === 'reject') {
             item.status = 'Delivered';
 
-            // Simply remove the pending transaction
+           
             await wallet.updateOne(
                 { user: order.userId },
                 {
@@ -495,7 +495,7 @@ const cancelorder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Order ID, item ID, and reason are required." });
         }
 
-        // Fetch the order without modifying it yet
+
         const order = await Order.findById(orderId).populate('orderItems.product');
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found." });
@@ -514,13 +514,12 @@ const cancelorder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Item is already canceled." });
         }
 
-        // Calculate refund amount based on shipping method
+   
         let refundAmount = 0;
         if (order.shoppingMethod !== 'COD') {
             refundAmount = item.price * item.quantity;
         }
 
-        // Use $set to update only the specific orderItem and finalAmount (if applicable)
         const updateFields = {
             'orderItems.$[item].status': 'Cancelled',
             'orderItems.$[item].cancelReason': reason,
@@ -529,20 +528,20 @@ const cancelorder = async (req, res) => {
             updateFields.finalAmount = order.finalAmount - refundAmount;
         }
 
-        // Perform the atomic update on the order
+        
         await Order.updateOne(
             { _id: orderId },
             { $set: updateFields },
             { arrayFilters: [{ 'item._id': itemId }] }
         );
 
-        // Restock the product
+      
         await Product.updateOne(
             { _id: item.product._id },
             { $inc: { quantity: item.quantity } }
         );
 
-        // Update wallet only for non-COD orders with a refund
+   
         if (refundAmount > 0) {
             await wallet.updateOne(
                 { user: order.userId },
@@ -574,15 +573,15 @@ const cancelorder = async (req, res) => {
     const loadwallet = async (req, res) => {
         try {
             const user = req.session.user;
-            const page = parseInt(req.query.page) || 1; // Default to page 1
-            const limit = parseInt(req.query.limit) || 4; // Default to 4 transactions per page
+            const page = parseInt(req.query.page) || 1; 
+            const limit = parseInt(req.query.limit) || 4; 
     
-            // Fetch user data
+        
             const userdata = await User.findById(user);
     
-            // Fetch wallet data
+           
             let walletdata = await wallet.findOne({ user: user }).populate({
-                path: 'transactions.order', // Populate the order field in transactions
+                path: 'transactions.order', 
             });
             const cartcount = await Cart.aggregate([
                 { $match: { userId: new mongoose.Types.ObjectId(user) } },
@@ -594,7 +593,7 @@ const cancelorder = async (req, res) => {
                   }
                 }
               ]);
-            // If no wallet exists, create a new one
+         
             if (!walletdata) {
                 walletdata = new wallet({
                     user: user,
@@ -604,26 +603,26 @@ const cancelorder = async (req, res) => {
                 await walletdata.save();
             }
     
-            // Sort transactions by date (newest first)
+          
             walletdata.transactions.sort((a, b) => b.date - a.date);
     
-            // Count total transactions
+       
             const totalTransactions = walletdata.transactions.length;
     
-            // Calculate total pages
+       
             const totalPages = Math.ceil(totalTransactions / limit);
     
-            // Paginate transactions
+     
             const paginatedTransactions = walletdata.transactions
                 .slice((page - 1) * limit, page * limit); 
     
-            // Render the wallet page
+       
             res.render("user/wallet", {
                 user: userdata,
                 wallet: walletdata,
                 currentPage: "wallet",
                 balance: walletdata.balance,
-                transactions: paginatedTransactions, // Pass paginated transactions
+                transactions: paginatedTransactions, 
                 totalPages,
                 page,
                 limit,
@@ -643,7 +642,7 @@ let createRazorpayOrd =async(req,res)=>{
     const { amount } = req.body;
 
     const options = {
-        amount: amount * 100, // amount in the smallest currency unit (paise)
+        amount: amount * 100, 
         currency: "INR",
         receipt: "order_rcptid_11"
     };
@@ -657,7 +656,6 @@ let createRazorpayOrd =async(req,res)=>{
 }
 const walletsave = async (user, amount) => {
     try {
-        // Find the user by their ID
         const userData = await User.findById(user);
         let Wallet = await wallet.findOne({ user: user });
         if (!userData) {
@@ -666,7 +664,7 @@ const walletsave = async (user, amount) => {
         if (!Wallet) {
             Wallet = new wallet({
                 user: user.id,
-                balance: 0 // Initialize balance to 0
+                balance: 0 
             });
         }
        console.log('amount',amount)
@@ -712,7 +710,6 @@ const downloadInvoice = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Order ID is required.' });
     }
 
-    // Fetch the order details
     const order = await Order.findOne({_id: orderId, userId })
       .populate('orderItems.product')
       .populate('address');
@@ -721,37 +718,32 @@ const downloadInvoice = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
-    // Check if address is populated and has at least one address entry
+
     if (!order.address || !order.address.address || order.address.address.length === 0) {
       return res.status(400).json({ success: false, message: 'No address found for this order.' });
     }
 
-    // Check if all products are populated
     if (!order.orderItems.every(item => item.product)) {
       return res.status(400).json({ success: false, message: 'Some products not found for this order.' });
     }
 
-    // Log the address for debugging
     console.log('Address:', JSON.stringify(order.address, null, 2));
 
-    // Create a new PDF document
     const doc = new PDFDocument({ margin: 50 });
 
-    // Set the response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice_${order.orderId}.pdf`);
 
-    // Pipe the PDF document to the response
     doc.pipe(res);
 
-    // Add a header
+
     doc.fontSize(20).text('Invoice', { align: 'center', underline: true });
     doc.moveDown();
 
-    // Use the first address in the address array
-    const shippingAddress = order.address.address[0]; // Adjust if you need to select a specific address
+ 
+    const shippingAddress = order.address.address[0]; 
 
-    // Add order details
+  
     doc.fontSize(12).text(`Order ID: ${order.orderId}`, { align: 'left' });
     doc.text(`Order Date: ${order.createdOn.toDateString()}`, { align: 'left' });
     doc.text(`Invoice Date: ${order.invoiceDate ? order.invoiceDate.toDateString() : 'N/A'}`, { align: 'left' });
@@ -765,23 +757,21 @@ const downloadInvoice = async (req, res) => {
     doc.text(`Phone: ${shippingAddress.phone || 'N/A'}`, { align: 'left' });
     doc.moveDown();
 
-    // Add a horizontal line
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown();
 
-    // Define table column widths and positions
     const table = {
       x: 50,
       widths: {
-        item: 250, // Item column
-        quantity: 80, // Quantity column
-        price: 80, // Price column
-        total: 80 // Total column
+        item: 250,
+        quantity: 80,
+        price: 80, 
+        total: 80
       }
     };
     const tableTop = doc.y;
 
-    // Add table headers
+
     doc.fontSize(12).font('Helvetica-Bold');
     doc.text('Item', table.x, tableTop, { width: table.widths.item, align: 'left' });
     doc.text('Quantity', table.x + table.widths.item, tableTop, { width: table.widths.quantity, align: 'right' });
@@ -789,11 +779,9 @@ const downloadInvoice = async (req, res) => {
     doc.text('Total', table.x + table.widths.item + table.widths.quantity + table.widths.price, tableTop, { width: table.widths.total, align: 'right' });
     doc.moveDown(0.5);
 
-    // Draw header line
-    doc.moveTo(table.x, doc.y).lineTo(table.x + 490, doc.y).stroke(); // Adjusted from 500 to 490
+    doc.moveTo(table.x, doc.y).lineTo(table.x + 490, doc.y).stroke(); 
     doc.moveDown(0.5);
 
-    // Add order items
     doc.font('Helvetica');
     let itemTotal = 0;
     order.orderItems.forEach((item, index) => {
@@ -807,17 +795,14 @@ const downloadInvoice = async (req, res) => {
       doc.moveDown(0.5);
     });
 
-    // Draw footer line
     doc.moveTo(table.x, doc.y).lineTo(table.x + 490, doc.y).stroke(); // Adjusted from 500 to 490
     doc.moveDown(0.5);
 
-    // Add subtotal row
     doc.font('Helvetica-Bold');
     doc.text('Subtotal', table.x, doc.y, { width: table.widths.item + table.widths.quantity + table.widths.price, align: 'right' });
     doc.text(`₹${itemTotal.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity + table.widths.price, doc.y, { width: table.widths.total, align: 'right' });
     doc.moveDown(0.5);
 
-    // Add discount and final amount
     if (order.discount > 0) {
       doc.text('Discount', table.x, doc.y, { width: table.widths.item + table.widths.quantity + table.widths.price, align: 'right' });
       doc.text(`₹${order.discount.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity + table.widths.price, doc.y, { width: table.widths.total, align: 'right' });
@@ -827,10 +812,8 @@ const downloadInvoice = async (req, res) => {
     doc.text(`₹${order.finalAmount.toFixed(2)}`, table.x + table.widths.item + table.widths.quantity + table.widths.price, doc.y, { width: table.widths.total, align: 'right' });
     doc.moveDown();
 
-    // Add a footer
     doc.fontSize(10).font('Helvetica').text('Thank you for shopping with us!', { align: 'center', marginTop: 20 });
 
-    // Finalize the PDF and end the stream
     doc.end();
   } catch (error) {
     console.error('Error generating invoice:', error);
@@ -838,7 +821,98 @@ const downloadInvoice = async (req, res) => {
   }
 };
 
-module.exports = downloadInvoice;
+const retryRazorpayOrder = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        const userId = req.session.user;
+
+        if (!orderId) {
+            return res.status(400).json({ success: false, message: 'Order ID is required.' });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId, status: 'Failed' });
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Failed order not found.' });
+        }
+
+        const amount = Math.round(order.finalAmount * 100);
+
+        const shortOrderId = order._id.toString().slice(-8);
+        const receipt = `retry_${shortOrderId}_${Date.now()}`.slice(0, 40);
+
+        const options = {
+            amount,
+            currency: "INR",
+            receipt
+        };
+
+        const razorpayOrder = await razorpay.orders.create(options);
+
+        order.razorpayOrderId = razorpayOrder.id;
+      let saved=  await order.save();
+      console.log('saved',saved)
+        res.json({
+            success: true,
+            razorpayOrder,
+            razorpayKey: process.env.RAZORPAY_KEY_ID || 'rzp_test_JQ4XKaeQP0R8PZ'
+        });
+    } catch (error) {
+        console.error('Error creating retry Razorpay order:', error);
+        res.status(500).json({ success: false, message: 'Server error while creating retry order.' });
+    }
+};
+const reverifyPayment = async (req, res) => {
+    try {
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } = req.body;
+        const userId = req.session.user;
+
+        if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+            return res.status(400).json({ success: false, message: 'Missing payment details.' });
+        }
+
+        const order = await Order.findOne({ razorpayOrderId: razorpay_order_id, userId }).populate('orderItems');
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found.' });
+        }
+
+        const generated_signature = crypto
+            .createHmac('sha256', 'Nw9O0gxxhJwU0yGeA7pBM0oU')
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest('hex');
+
+        if (generated_signature !== razorpay_signature) {
+            return res.status(400).json({ success: false, message: 'Payment signature verification failed.' });
+        }
+
+    
+        order.status = 'Pending'; 
+        order.razorpayPaymentId = razorpay_payment_id;
+        order.paymentVerified = true;
+
+        order.orderItems.forEach(item => {
+            item.status = 'Pending';
+        });
+
+        let updated = await order.save();
+        if(updated){
+            for (const item of order.orderItems) {
+        try {
+            await product.updateOne(
+                { _id: item.product },
+                { $inc: { quantity: -item.quantity } }
+            );
+        } catch (er) {
+            console.log('error on stock updating retrypayment', er);
+        }
+    }
+        }
+        console.log('updated', updated);
+        res.json({ success: true, message: 'Payment verified and order updated.' });
+    } catch (error) {
+        console.error('Error verifying payment:', error);
+        res.status(500).json({ success: false, message: 'Server error during payment verification.' });
+    }
+};
 
 module.exports = {
     userProfile,
@@ -857,5 +931,7 @@ module.exports = {
     loadwallet,
     createRazorpayOrd,
     verifypayment,
-    downloadInvoice
+    downloadInvoice,
+    retryRazorpayOrder,
+    reverifyPayment,
 };

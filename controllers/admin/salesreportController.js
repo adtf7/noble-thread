@@ -39,7 +39,7 @@ let loadsalesreport = async (req, res) => {
         console.log("Final Query:", query);
 
         const orders = await Order.find(query)
-            .populate('userId', 'name email') // Populate userId with name and email
+            .populate('userId', 'name email')
             .sort({ createdOn: -1 });
 
         const totalSales = orders.reduce((sum, order) => sum + order.finalAmount, 0);
@@ -101,7 +101,7 @@ const fetchSalesReportData = async (filterType, startDate, endDate) => {
     const orders = await Order.find({
         createdOn: { $gte: dateRange.startDate, $lte: dateRange.endDate },
         status: { $nin: ['Cancelled', 'Returned'] }
-    }).populate('userId', 'name email'); // Populate userId with name and email
+    }).populate('userId', 'name email'); 
 
     const salesCount = orders.length;
     const totalOrderAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -146,16 +146,16 @@ let salespdf = async (req, res) => {
         const table = {
             headers: [
                 { label: "Order ID", property: 'orderId', width: 80, renderer: null },
-                { label: "User Name", property: 'userName', width: 100, renderer: null }, // New column
-                { label: "User Email", property: 'userEmail', width: 120, renderer: null }, // New column
+                { label: "User Name", property: 'userName', width: 100, renderer: null }, 
+                { label: "User Email", property: 'userEmail', width: 120, renderer: null },
                 { label: "Total Amount", property: 'totalAmount', width: 80, renderer: null },
                 { label: "Discount", property: 'discount', width: 80, renderer: null },
                 { label: "Date", property: 'date', width: 100, renderer: null },
             ],
             datas: reportData.orders.map((order, index) => ({
                 orderId: order.orderId,
-                userName: order.userId ? order.userId.name : 'N/A', // User name
-                userEmail: order.userId ? order.userId.email : 'N/A', // User email
+                userName: order.userId ? order.userId.name : 'N/A', 
+                userEmail: order.userId ? order.userId.email : 'N/A',
                 totalAmount: `₹${order.totalAmount.toFixed(2)}`,
                 discount: `₹${Math.abs(order.discount || 0)}`,
                 date: order.createdOn.toDateString(),
@@ -192,8 +192,8 @@ let downloadSalesReportExcel = async (req, res) => {
 
         worksheet.columns = [
             { header: 'Order ID', key: 'orderId', width: 20 },
-            { header: 'User Name', key: 'userName', width: 20 }, // New column
-            { header: 'User Email', key: 'userEmail', width: 30 }, // New column
+            { header: 'User Name', key: 'userName', width: 20 }, 
+            { header: 'User Email', key: 'userEmail', width: 30 },
             { header: 'Order Date', key: 'orderDate', width: 20 },
             { header: 'Total Amount', key: 'totalAmount', width: 15 },
             { header: 'Discount', key: 'discount', width: 15 },
@@ -205,8 +205,8 @@ let downloadSalesReportExcel = async (req, res) => {
         reportData.orders.forEach((order) => {
             worksheet.addRow({
                 orderId: order.orderId,
-                userName: order.userId ? order.userId.name : 'N/A', // User name
-                userEmail: order.userId ? order.userId.email : 'N/A', // User email
+                userName: order.userId ? order.userId.name : 'N/A',
+                userEmail: order.userId ? order.userId.email : 'N/A',
                 orderDate: order.createdOn.toDateString(),
                 totalAmount: order.totalAmount,
                 discount: Math.abs(order.discount || 0),

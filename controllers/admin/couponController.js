@@ -51,13 +51,19 @@ const addCoupon = async (req, res) => {
       }
 
     
-      if (offerPrice < 0 || offerPrice > 100 || minimumPrice < 0 || minimumPrice > 100 || maxDiscount< 0 || maxDiscount > 100) {
-          return res.status(400).json({ success: false, message: "All percentage fields must be between 0 and 100." });
+      if (offerPrice < 0 || offerPrice > 100) {
+          return res.status(400).json({ success: false, message: "Offer Price (%) must be between 0 and 100." });
+      }
+      if (minimumPrice < 0) {
+          return res.status(400).json({ success: false, message: "Minimum Price must be a positive amount." });
+      }
+      if (maxDiscount < 0) {
+          return res.status(400).json({ success: false, message: "Maximum Discount must be a positive amount." });
       }
 
   
-      if (maxDiscount < offerPrice) {
-          return res.status(400).json({ success: false, message: "Maximum Discount (%) must be greater than or equal to Offer Price (%)." });
+      if (maxDiscount < 1) {
+          return res.status(400).json({ success: false, message: "Maximum Discount must be at least 1." });
       }
 
       const existingCoupon = await coupon.findOne({ name });
@@ -96,8 +102,7 @@ const addCoupon = async (req, res) => {
       couponToUnlist.isList = false;
       await couponToUnlist.save();
   
-      // Return success response
-      res.status(200).json({ success: true, message: "Coupon unlisted successfully.", data: couponToUnlist });
+           res.status(200).json({ success: true, message: "Coupon unlisted successfully.", data: couponToUnlist });
     } catch (error) {
       console.error("Error unlisting coupon:", error);
       res.status(500).json({ success: false, message: "Server error while unlisting coupon. Try again later." });
@@ -131,17 +136,16 @@ const addCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        // Validate percentages (0-100)
-        if (offerPrice < 0 || offerPrice > 100 || 
-            minimumPrice < 0 || minimumPrice > 100 || 
-            maxDiscount < 0 || maxDiscount > 100) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "All percentage fields must be between 0 and 100." 
-            });
-        }
+                if (offerPrice < 0 || offerPrice > 100) {
+                return res.status(400).json({ success: false, message: "Offer Price (%) must be between 0 and 100." });
+            }
+            if (minimumPrice < 0) {
+                return res.status(400).json({ success: false, message: "Minimum Price must be a positive amount." });
+            }
+            if (maxDiscount < 0) {
+                return res.status(400).json({ success: false, message: "Maximum Discount must be a positive amount." });
+            }
 
-        // Ensure maxDiscount >= offerPrice
         if (maxDiscount < offerPrice) {
             return res.status(400).json({ 
                 success: false, 

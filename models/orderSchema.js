@@ -30,7 +30,7 @@ const orderSchema = new Schema({
     status: {
       type: String,
       required: true,
-      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Failed'], // <-- Add 'Failed' here
       default: 'Pending'
     },
     returnReason: {
@@ -57,7 +57,7 @@ const orderSchema = new Schema({
   address: {
     type: Schema.Types.ObjectId,
     ref: 'Address',
-    required: true
+    required: false // <-- change from true to false
   },
   invoiceDate: {
     type: Date
@@ -65,7 +65,7 @@ const orderSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+    enum: ['Pending', 'Failed', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
     default: 'Pending'
   },
   shoppingMethod: {
@@ -82,6 +82,10 @@ const orderSchema = new Schema({
   couponStatus: {
     type: Boolean,
     default: false
+  },
+  razorpayOrderId: {
+    type: String,
+    default: null
   }
 });
 let order = mongoose.model('Order', orderSchema);

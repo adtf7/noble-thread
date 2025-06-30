@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f9fa; }
+        .error-container { max-width: 500px; margin: 80px auto; text-align: center; background: #fff; padding: 40px 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);}
+        .error-icon { font-size: 60px; color: #dc3545; margin-bottom: 20px; }
+        .error-title { font-size: 28px; color: #333; margin-bottom: 10px; }
+        .error-message { color: #555; margin-bottom: 25px; }
+        .btn { display: inline-block; padding: 10px 22px; background: #007bff; color: #fff; border-radius: 6px; text-decoration: none; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="error-title">Something went wrong</div>
+        <div class="error-message">
+            <%= message || "An unexpected error occurred. Please try again later." %>
+        </div>
+        <a href="/" class="btn">Go Home</a>
+    </div>
+</body>
+</html>

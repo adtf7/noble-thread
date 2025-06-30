@@ -1,11 +1,11 @@
-let express = require('express');
-let router = express.Router();
-let { userauth, adminauth } = require('../middlewares/auth');
-let userController = require('../controllers/user/usercontroller');
+const express = require('express');
+const router = express.Router();
+const { userauth, adminauth } = require('../middlewares/auth');
+const userController = require('../controllers/user/usercontroller');
 const passport = require('passport');
-let userProfileController=require('../controllers/user/userprofileController')
-let cartController = require('../controllers/user/cartController');
-let wishlistController = require("../controllers/user/wishlistController");
+const userProfileController = require('../controllers/user/userprofileController');
+const cartController = require('../controllers/user/cartController');
+const wishlistController = require('../controllers/user/wishlistController');
 
 router.get('/pagenotfound', userController.pagenotfound);
 router.get('/', userController.loadHomePage);
@@ -21,58 +21,54 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 });
 router.get('/login', userController.loadlogin);
 router.post('/login', userController.login);
-router.get('/contact',userauth, userController.loadContactPage);
-router.get('/logout',userauth, userController.logout);
+router.get('/contact', userauth, userController.loadContactPage);
+router.get('/logout', userauth, userController.logout);
 
-router.get('/product',userauth, userController.loadproduct);
-router.get('/product/:id', userController.loadProductDetails); // Load single product details
+router.get('/product', userauth, userController.loadproduct);
+router.get('/product/:id', userController.loadProductDetails);
 
+router.get('/forgotpasswordemail', userController.forgotemailpassword);
+router.post('/verify-otp4pass', userController.verifyOtppass);
+router.post('/resetpassword', userController.updatepassword);
 
-router.get('/forgotpasswordemail',userController.forgotemailpassword)
-router.post('/verify-otp4pass', userController.verifyOtppass); // Handle the OTP verification
-router.post('/resetpassword',userController.updatepassword)
-
-router.get('/profile',userauth,userProfileController.userProfile )
-router.post('/update-profile',userauth,userProfileController.edituser)
-router.get('/change-password',userauth,userProfileController.changepassword)
-router.post('/change-password',userauth,userProfileController.changenewpassword)
-router.get('/address',userauth,userProfileController.addressmanagement)
-router.post('/add-address',userauth,userProfileController.addaddress)
+router.get('/profile', userauth, userProfileController.userProfile);
+router.post('/update-profile', userauth, userProfileController.edituser);
+router.get('/change-password', userauth, userProfileController.changepassword);
+router.post('/change-password', userauth, userProfileController.changenewpassword);
+router.get('/address', userauth, userProfileController.addressmanagement);
+router.post('/add-address', userauth, userProfileController.addaddress);
 router.put('/editaddresses/:id', userauth, userProfileController.editAddress);
 router.get('/editaddresses/:id', userauth, userProfileController.seteditAddress);
 router.post('/addressesdelete/:id', userauth, userProfileController.deleteAddress);
-router.get('/download-invoice/:orderId',userauth, userProfileController.downloadInvoice);
-
-
+router.get('/download-invoice/:orderId', userauth, userProfileController.downloadInvoice);
 
 router.post('/add-to-cart', userauth, cartController.addToCart);
-router.get('/cart',userauth,cartController.loadcart)
-router.post('/resend-otpforgot',userController.resendotpassword)
-router.post('/update-cart-item',userauth, cartController.updateCartItem);
-router.post('/remove-cart-item',userauth, cartController.removeCartItem);
-router.get('/checkout',userauth,cartController.loadcheckout)
-router.get ('/order-success',userauth,cartController.orderSuccess)
-router.post('/place-order',userauth,cartController.placeorder)
-router.post(
-  "/handle-razorpay-payment-success",
-  userauth,
-  cartController.handleRazorpayPaymentSuccess
-);
-router.post('/create-razorpay-order',userauth,cartController.createRazorpayOrder);
-router.post('/handle-payment-success',userauth,cartController.handlesuccess)
-router.get('/orders/:id',userauth,userProfileController.orderDetails)
-router.get('/order-history',userauth,userProfileController.orderHistory)
-router.post("/return-order", userauth, userProfileController.returnOrder);
+router.get('/cart', userauth, cartController.loadcart);
+router.post('/resend-otpforgot', userController.resendotpassword);
+router.post('/update-cart-item', userauth, cartController.updateCartItem);
+router.post('/remove-cart-item', userauth, cartController.removeCartItem);
+router.get('/checkout', userauth, cartController.loadcheckout);
+router.get('/order-success', userauth, cartController.orderSuccess);
+router.get('/order-failed', userauth, cartController.orderFailed);
+router.post('/place-order', userauth, cartController.placeOrder);
+router.post('/handle-razorpay-payment-success', userauth, cartController.handleRazorpayPaymentSuccess);
+router.post('/order-failed/:orderId', userauth, cartController.markOrderFailed);
+router.get('/get-payment-methods', userauth, cartController.getPaymentMethods);
+router.post('/create-razorpay-order', userauth, cartController.createRazorpayOrder);
+router.post('/get-updated-price-details', userauth, cartController.getUpdatedPriceDetails);
+
+router.get('/orders/:id', userauth, userProfileController.orderDetails);
+router.get('/order-history', userauth, userProfileController.orderHistory);
+router.post('/return-order', userauth, userProfileController.returnOrder);
 router.post('/cancel-order', userauth, userProfileController.cancelorder);
-router.get("/wallet", userauth, userProfileController.loadwallet);
-router.post("/create-razorpay-orderonwallet",userauth,userProfileController.createRazorpayOrd);
-router.post("/verify-payment", userauth, userProfileController.verifypayment);
-router.post("/get-updated-price-details", userauth, cartController.getUpdatedPriceDetails);
-
-router.post("/addwishlist", userauth, wishlistController.addwishlist);
-router.get('/wishlist',userauth,wishlistController.loadwishlist)
-router.post(  "/remove-wishlist", userauth, wishlistController.removewishlist);
-router.post( "/addtocartwishlist", userauth,wishlistController.addtocartwishlist);
-
-
+router.get('/wallet', userauth, userProfileController.loadwallet);
+router.post('/create-razorpay-orderonwallet', userauth, userProfileController.createRazorpayOrd);
+router.post('/verify-payment', userauth, userProfileController.verifypayment);
+router.post('/addwishlist', userauth, wishlistController.addwishlist);
+router.get('/wishlist', userauth, wishlistController.loadwishlist);
+router.post('/remove-wishlist', userauth, wishlistController.removewishlist);
+router.post('/addtocartwishlist', userauth, wishlistController.addtocartwishlist);
+router.post('/save-failed-order', userauth, cartController.saveFailedOrder);
+router.post('/retry-razorpay-order', userauth, userProfileController.retryRazorpayOrder);
+router.post('/reverify-payment', userauth, userProfileController.reverifyPayment);
 module.exports = router;
