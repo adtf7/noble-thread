@@ -129,7 +129,7 @@
   <!-- Pagination -->
 <div class="mt-4 flex justify-center space-x-2">
     <!-- Previous Button -->
-    <% if (currentPage > 1) { %>
+    <% if (page > 1) { %>
         <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= currentPage - 1 %>" 
            class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
            Previous
@@ -141,8 +141,8 @@
     <% } %>
 
     <!-- Next Button -->
-    <% if (currentPage < totalPages) { %>
-        <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= currentPage + 1 %>" 
+    <% if (page < totalPages) { %>
+        <a href="/admin/orders?search=<%= search %>&status=<%= selectedStatus %>&sortBy=<%= sortBy %>&page=<%= page + 1 %>" 
            class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
            Next
         </a>
@@ -155,7 +155,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
+<script>    
 // Handle Return Request
 function handleReturnRequest(orderId, action) {
     Swal.fire({

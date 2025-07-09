@@ -50,16 +50,26 @@ const addToCart = async (req, res) => {
     if (cart) {
       const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
       if (itemIndex > -1) {
-        cart.items[itemIndex].quantity += qty;
-        if (cart.items[itemIndex].quantity > 5) {
+        const newTotalQty = cart.items[itemIndex].quantity + qty;
+        if (newTotalQty > 5) {
           return res.status(400).json({ success: false, message: 'Total quantity cannot exceed 5.' });
         }
+        if (newTotalQty > product.quantity) {
+          return res.status(400).json({ success: false, message: 'Limited stock, please reduce your quantity.' });
+        }
+        cart.items[itemIndex].quantity = newTotalQty;
         cart.items[itemIndex].totalPrice = cart.items[itemIndex].quantity * discountedPrice;
       } else {
+        if (qty > product.quantity) {
+          return res.status(400).json({ success: false, message: 'Limited stock, please reduce your quantity.' });
+        }
         cart.items.push({ productId, quantity: qty, price: discountedPrice, totalPrice });
       }
       cart = await cart.save();
     } else {
+      if (qty > product.quantity) {
+        return res.status(400).json({ success: false, message: 'Limited stock, please reduce your quantity.' });
+      }
       cart = new Cart({
         userId: new mongoose.Types.ObjectId(userId),
         items: [{ productId, quantity: qty, price: discountedPrice, totalPrice }],
@@ -158,7 +168,7 @@ const loadcheckout = async (req, res) => {
     if (!userdata) return res.status(404).render('error', { message: 'User not found.' });
 
     const addresses = await Address.find({ userid: userId });
-    const allCoupons = await Coupon.find({ isList: true });
+    const allCoupons = await Coupon.find({ isList: true, expireOn: { $gte: new Date() } });
     const coupons = allCoupons.filter(coupon =>
       !userdata.redeemedUser.some(redeemedId => redeemedId.toString() === coupon._id.toString())
     );
@@ -1035,11 +1045,12 @@ const placeOrder = async (req, res) => {
           order: newOrder._id,
           description: `Order payment (Order ID: ${newOrder._id})`,
           amount: finalTotal,
-          status: 'Pending',
+          status: 'completed',
           type: 'debit'
       });
       wallet.updatedAt = new Date();
       await wallet.save();
+         await Cart.updateOne({ userId }, { $set: { items: [] } });
 
       for (const item of orderItems) {
           await Product.updateOne({ _id: item.productId }, { $inc: { quantity: -item.quantity } });

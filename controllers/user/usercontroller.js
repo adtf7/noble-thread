@@ -303,18 +303,53 @@ let securedpass = async (password) => {
 
 let verifyOtp = async (req, res) => {
     try {
-        let { enterotp } = req.body;
+        const { enterotp } = req.body;
+
         console.log("Entered OTP:", enterotp);
         console.log("Session OTP:", req.session.userOtp);
         console.log("Session Data:", req.session);
 
+        if (!enterotp) {
+            console.log('No OTP provided');
+            return res.status(400).json({ success: false, message: 'OTP is required' });
+        }
+        if (!/^\d{6}$/.test(enterotp)) {
+            console.log('Invalid OTP format');
+            return res.status(400).json({ success: false, message: 'OTP must be a 6-digit number' });
+        }
+
+        if (!req.session.userOtp) {
+            console.log('No OTP found in session');
+            return res.status(400).json({ success: false, message: 'No OTP found. Please request a new OTP' });
+        }
+        if (!req.session.userdata) {
+            console.log('No user data found in session');
+            return res.status(400).json({ success: false, message: 'Session expired or invalid. Please start over' });
+        }
+
+        if (req.session.otpExpires && req.session.otpExpires < Date.now()) {
+            console.log('OTP expired');
+            return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new OTP' });
+        }
+
         if (enterotp.toString() === req.session.userOtp.toString()) {
             console.log('OTP matched');
 
-            let userData = req.session.userdata;
-            let passwordhash = await securedpass(userData.password);
+            const userData = req.session.userdata;
+            const passwordhash = await securedpass(userData.password);
 
-            let saveuserdata = new User({
+            if (!userData.name || !userData.email || !userData.phone || !userData.password) {
+                console.log('Incomplete user data');
+                return res.status(400).json({ success: false, message: 'Incomplete user data. Please start over' });
+            }
+
+            const existingUser = await User.findOne({ email: userData.email });
+            if (existingUser) {
+                console.log('User already exists');
+                return res.status(400).json({ success: false, message: 'Email already registered. Please log in' });
+            }
+
+            const saveuserdata = new User({
                 name: userData.name,
                 email: userData.email,
                 phone: userData.phone,
@@ -324,14 +359,18 @@ let verifyOtp = async (req, res) => {
             await saveuserdata.save();
             req.session.user = saveuserdata._id;
 
+            req.session.userOtp = null;
+            req.session.otpExpires = null;
+            req.session.userdata = null;
+
             return res.json({ success: true, redirectUrl: "/" });
         } else {
             console.log('OTP did not match');
-            return res.status(400).json({ success: false, message: 'Invalid OTP, try again' });
+            return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again' });
         }
     } catch (error) {
         console.error('Error on OTP verification:', error);
-        return res.status(500).json({ success: false, message: 'An error occurred' });
+        return res.status(500).json({ success: false, message: 'An error occurred while verifying the OTP' });
     }
 };
 

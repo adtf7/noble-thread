@@ -9,16 +9,26 @@ let loadDashboard = async (req, res) => {
         }
         else{
             let user=await User.find({})
-            const totalRevenue = await Order.aggregate([{ $group: { _id: null, total: { $sum: "$finalAmount" } } }]);
+            const excludedStatuses = ["Cancelled", "Returned", "Failed"];
+
+            const totalRevenue = await Order.aggregate([
+                { $match: { status: { $nin: excludedStatuses } } },
+                { $group: { _id: null, total: { $sum: "$finalAmount" } } }
+            ]);
+
             let totalUsers=await User.countDocuments({})
-            let totalOrders=await Order.countDocuments({})
+            let totalOrders = await Order.countDocuments({ status: { $nin: excludedStatuses } });
             let pendingOrders = await Order.countDocuments({
               status: "Pending",
             });
-            const recentOrders = await Order.find().sort({ date: -1 }).limit(5) .populate('userId', 'name email');
+            const recentOrders = await Order.find({ status: { $nin: excludedStatuses } })
+                .sort({ createdOn: -1 })
+                .limit(5)
+                .populate('userId', 'name email');
             let totalProducts=await Product.countDocuments({})
             let totalcategories=await category.countDocuments({})
             const bestSellingProducts = await Order.aggregate([
+                { $match: { status: { $nin: excludedStatuses } } },
                 { $unwind: "$orderItems" },
                 {
                     $group: {
@@ -39,8 +49,9 @@ let loadDashboard = async (req, res) => {
                 { $unwind: "$product" },
                 { $project: { name: "$product.productName", totalSold: 1 } }
             ]);
-    
+
             const bestSellingCategories = await Order.aggregate([
+                { $match: { status: { $nin: excludedStatuses } } },
                 { $unwind: "$orderItems" },
                 {
                     $lookup: {
@@ -53,13 +64,12 @@ let loadDashboard = async (req, res) => {
                 { $unwind: "$product" },
                 {
                     $group: {
-                        _id: "$product.category", 
+                        _id: "$product.category",
                         totalSold: { $sum: "$orderItems.quantity" }
                     }
                 },
                 { $sort: { totalSold: -1 } },
                 { $limit: 10 },
-               
                 {
                     $lookup: {
                         from: "categories",

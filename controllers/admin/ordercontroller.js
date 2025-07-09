@@ -68,12 +68,12 @@ const listOrders = async (req, res) => {
 
         return res.render('admin/order', {
             orders,
-            currentPage: 'orders', 
+            currentPage:'orders', 
             totalOrders,
             totalPages,
-            currentPage: page,
             returnRequests,
             search,
+            page,
             selectedStatus,
             sortBy,
         });

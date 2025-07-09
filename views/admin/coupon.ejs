@@ -77,6 +77,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+     const existingCouponNames = <%- JSON.stringify(coupons.map(c => c.name.toLowerCase())) %>;
     function addCoupon() {
         Swal.fire({
             title: "Add New Coupon",
@@ -147,7 +148,23 @@
                     Swal.showValidationMessage('Maximum Discount must be ≥ Offer Percentage');
                     return false;
                 }
+                 if(maxDiscount<minimumPrice){
+                  Swal.showValidationMessage('Maximum Discount must be greater than minimum discount');
+                    return false;
+               }
 
+                const today = new Date();
+                const selectedDate = new Date(expireOn);
+                today.setHours(0,0,0,0); 
+
+                if (selectedDate < today) {
+                    Swal.showValidationMessage('Expiry date must be today or a future date');
+                    return false;
+                }
+                 if (existingCouponNames.includes(name.toLowerCase())) {
+                    Swal.showValidationMessage('A coupon with this name already exists.');
+                    return false;
+    }
                 return { name, expireOn, offerPrice, minimumPrice, maxDiscount, isList };
             }
         }).then((result) => {
@@ -245,6 +262,19 @@
 
                 if (maxDiscount < offerPrice) {
                     Swal.showValidationMessage('Maximum Discount must be ≥ Offer Percentage');
+                    return false;
+                }
+               if(maxDiscount<minimumPrice){
+                  Swal.showValidationMessage('Maximum Discount must be greater than minimum discount');
+                    return false;
+               }
+             
+                const today = new Date();
+                const selectedDate = new Date(expireOn);
+                today.setHours(0,0,0,0); 
+
+                if (selectedDate < today) {
+                    Swal.showValidationMessage('Expiry date must be today or a future date');
                     return false;
                 }
 

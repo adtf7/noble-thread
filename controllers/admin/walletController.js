@@ -4,7 +4,7 @@ const loadwallet = async (req, res, next) => {
     try {
         const wallets = await Wallet.find({})
             .populate('user', 'name email phone')
-            .populate('transactions.order', 'orderId').sort({createdAt:-1});
+            .populate('transactions.order', 'orderId').sort({createdAt:1});
         
         const transactions = [];
         for (const wallet of wallets) {
@@ -23,6 +23,8 @@ const loadwallet = async (req, res, next) => {
             }
         }
 
+        transactions.sort((a, b) => b.date - a.date);
+
         const page = parseInt(req.query.page) || 1;
         const limit = 10;
         const startIndex = (page - 1) * limit;
@@ -31,7 +33,7 @@ const loadwallet = async (req, res, next) => {
         const totalPages = Math.ceil(totalTransactions / limit);
         const paginatedTransactions = transactions.slice(startIndex, endIndex);
 
-      
+        
         const transactionId = req.query.transactionId;
         let selectedTransaction = null;
         if (transactionId) {
@@ -44,10 +46,10 @@ const loadwallet = async (req, res, next) => {
         res.render('admin/wallet', {
             transactions: paginatedTransactions,
             selectedTransaction,
-            currentPage: page,
+            page,
             totalPages,
             totalTransactions,
-            currentPageName: 'wallet',
+            currentPage: 'wallet',
         });
     } catch (error) {
         console.error('Wallet not loading:', error.message);

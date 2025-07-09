@@ -152,6 +152,12 @@ const addCoupon = async (req, res) => {
                 message: "Maximum Discount must be greater than or equal to Offer Price." 
             });
         }
+         if (maxDiscount < minimumPrice) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Maximum Discount must be greater than minimum price" 
+            });
+        }
 
         const existingCoupon = await coupon.findOne({ name, _id: { $ne: id } });
         if (existingCoupon) {

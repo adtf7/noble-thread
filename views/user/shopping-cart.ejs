@@ -90,10 +90,14 @@
 
 <%- include('../../views/partials/user/footer.ejs')%>
 
-<!-- Add this script block at the bottom of your shopping-cart.ejs file, after the footer include -->
+
 <script>
-   const cartData = <%- JSON.stringify(cart) %>;
+const cartData = <%- JSON.stringify(cart) %>;
+
 document.addEventListener("DOMContentLoaded", function () {
+  // State to track ongoing updates to prevent duplicates
+  let isUpdating = false;
+
   // Update overall cart summary
   function updateCartSummary() {
     let totalSum = 0;
@@ -101,8 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
     rows.forEach(row => {
       const cartPriceElem = row.querySelector(".cart__price");
       if (cartPriceElem) {
-        // Remove currency symbol and trim spaces
-        let rowTotal = parseFloat(cartPriceElem.textContent.replace('₹','').trim());
+        let rowTotal = parseFloat(cartPriceElem.textContent.replace('₹', '').trim());
         totalSum += rowTotal;
       }
     });
@@ -110,47 +113,125 @@ document.addEventListener("DOMContentLoaded", function () {
     const totalElem = document.getElementById("total");
     if (subtotalElem) subtotalElem.textContent = "₹ " + totalSum.toFixed(2);
     if (totalElem) totalElem.textContent = "₹ " + totalSum.toFixed(2);
+    console.log(`Cart summary updated: ₹${totalSum.toFixed(2)}`);
   }
 
   // Function to update cart quantity on the backend
   function updateCartQuantity(row, newQuantity) {
+    if (isUpdating) {
+      console.log('Update skipped: another update is in progress');
+      return Promise.resolve();
+    }
+    isUpdating = true;
     const productId = row.getAttribute("data-product-id");
-    fetch('/update-cart-item', {
+    console.log(`Updating quantity for product ${productId} to ${newQuantity}`);
+    return fetch('/update-cart-item', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId, quantity: newQuantity })
     })
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to update quantity');
-      return response.json();
-    })
-    .then(data => {
-      if (!data.success) {
-        Swal.fire({ icon: 'error', title: 'Error', text: data.message });
-      } else {
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to update quantity');
+        return response.json();
+      })
+      .then(data => {
+        if (!data.success) {
+          throw new Error(data.message);
+        }
+        console.log(`Backend update successful for product ${productId}`);
         updateCartSummary();
-      }
-    })
-    .catch(error => {
-      Swal.fire({ icon: 'error', title: 'Error', text: error.message });
-    });
+      })
+      .catch(error => {
+        console.error('Update error:', error.message);
+        Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+        throw error;
+      })
+      .finally(() => {
+        isUpdating = false;
+      });
   }
 
-  // Listen for changes in quantity inputs (manual edits or triggered by the buttons)
-  const qtyInputs = document.querySelectorAll(".pro-qty-2 input");
-  qtyInputs.forEach((input, idx) => {
+  // Update row total in the frontend
+  function updateRowTotal(row, newQuantity) {
+    const priceElem = row.querySelector(".product__cart__item__text h5");
+    if (priceElem) {
+      let priceValue = parseFloat(priceElem.textContent.replace('₹', '').trim());
+      const newRowTotal = priceValue * newQuantity;
+      row.querySelector(".cart__price").textContent = "₹ " + newRowTotal.toFixed(2);
+      console.log(`Updated row total for product ${row.getAttribute("data-product-id")} to ₹${newRowTotal.toFixed(2)}`);
+    }
+  }
+
+  // Debounce function to prevent multiple rapid clicks
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  // Handle quantity button clicks (increment/decrement)
+  const qtyControls = document.querySelectorAll(".pro-qty-2");
+  qtyControls.forEach(control => {
+    // Clone to remove any existing listeners
+    control.replaceWith(control.cloneNode(true));
+  });
+
+  // Re-select controls after cloning
+  const newQtyControls = document.querySelectorAll(".pro-qty-2");
+  newQtyControls.forEach(control => {
+    const input = control.querySelector("input");
+    const incBtn = control.querySelector(".inc");
+    const decBtn = control.querySelector(".dec");
+    const row = control.closest("tr");
+    const productId = row.getAttribute("data-product-id");
+    const cartItem = cartData.items.find(item => item.productId._id === productId);
+    const maxStock = cartItem ? cartItem.productId.quantity : 5;
+
+    // Increment button
+    if (incBtn) {
+      incBtn.addEventListener("click", debounce(function () {
+        let currentVal = parseInt(input.value);
+        if (isNaN(currentVal)) currentVal = 1;
+        if (currentVal < 5 && currentVal < maxStock) {
+          const newQuantity = currentVal + 1;
+          input.value = newQuantity;
+          console.log(`Incremented product ${productId} to ${newQuantity}`);
+          updateRowTotal(row, newQuantity);
+          updateCartQuantity(row, newQuantity);
+        } else {
+          const errorMessage = currentVal >= maxStock 
+            ? `Only ${maxStock} in stock for this product.` 
+            : 'Maximum quantity is 5.';
+          Swal.fire({ icon: 'error', title: 'Quantity Error', text: errorMessage });
+        }
+      }, 300));
+    }
+
+    // Decrement button
+    if (decBtn) {
+      decBtn.addEventListener("click", debounce(function () {
+        let currentVal = parseInt(input.value);
+        if (isNaN(currentVal)) currentVal = 1;
+        if (currentVal > 1) {
+          const newQuantity = currentVal - 1;
+          input.value = newQuantity;
+          console.log(`Decremented product ${productId} to ${newQuantity}`);
+          updateRowTotal(row, newQuantity);
+          updateCartQuantity(row, newQuantity);
+        }
+      }, 300));
+    }
+
+    // Manual input change
     input.addEventListener("change", function () {
+      console.log(`Manual input changed for product ${productId} to ${this.value}`);
       let newQuantity = parseInt(this.value);
       if (isNaN(newQuantity) || newQuantity < 1) {
         this.value = 1;
         newQuantity = 1;
       }
-      // Get productId from row
-      const row = this.closest("tr");
-      const productId = row.getAttribute("data-product-id");
-      // Find the corresponding cart item
-      const cartItem = cartData.items.find(item => item.productId._id === productId);
-      const maxStock = cartItem ? cartItem.productId.quantity : 5;
       if (newQuantity > maxStock) {
         Swal.fire({ icon: 'error', title: 'Stock Error', text: `Only ${maxStock} in stock for this product.` });
         this.value = maxStock;
@@ -160,50 +241,12 @@ document.addEventListener("DOMContentLoaded", function () {
         this.value = 5;
         newQuantity = 5;
       }
-      const priceElem = row.querySelector(".product__cart__item__text h5");
-      if (priceElem) {
-        let priceValue = parseFloat(priceElem.textContent.replace('₹', '').trim());
-        const newRowTotal = priceValue * newQuantity;
-        row.querySelector(".cart__price").textContent = "₹ " + newRowTotal.toFixed(2);
-      }
+      updateRowTotal(row, newQuantity);
       updateCartQuantity(row, newQuantity);
     });
   });
 
-  // Increase button functionality using your existing .inc button
-  const incBtns = document.querySelectorAll(".inc");
-  incBtns.forEach(btn => {
-    btn.addEventListener("click", function () {
-      const parent = this.parentElement;
-      const input = parent.querySelector("input");
-      let currentVal = parseInt(input.value);
-      if (isNaN(currentVal)) currentVal = 1;
-      if (currentVal < 5) {
-        input.value = currentVal + 1;
-        input.dispatchEvent(new Event("change"));
-      } else {
-        Swal.fire({ icon: 'error', title: 'Quantity Error', text: 'Maximum quantity is 5.' });
-      }
-    });
-  });
-
-  // Decrease button functionality using your existing .dec button
-  const decBtns = document.querySelectorAll(".dec");
-  decBtns.forEach(btn => {
-    btn.addEventListener("click", function () {
-      const parent = this.parentElement;
-      const input = parent.querySelector("input");
-      let currentVal = parseInt(input.value);
-      if (isNaN(currentVal)) currentVal = 1;
-      // Only decrease if above 1; never let the quantity drop below 1.
-      if (currentVal > 1) {
-        input.value = currentVal - 1;
-        input.dispatchEvent(new Event("change"));
-      }
-    });
-  });
-
-  // Remove item with SweetAlert confirmation and backend removal
+  // Remove item with SweetAlert confirmation
   const removeBtns = document.querySelectorAll(".cart__close");
   removeBtns.forEach(btn => {
     btn.addEventListener("click", function () {
@@ -224,26 +267,27 @@ document.addEventListener("DOMContentLoaded", function () {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productId })
           })
-          .then(response => {
-            if (!response.ok) throw new Error('Failed to remove item');
-            return response.json();
-          })
-          .then(data => {
-            if (data.success) {
-              row.remove();
-              updateCartSummary();
-              const tbody = document.querySelector("tbody");
-              if (tbody.querySelectorAll("tr[data-product-id]").length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center">Your shopping cart is empty</td></tr>';
+            .then(response => {
+              if (!response.ok) throw new Error('Failed to remove item');
+              return response.json();
+            })
+            .then(data => {
+              if (data.success) {
+                row.remove();
+                updateCartSummary();
+                const tbody = document.querySelector("tbody");
+                if (tbody.querySelectorAll("tr[data-product-id]").length === 0) {
+                  tbody.innerHTML = '<tr><td colspan="4" class="text-center">Your shopping cart is empty</td></tr>';
+                }
+                Swal.fire('Removed!', 'Your item has been removed.', 'success');
+              } else {
+                Swal.fire('Error', data.message, 'error');
               }
-              Swal.fire('Removed!', 'Your item has been removed.', 'success');
-            } else {
-              Swal.fire('Error', data.message, 'error');
-            }
-          })
-          .catch(error => {
-            Swal.fire('Error', error.message, 'error');
-          });
+            })
+            .catch(error => {
+              console.error('Remove error:', error.message);
+              Swal.fire('Error', error.message, 'error');
+            });
         }
       });
     });
@@ -251,53 +295,52 @@ document.addEventListener("DOMContentLoaded", function () {
 
   updateCartSummary();
 });
+
 document.addEventListener("DOMContentLoaded", function () {
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', async function (e) {
       e.preventDefault();
-      checkoutBtn.disabled = true; 
+      checkoutBtn.disabled = true;
 
-      let canProceed = true; 
+      let canProceed = true;
       let errorMessage = '';
 
-     
-      for (const item of cartData.items) {
-        const productStatus = item.productId.status;
-        const productStock = item.productId.quantity;
-        const cartQuantity = item.quantity;
-        const isblocked = item.productId.isBlocked
-        const isListed=item.productId.category.isListed
-       if(item.length==0){
-        checkoutBtn.disabled = true;
-       }
+      if (!cartData || !cartData.items || cartData.items.length === 0) {
+        canProceed = false;
+        errorMessage = 'Your cart is empty.';
+      } else {
+        for (const item of cartData.items) {
+          const productStatus = item.productId.status;
+          const productStock = item.productId.quantity;
+          const cartQuantity = item.quantity;
+          const isBlocked = item.productId.isBlocked;
+          const isListed = item.productId.category.isListed;
 
-     
-        if (productStatus.toLowerCase() !== 'available') {
-          canProceed = false;
-          errorMessage = `The product "${item.productId.productName}" is currently out of stock.`;
-          break; 
+          if (productStatus.toLowerCase() !== 'available') {
+            canProceed = false;
+            errorMessage = `The product "${item.productId.productName}" is currently out of stock.`;
+            break;
+          }
+          if (isBlocked) {
+            canProceed = false;
+            errorMessage = `The product "${item.productId.productName}" is currently blocked, please wait for unblock or remove product from cart.`;
+            break;
+          }
+          if (!isListed) {
+            canProceed = false;
+            errorMessage = `The product "${item.productId.productName}" category is not listed, please wait for listing or remove product from cart.`;
+            break;
+          }
+          if (productStock < cartQuantity) {
+            canProceed = false;
+            errorMessage = `The product "${item.productId.productName}" has insufficient stock. Reduce the quantity in your cart or wait for to add more stock.`;
+            break;
+          }
         }
-        if(isblocked){
-          canProceed = false;
-          errorMessage = `The product "${item.productId.productName}" is currently blocked ,please wait for unblock or remove product from cart.`;
-          break;
-        }
-        if(!isListed) {
-          canProceed = false;
-          errorMessage = `The product "${item.productId.productName}" The category is not listed, please wait for listing or remove product from cart.`;
-          break; 
-        }
-        if (productStock < cartQuantity) {
-          canProceed = false;
-          errorMessage = `The product "${item.productId.productName}" has insufficient stock. Reduce the quantity in your cart.`;
-          break; 
-        }
- 
       }
 
       if (canProceed) {
-        
         window.location.href = "/checkout";
       } else {
         Swal.fire({
@@ -305,9 +348,10 @@ document.addEventListener("DOMContentLoaded", function () {
           title: 'Checkout Failed',
           text: errorMessage,
         });
-        checkoutBtn.disabled = false; // Re-enable the button
+        checkoutBtn.disabled = false;
       }
     });
   }
 });
 </script>
+```

@@ -34,7 +34,7 @@ let loadsalesreport = async (req, res) => {
             query.createdOn = { $gte: new Date(startDate), $lt: new Date(endDate) };
         }
 
-        query.status = { $nin: ['Cancelled', 'Returned'] };
+        query.status = { $nin: ['Cancelled', 'Returned','Failed'] };
 
         console.log("Final Query:", query);
 
@@ -100,7 +100,7 @@ const fetchSalesReportData = async (filterType, startDate, endDate) => {
 
     const orders = await Order.find({
         createdOn: { $gte: dateRange.startDate, $lte: dateRange.endDate },
-        status: { $nin: ['Cancelled', 'Returned'] }
+        status: { $nin: ['Cancelled', 'Returned','Failed'] }
     }).populate('userId', 'name email'); 
 
     const salesCount = orders.length;
@@ -140,38 +140,57 @@ let salespdf = async (req, res) => {
         pdfDoc.text(`Total Discount: ₹${reportData.totalDiscount.toFixed(2)}`);
         pdfDoc.moveDown();
 
-        pdfDoc.fontSize(14).text('Order Details:', { underline: true });
+        pdfDoc.fontSize(16).text('Order Details', { underline: true, align: 'center' });
         pdfDoc.moveDown();
 
         const table = {
             headers: [
-                { label: "Order ID", property: 'orderId', width: 80, renderer: null },
-                { label: "User Name", property: 'userName', width: 100, renderer: null }, 
-                { label: "User Email", property: 'userEmail', width: 120, renderer: null },
-                { label: "Total Amount", property: 'totalAmount', width: 80, renderer: null },
-                { label: "Discount", property: 'discount', width: 80, renderer: null },
-                { label: "Date", property: 'date', width: 100, renderer: null },
+                { label: "Order ID", property: 'orderId', width: 80, align: 'center' },
+                { label: "User Email", property: 'userEmail', width: 120, align: 'center' },
+                { label: "Discount", property: 'discount', width: 50, align: 'right' },
+                { label: "Final Amount", property: 'finalAmount', width: 80, align: 'right' },
+                { label: "Payment Method", property: 'paymentMethod', width: 90, align: 'center' },
+                { label: "Status", property: 'status', width: 80, align: 'center' },
+                { label: "Date", property: 'date', width: 100, align: 'center' },
             ],
-            datas: reportData.orders.map((order, index) => ({
-                orderId: order.orderId,
-                userName: order.userId ? order.userId.name : 'N/A', 
+            datas: reportData.orders.map(order => ({
+                orderId: order._id.toString(),
+                userName: order.userId ? order.userId.name : 'N/A',
                 userEmail: order.userId ? order.userId.email : 'N/A',
                 totalAmount: `₹${order.totalAmount.toFixed(2)}`,
-                discount: `₹${Math.abs(order.discount || 0)}`,
-                date: order.createdOn.toDateString(),
+                discount: `₹${Math.abs(order.discount || 0).toFixed(2)}`,
+                finalAmount: `₹${order.finalAmount.toFixed(2)}`,
+                paymentMethod: order.shoppingMethod,
+                status: order.status,
+                date: order.createdOn.toLocaleDateString(),
             })),
         };
 
         pdfDoc.table(table, {
-            prepareHeader: () => pdfDoc.font('Helvetica-Bold').fontSize(10),
-            prepareRow: (row, indexColumn, indexRow, rectRow) => {
-                pdfDoc.font('Helvetica').fontSize(10);
-                if (indexRow % 2 === 0) {
-                    pdfDoc.rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height).fill('#f0f0f0');
-                    pdfDoc.fillColor('black');
+            prepareHeader: () => pdfDoc.font('Helvetica-Bold').fontSize(10).fillColor('#222'),
+            prepareRow: (row, i) => {
+                pdfDoc.font('Helvetica').fontSize(9).fillColor('#222');
+                // Alternate row background for readability
+                if (i % 2 === 0) {
+                    pdfDoc.rect(pdfDoc.x, pdfDoc.y, 700, 18).fill('#f5f5f5').fillColor('#222');
                 }
             },
-            padding: 5,
+            columnSpacing: 5,
+            padding: 4,
+            hideHeader: false,
+            minRowHeight: 18,
+            width: 700,
+            columns: [
+                { property: 'orderId', align: 'center' },
+                { property: 'userName', align: 'center' },
+                { property: 'userEmail', align: 'center' },
+                { property: 'totalAmount', align: 'right' },
+                { property: 'discount', align: 'right' },
+                { property: 'finalAmount', align: 'right' },
+                { property: 'paymentMethod', align: 'center' },
+                { property: 'status', align: 'center' },
+                { property: 'date', align: 'center' },
+            ]
         });
 
         pdfDoc.end();
@@ -184,9 +203,9 @@ let salespdf = async (req, res) => {
 let downloadSalesReportExcel = async (req, res) => {
     try {
         const { filterType, startDate, endDate } = req.query;
-
+        
         const reportData = await fetchSalesReportData(filterType, startDate, endDate);
-
+     
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
 

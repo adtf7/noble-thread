@@ -98,8 +98,8 @@
 
         <!-- Pagination -->
         <div class="mt-4 flex justify-center space-x-2">
-            <% if (currentPage > 1) { %>
-                <a href="/admin/wallet?page=<%= currentPage - 1 %>"
+            <% if (page > 1) { %>
+                <a href="/admin/wallet?page=<%= page - 1 %>"
                    class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
                     Previous
                 </a>
@@ -108,8 +108,8 @@
                     Previous
                 </span>
             <% } %>
-            <% if (currentPage < totalPages) { %>
-                <a href="/admin/wallet?page=<%= currentPage + 1 %>"
+            <% if (page < totalPages) { %>
+                <a href="/admin/wallet?page=<%= page + 1 %>"
                    class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
                     Next
                 </a>

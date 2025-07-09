@@ -9,6 +9,7 @@ const userRouter = require('./routes/userRouter');
 const authRoutes = require('./routes/auth');   
 let adminRouter=require('./routes/adminRouter') 
 const errorHandler = require('./middlewares/errorHandler');
+const DeleteExpiredCoupon = require('./cron/deleteExpiredCoupons');
 
 dotenv.config();
 
@@ -17,10 +18,8 @@ db().catch(err => {
     process.exit(1);
 });
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'default_secret',
@@ -32,7 +31,6 @@ app.use(session({
         httpOnly: true
     }
 }));
-
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -57,5 +55,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+DeleteExpiredCoupon();
 
 module.exports = app;

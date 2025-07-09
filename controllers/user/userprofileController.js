@@ -541,10 +541,11 @@ const cancelorder = async (req, res) => {
 
    
         if (refundAmount > 0) {
-            await wallet.updateOne(
+          let cancel=  await wallet.updateOne(
                 { user: order.userId },
                 {
                     $inc: { balance: refundAmount },
+                    updatedAt:new Date(),
                     $push: {
                         transactions: {
                             order: order._id,
@@ -559,6 +560,7 @@ const cancelorder = async (req, res) => {
                 },
                 { upsert: true }
             );
+            console.log(cancel)
         }
 
         return res.json({ success: true, message: "Item canceled successfully." });

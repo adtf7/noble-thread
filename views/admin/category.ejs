@@ -89,13 +89,15 @@
                                 Delete
                             </button>
                         </td>
-                        <td>
-                            <button onclick="addCategoryOffer('<%= category._id %>')" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition">
-                                Add Offer
-                            </button>
-                            <button onclick="removeCategoryOffer('<%= category._id %>')" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition">
-                                Remove Offer
-                            </button>
+                        <td class="p-3">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="addCategoryOffer('<%= category._id %>')" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition">
+                                    Add Offer
+                                </button>
+                                <button onclick="removeCategoryOffer('<%= category._id %>')" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition">
+                                    Remove Offer
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 <% }) %>
