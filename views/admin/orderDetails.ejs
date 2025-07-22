@@ -226,17 +226,7 @@
             <p><strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
             <p><strong>Discount:</strong> ₹<%= (order.totalAmount - order.finalAmount).toFixed(2) %></p>
             <p><strong>Final Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
-            <p><strong>Status:</strong> 
-                <span class="status 
-                    <%= order.status === 'Pending' ? 'status-pending' : '' %>
-                    <%= order.status === 'Processing' ? 'status-processing' : '' %>
-                    <%= order.status === 'Shipped' ? 'status-shipped' : '' %>
-                    <%= order.status === 'Delivered' ? 'status-delivered' : '' %>
-                    <%= order.status === 'Cancelled' ? 'status-cancelled' : '' %>
-                    <%= order.status === 'Return Request' ? 'status-return-request' : '' %>
-                    <%= order.status === 'Returned' ? 'status-returned' : '' %>">
-                    <%= order.status %>
-                </span>
+           
             </p>
         <% } else { %>
             <p><strong>Address:</strong> No address available.</p>

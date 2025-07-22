@@ -5,13 +5,13 @@ let wallet=require('../../models/walletSchema')
 
 const listOrders = async (req, res) => {
     try {
-        let { page = 1, limit = 4, search = '', status: selectedStatus = '', sortBy = 'date' } = req.query;
+        let { page = 1, limit = 10, search = '', status: selectedStatus = '', sortBy = 'date' } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
 
     
         if (isNaN(page) || page < 1) page = 1;
-        if (isNaN(limit) || limit < 1) limit = 4;
+        if (isNaN(limit) || limit < 1) limit = 10;
 
         let searchQuery = {};
         if (search) {
@@ -51,10 +51,11 @@ const listOrders = async (req, res) => {
         const totalPages = Math.ceil(totalOrders / limit);
 
         const returnRequests = await Order.find({
-            'orderItems': {
-                $elemMatch: { status: 'Return Request' }
-            }
-        })
+  $or: [
+    { status: 'Return Request' }, 
+    { 'orderItems': { $elemMatch: { status: 'Return Request' } } } 
+  ]
+})
             .populate('userId', 'name email')
             .populate('orderItems.product');
 

@@ -218,7 +218,7 @@ let seteditproduct = async (req, res) => {
             }
         }
 
-        // Updated fields
+    
         let updateFields = {
             productName: data.productName || product.productName,
             description: data.description || product.description,
@@ -305,13 +305,15 @@ console.log("params", req.params);
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
+           const expireDate = new Date(endDate);
+              expireDate.setHours(23, 59, 59, 999); 
 
         const offer = new Offer({
             type: 'product',
             productId,
             discountPercentage,
             startDate,
-            endDate,
+            endDate:expireDate
         });
         await offer.save();
 

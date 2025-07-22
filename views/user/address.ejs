@@ -72,9 +72,15 @@
       <section class="bg-white shadow rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-semibold text-gray-700">Your Addresses</h2>
+         <% if (addresscount >= 5) { %>
+          <p style="color: #856404; background-color: #fff3cd; padding: 10px; border: 1px solid #ffeeba; border-radius: 5px;">
+            Only 5 addresses can be added per user. If you need to add more, please remove one.
+          </p>
+        <% } else { %>
           <button id="addAddressBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
             + Add Address
           </button>
+        <% } %>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <% if (addresses && addresses.length) { %>
@@ -114,9 +120,9 @@
   <!-- Footer -->
   <%- include('../../views/partials/user/footer.ejs') %>
 
-  <!-- JavaScript for Address Modals -->
+
   <script>
-    // Helper function to validate address fields.
+    
     function validateAddressFields({ name, addressLine1, city, state, postalCode, Phone, landmark }) {
       if (name.length < 2) return "Name must be at least 2 characters long.";
       if (addressLine1.length < 5) return "Address must be at least 5 characters long.";

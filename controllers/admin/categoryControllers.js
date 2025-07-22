@@ -173,13 +173,15 @@ const deleteCategory = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Category not found' });
         }
 
-   
+    const expireDate = new Date(endDate);
+    expireDate.setHours(23, 59, 59, 999); 
+
         const offer = new Offer({
             type: 'category',
             categoryId,
             discountPercentage,
             startDate,
-            endDate,
+            endDate:expireDate
         });
         await offer.save();
 

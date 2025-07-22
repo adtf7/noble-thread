@@ -57,7 +57,14 @@ const addwishlist = async (req, res) => {
           userId: new mongoose.Types.ObjectId(userId),
           "products.productId": new mongoose.Types.ObjectId(productId), 
       });
+       let cartexist=await cart.findOne({
+        userId:new mongoose.Types.ObjectId(userId),
+         "items.productId": new mongoose.Types.ObjectId(productId), 
+       })
+       if (cartexist){
+            return res.status(400).json({ success: false, message: "Can't add to wishlist, Product already in Cart" });
 
+       }
       if (isexisted) {
           return res.status(400).json({ success: false, message: "Product already in wishlist" });
       }

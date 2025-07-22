@@ -165,6 +165,8 @@ const loadcheckout = async (req, res) => {
   try {
     const userId = req.session.user;
     const userdata = await User.findOne({ _id: userId });
+     let userAddresses = await Address.find({ userid: userId });
+     let addresscount= userAddresses.length;
     if (!userdata) return res.status(404).render('error', { message: 'User not found.' });
 
     const addresses = await Address.find({ userid: userId });
@@ -211,7 +213,8 @@ const loadcheckout = async (req, res) => {
       coupons,
       cartcount,
       appliedCoupon,
-      selectedCouponId 
+      selectedCouponId ,
+      addresscount
     });
   } catch (error) {
     console.error('Error loading checkout:', error);
@@ -1037,9 +1040,11 @@ const placeOrder = async (req, res) => {
           couponStatus: !!couponId,
           requestId,
       });
-
-      await newOrder.save();
-
+      
+     let walletorder= await newOrder.save();
+if(walletorder){
+  console.log(newOrder.createdOn)
+}
       wallet.balance -= finalTotal;
       wallet.transactions.push({
           order: newOrder._id,
@@ -1080,7 +1085,10 @@ const placeOrder = async (req, res) => {
       requestId,
     });
 
-    await newOrder.save();
+   let ordered= await newOrder.save();
+   if(ordered){
+    console.log(newOrder.createdOn)
+   }
     for (const item of orderItems) {
       await Product.updateOne({ _id: item.productId }, { $inc: { quantity: -item.quantity } });
     }

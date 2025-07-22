@@ -8,7 +8,9 @@ let loadsalesreport = async (req, res) => {
     try {
         const { filterType, startDate, endDate } = req.query;
         console.log('filterType:', filterType);
-
+      
+        
+     
         let query = {};
         if (filterType === 'daily') {
             const today = new Date();
@@ -19,22 +21,28 @@ let loadsalesreport = async (req, res) => {
             const endOfWeek = new Date(startOfWeek);
             endOfWeek.setDate(startOfWeek.getDate() + 6);
             endOfWeek.setHours(23, 59, 59, 999);
-            query.createdOn = { $gte: startOfWeek, $lt: endOfWeek };
+            query.createdOn = { $gte: startOfWeek, $lte: endOfWeek };
         } else if (filterType === 'monthly') {
             const today = new Date();
             const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            query.createdOn = { $gte: startOfMonth, $lt: endOfMonth };
+            endOfMonth.setHours(23, 59, 59, 999); 
+            query.createdOn = { $gte: startOfMonth, $lte: endOfMonth };
         } else if (filterType === 'yearly') {
             const today = new Date();
             const startOfYear = new Date(today.getFullYear(), 0, 1);
             const endOfYear = new Date(today.getFullYear(), 11, 31);
-            query.createdOn = { $gte: startOfYear, $lt: endOfYear };
+            endOfYear.setHours(23, 59, 59, 999); 
+            query.createdOn = { $gte: startOfYear, $lte: endOfYear };
         } else if (filterType === 'custom' && startDate && endDate) {
-            query.createdOn = { $gte: new Date(startDate), $lt: new Date(endDate) };
+            const end = new Date(endDate);
+
+            end.setHours(23, 59, 59, 999); 
+            query.createdOn = { $gte: new Date(startDate), $lte: end };
+
         }
 
-        query.status = { $nin: ['Cancelled', 'Returned','Failed'] };
+        query.status = { $nin: ['Cancelled', 'Returned', 'Failed'] };
 
         console.log("Final Query:", query);
 
@@ -82,10 +90,12 @@ const fetchSalesReportData = async (filterType, startDate, endDate) => {
         case 'monthly':
             dateRange.startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
             dateRange.endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            dateRange.endDate.setHours(23, 59, 59, 999); 
             break;
         case 'yearly':
             dateRange.startDate = new Date(currentDate.getFullYear(), 0, 1);
             dateRange.endDate = new Date(currentDate.getFullYear(), 11, 31);
+            dateRange.endDate.setHours(23, 59, 59, 999); 
             break;
         case 'custom':
             if (!startDate || !endDate) {
@@ -93,6 +103,7 @@ const fetchSalesReportData = async (filterType, startDate, endDate) => {
             }
             dateRange.startDate = new Date(startDate);
             dateRange.endDate = new Date(endDate);
+            dateRange.endDate.setHours(23, 59, 59, 999);
             break;
         default:
             throw new Error('Invalid filter.');
@@ -100,8 +111,8 @@ const fetchSalesReportData = async (filterType, startDate, endDate) => {
 
     const orders = await Order.find({
         createdOn: { $gte: dateRange.startDate, $lte: dateRange.endDate },
-        status: { $nin: ['Cancelled', 'Returned','Failed'] }
-    }).populate('userId', 'name email'); 
+        status: { $nin: ['Cancelled', 'Returned', 'Failed'] }
+    }).populate('userId', 'name email');
 
     const salesCount = orders.length;
     const totalOrderAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -170,7 +181,6 @@ let salespdf = async (req, res) => {
             prepareHeader: () => pdfDoc.font('Helvetica-Bold').fontSize(10).fillColor('#222'),
             prepareRow: (row, i) => {
                 pdfDoc.font('Helvetica').fontSize(9).fillColor('#222');
-                // Alternate row background for readability
                 if (i % 2 === 0) {
                     pdfDoc.rect(pdfDoc.x, pdfDoc.y, 700, 18).fill('#f5f5f5').fillColor('#222');
                 }

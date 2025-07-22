@@ -120,12 +120,13 @@ let addressmanagement = async (req, res) => {
           ]);
         let userAddresses = await Address.find({ userid: userId });
         let user=await User.findById(userId)
-        console.log(userAddresses);
+        let addresscount=userAddresses.length
         res.render('user/address', {
             currentPage: 'addresses',
             addresses: userAddresses,
             user:user,
-            cartcount
+            cartcount,
+            addresscount
         });
     } catch (error) {
         console.error("Error retrieving address:", error);
@@ -140,8 +141,12 @@ let addaddress = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
-       
         let { name, addressLine1, city, state, postalCode, Phone, landmark } = req.body;
+         let userAddresses = await Address.find({ userid: userId });
+         if (userAddresses.length>=5){
+            return res.status(400).json({ success: false, message: "Only 5 addresses can be added per user. If you need to add more, please remove one." });
+
+         }
         
    
         if (!name || !addressLine1 || !city || !state || !postalCode || !Phone || !landmark) {
@@ -398,7 +403,7 @@ const returnOrder = async (req, res) => {
       
         item.status = 'Return Request';
         item.returnReason = returnReason;
-
+    
      
 
         await order.save();

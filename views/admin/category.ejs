@@ -90,14 +90,21 @@
                             </button>
                         </td>
                         <td class="p-3">
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button onclick="addCategoryOffer('<%= category._id %>')" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition">
-                                    Add Offer
-                                </button>
-                                <button onclick="removeCategoryOffer('<%= category._id %>')" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition">
-                                    Remove Offer
-                                </button>
-                            </div>
+    <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center;">
+        <button onclick="addCategoryOffer('<%= category._id %>')" 
+                style="background-color: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; width: 100px; text-align: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"
+                onmouseover="this.style.backgroundColor='#059669'; this.style.transform='scale(1.05)';"
+                onmouseout="this.style.backgroundColor='#10b981'; this.style.transform='scale(1);'">
+            Add Offer
+        </button>
+        <button onclick="removeCategoryOffer('<%= category._id %>')" 
+                style="background-color: #ef4444; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; width: 100px; text-align: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"
+                onmouseover="this.style.backgroundColor='#dc2626'; this.style.transform='scale(1.05)';"
+                onmouseout="this.style.backgroundColor='#ef4444'; this.style.transform='scale(1);'">
+            Remove
+        </button>
+    </div>
+</td>
                         </td>
                     </tr>
                 <% }) %>
@@ -312,29 +319,50 @@ function addCategoryOffer(categoryId) {
         title: 'Add Category Offer',
         html: `
             <input id="discount-percentage" type="number" min="0" max="100" class="swal2-input" placeholder="Discount Percentage (%)"><br>
-              <label for="start-date">Start Date:</label>
+            <label for="start-date">Start Date:</label>
             <input id="start-date" type="date" class="swal2-input" placeholder="Start Date"><br>
-              <label for="start-date">End Date:</label>
+            <label for="end-date">End Date:</label>
             <input id="end-date" type="date" class="swal2-input" placeholder="End Date">
         `,
         showCancelButton: true,
         confirmButtonText: 'Add Offer',
         preConfirm: () => {
             const discountPercentage = document.getElementById('discount-percentage').value.trim();
-            const startDate = document.getElementById('start-date').value.trim();
-            const endDate = document.getElementById('end-date').value.trim();
+            const startDateInput = document.getElementById('start-date').value.trim();
+            const endDateInput = document.getElementById('end-date').value.trim();
+            const now = new Date();
 
-            if (!discountPercentage || discountPercentage < 0 || discountPercentage > 100) {
+            if (!discountPercentage || isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
                 Swal.showValidationMessage('Please enter a valid discount percentage (0-100).');
                 return false;
             }
 
-            if (!startDate || !endDate) {
+            if (!startDateInput || !endDateInput) {
                 Swal.showValidationMessage('Please enter both start and end dates.');
                 return false;
             }
 
-            return { discountPercentage, startDate, endDate };
+            const startDate = new Date(startDateInput);
+            const endDate = new Date(endDateInput);
+
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                Swal.showValidationMessage('Please enter valid date formats.');
+                return false;
+            }
+
+            
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (startDate < today) {
+                Swal.showValidationMessage('Start date cannot be in the past.');
+                return false;
+            }
+
+            if (endDate <= startDate) {
+                Swal.showValidationMessage('End date must be after start date.');
+                return false;
+            }
+
+            return { discountPercentage: parseFloat(discountPercentage), startDate, endDate };
         }
     }).then((result) => {
         if (result.isConfirmed) {
@@ -345,7 +373,7 @@ function addCategoryOffer(categoryId) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ discountPercentage, startDate, endDate })
+                body: JSON.stringify({ discountPercentage, startDate: startDate.toISOString(), endDate: endDate.toISOString() })
             })
             .then(async (response) => {
                 let data;
@@ -363,7 +391,7 @@ function addCategoryOffer(categoryId) {
             })
             .then((data) => {
                 Swal.fire('Success', 'Category offer added successfully', 'success').then(() => {
-                    location.reload(); // Refresh the page to reflect changes
+                    location.reload();
                 });
             })
             .catch((error) => {

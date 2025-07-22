@@ -11,7 +11,7 @@ const loadCoupon = async (req, res) => {
       const couponsPerPage = 5;
       const page = parseInt(req.query.page) || 1; 
  
-
+     console.log( req.session.expiredCoupons)
       if (isNaN(page) || page < 1) {
           return res.status(400).send("Invalid page number");
       }
@@ -70,10 +70,13 @@ const addCoupon = async (req, res) => {
       if (existingCoupon) {
           return res.status(400).json({ success: false, message: "Coupon name already exists." });
       }
+       const expireDate = new Date(expireOn);
+    expireDate.setHours(23, 59, 59, 999); 
+
 
       const newCoupon = new coupon({
           name,
-          expireOn: expireOn, 
+          expireOn: expireDate, 
           offerPrice: offerPrice, 
           minimumPrice: minimumPrice, 
           maxDiscount: maxDiscount,  
@@ -166,12 +169,14 @@ const addCoupon = async (req, res) => {
                 message: "Coupon name already exists." 
             });
         }
+        const expireDate = new Date(expireOn);
+         expireDate.setHours(23, 59, 59, 999);
 
         const updateCoupon = await coupon.findByIdAndUpdate(
             id,
             { 
                 name, 
-                expireOn, 
+                expireOn:expireDate, 
                 offerPrice, 
                 minimumPrice, 
                 maxDiscount,

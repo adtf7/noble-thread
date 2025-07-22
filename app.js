@@ -9,7 +9,7 @@ const userRouter = require('./routes/userRouter');
 const authRoutes = require('./routes/auth');   
 let adminRouter=require('./routes/adminRouter') 
 const errorHandler = require('./middlewares/errorHandler');
-const DeleteExpiredCoupon = require('./cron/deleteExpiredCoupons');
+const {DeleteExpiredCoupon,changeProductOffer,changeCategoryOffer} = require('./cron/deleteExpiredCoupons');
 
 dotenv.config();
 
@@ -57,5 +57,6 @@ app.listen(PORT, () => {
 });
 
 DeleteExpiredCoupon();
-
+changeProductOffer()
+changeCategoryOffer()
 module.exports = app;

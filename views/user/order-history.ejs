@@ -179,21 +179,50 @@
         font-weight: 600;
     }
     
-    .status {
-        padding: 6px 12px;
-        border-radius: 5px;
+     .order-status {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 25px;
         font-weight: bold;
-        text-transform: uppercase;
-        font-size: 12px;
+        color: white;
+        background-size: 200% 200%;
+        animation: gradient 1s ease infinite, pulse 2s normal ;
+    }
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
     }
     
-    .pending { background: #ff9800; color: white; }
-    .shipped { background: #2196f3; color: white; }
-    .delivered { background: #4caf50; color: white; }
-    .returned {background: rgb(207, 107, 107); color: white;}
-    .cancelled { background-image: linear-gradient(45deg, #888787, #e7c2b7); color: white; }
-    .processing { background: #9c27b0; color: white; }
-    .failed {background: red;color: wheat;}
+   .order-status.pending {
+        background-image: linear-gradient(45deg, #f39c12, #c07804);
+    }
+    .order-status.processing {
+        background-image: linear-gradient(45deg, #e67e22, #d35400);
+    }
+    .order-status.shipped {
+        background-image: linear-gradient(45deg, #3498db, #115c8d);
+    }
+    .order-status.delivered {
+        background-image: linear-gradient(45deg, #2ecc71, #02963f);
+    }
+    .order-status.return-request {
+        background-image: linear-gradient(45deg, #ff9800, #ff5722);
+    }
+    .order-status.returned {
+        background-image: linear-gradient(45deg, #a04b4b, #f58e6f);
+    }
+    .order-status.cancelled {
+        background-image: linear-gradient(45deg, #494848, #e7c2b7);
+    }
+    .order-status.failed{
+          background-image: linear-gradient(45deg, #6e1b1b, #f03030);
+    }
     .product-list {
         display: flex;
         flex-wrap: wrap;
@@ -289,17 +318,9 @@
                                     <p>Price: ₹<%= item.price.toFixed(2) %> | Qty: <%= item.quantity %></p>
                                     <div class="product-status">
                                         <span>Status:</span>
-                                        <span class="item-status <%= item.status ? item.status.toLowerCase() : '' %>">
-                                   <%=item.status%>
-                                            <% if (item.status === 'Delivered') { %>
-                                                <i class="fas fa-check-circle"></i>
-                                            <% } else if (item.status === 'Cancelled') { %>
-                                                <i class="fas fa-times-circle"></i>
-                                            <% } else if (item.status === 'Returned') { %>
-                                                <i class="fas fa-exchange-alt"></i>
-                                            <% } else if(item.status==='Failed'){%>
-                                              <i class="fas fa-times-circle-xmark"></i>
-                                     <%}%>   </span>
+                                         <span class="order-status <%= item.status.toLowerCase().replace(' ', '-') %>">
+                                                <%= item.status %>
+                                            </span>
                                     </div>
                                 </div>
                             </div>

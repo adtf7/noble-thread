@@ -88,9 +88,9 @@
 }
 
 .active-price {
-    font-weight: bold;
-    color: #ff4500; /* Use your theme color */
-    text-decoration: underline blue 2px;
+    font-weight: bolder;
+     color: blue; 
+    text-decoration: underline rgb(0, 0, 0) 2px;
 }
 
 .shop__sidebar__price a:hover {
@@ -237,45 +237,45 @@
                                 </div>
                                 <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
                                     <div class="card-body">
-                                        <div class="shop__sidebar__price">
-                                            <ul>
+                                        <div class="shop__sidebar__price" style="color: #333;">
+                                            <ul style="color: #333">
                                                 <li>
                                                     <a href="<%= buildUrl({ minPrice: 0, maxPrice: 1000, page: 1 }) %>" 
-                                                       class="<%= (minPrice == 0 && maxPrice == 1000) ? 'active-price' : '' %>">
+                                                       class="<%= (minPrice == 0 && maxPrice == 1000) ? 'active-price' : '' %>" style="color: #7a7979">
                                                         ₹ 0 - ₹ 1,000.00
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="<%= buildUrl({ minPrice: 1000, maxPrice: 5000, page: 1 }) %>" 
-                                                       class="<%= (minPrice == 1000 && maxPrice == 5000) ? 'active-price' : '' %>">
+                                                       class="<%= (minPrice == 1000 && maxPrice == 5000) ? 'active-price' : '' %>" style="color: #7a7979">
                                                         ₹ 1,000.00 - ₹ 5,000.00
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="<%= buildUrl({ minPrice: 5000, maxPrice: 10000, page: 1 }) %>" 
-                                                       class="<%= (minPrice == 5000 && maxPrice == 10000) ? 'active-price' : '' %>">
+                                                       class="<%= (minPrice == 5000 && maxPrice == 10000) ? 'active-price' : '' %>" style="color: #7a7979">
                                                         ₹ 5,000.00 - ₹ 10,000.00
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="<%= buildUrl({ minPrice: 10000, maxPrice: 15000, page: 1 }) %>" 
-                                                       class="<%= (minPrice == 10000 && maxPrice == 15000) ? 'active-price' : '' %>">
+                                                       class="<%= (minPrice == 10000 && maxPrice == 15000) ? 'active-price' : '' %>" style="color: #7a7979">
                                                         ₹ 10,000.00 - ₹ 15,000.00
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="<%= buildUrl({ minPrice: 15000, maxPrice: 25999, page: 1 }) %>" 
-                                                       class="<%= (minPrice == 15000 && maxPrice == 25999) ? 'active-price' : '' %>">
+                                                       class="<%= (minPrice == 15000 && maxPrice == 25999) ? 'active-price' : '' %>" style="color: #7a7979">
                                                         ₹ 15,000.00 - ₹ 25,999.00
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="<%= buildUrl({ minPrice: 25999, page: 1 }) %>" 
-                                                       class="<%= (minPrice == 25999 && !maxPrice) ? 'active-price' : '' %>">
+                                                       class="<%= (minPrice == 25999 && !maxPrice) ? 'active-price' : '' %>" style="color: #7a7979">
                                                         ₹ 25,999.00 +
                                                     </a>
                                                 </li>
-                                                <li><a href="/shop">Clear</a></li>
+                                                <li><a href="/shop" style="color: #7a7979">Clear</a></li>
                                             </ul>
                                         </div>
                                     </div>
