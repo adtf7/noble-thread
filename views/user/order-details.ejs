@@ -2,162 +2,223 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
-    .swal2-popup-custom {
-        border-radius: 10px;
-        padding: 20px;
-    }
-    .swal2-confirm-custom {
-        background-color: #28a745 !important;
-        border-radius: 5px;
-        font-size: 16px;
-        padding: 8px 20px;
-    }
-    .swal2-cancel-custom {
-        background-color: #dc3545 !important;
-        border-radius: 5px;
-        font-size: 16px;
-        padding: 8px 20px;
-    }
-    .swal2-confirm-custom:hover {
-        background-color: #218838 !important;
-    }
-    .swal2-cancel-custom:hover {
-        background-color: #c82333 !important;
-    }
     * {
-        margin: 0;
-        padding: 0;
+      
         box-sizing: border-box;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Arial', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
+
     body {
+        background-color: #f5f5f5;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
-        min-height: 100vh;
-        background-color: #f4f4f9;
     }
+
     .dashboard {
         display: flex;
         width: 100%;
         max-width: 1400px;
-        margin: 20px auto;
-        gap: 20px;
+     
+       
+        padding: 0 20px;
     }
-    .sidebar {
-        width: 250px;
-        background: #ffffff;
-        padding: 20px;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        position: sticky;
-        top: 20px;
-        height: 90vh;
-        overflow-y: auto;
-    }
+
+
+
     .main-content {
         flex: 1;
-        background: white;
-        padding: 20px;
+        background: #fff;
+        padding: 30px;
         border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
         overflow-y: auto;
-        height: 90vh;
+        width: 100%;
     }
-    .order-header, .order-info, .order-footer {
-        padding-bottom: 15px;
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 15px;
+
+    .order-header {
+        border-bottom: 1px solid #e7e7e7;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
     }
+
+    .order-header h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #131921;
+        margin-bottom: 10px;
+    }
+
+    .order-header p {
+        font-size: 14px;
+        color: #565959;
+        margin: 5px 0;
+    }
+
+    .order-info {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #fafafa;
+        border-radius: 8px;
+        border: 1px solid #e7e7e7;
+    }
+
+    .order-info p {
+        font-size: 14px;
+        color: #333;
+        margin: 8px 0;
+    }
+
+    .order-info p strong {
+        color: #131921;
+    }
+
     .product-list {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
+        margin-bottom: 20px;
     }
+
     .product-item {
         display: flex;
         align-items: center;
-        gap: 15px;
-        background: #f9f9f9;
-        padding: 10px;
-        border-radius: 5px;
+        gap: 20px;
+        background: #fff;
+        padding: 15px;
+        border: 1px solid #e7e7e7;
+        border-radius: 8px;
+        transition: box-shadow 0.2s;
     }
+
+    .product-item:hover {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
     .product-item img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 5px;
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        border-radius: 4px;
+        background: #f5f5f5;
     }
+
+    .product-item h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #131921;
+        margin-bottom: 5px;
+    }
+
+    .product-item p {
+        font-size: 14px;
+        color: #565959;
+        margin: 5px 0;
+    }
+
     .btn {
         text-decoration: none;
-        padding: 10px 15px;
-        background: #007bff;
-        color: white;
-        border-radius: 5px;
+        padding: 10px 20px;
+        border-radius: 4px;
         font-size: 14px;
-        font-weight: 600;
-        transition: 0.3s;
-        display: inline-block;
-        margin-right: 5px;
+        font-weight: 500;
+        transition: background 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
-    .btn:hover {
-        background: #0056b3;
+
+    .btn-primary {
+        background: #ff9900;
+        border: 1px solid #f08804;
+        color: #111;
     }
-    .btn.cancel-btn {
-        background: #e74c3c;
+
+    .btn-primary:hover {
+        background: #f08804;
+        transform: translateY(-1px);
     }
-    .btn.cancel-btn:hover {
-        background: #c0392b;
+
+    .btn-cancel {
+        background: #fff;
+        border: 1px solid #d11507;
+        color: #d11507;
     }
-    .btn.return-btn {
-        background: #f1c40f;
-        color: #333;
+
+    .btn-cancel:hover {
+        background: #d11507;
+        color: #fff;
     }
-    .btn.return-btn:hover {
-        background: #d4ac0d;
+
+    .btn-return {
+        background: #fff;
+        border: 1px solid #007185;
+        color: #007185;
     }
+
+    .btn-return:hover {
+        background: #007185;
+        color: #fff;
+    }
+
     .order-status {
         display: inline-block;
-        padding: 8px 15px;
-        border-radius: 25px;
-        font-weight: bold;
-        color: white;
-        background-size: 200% 200%;
-        animation: gradient 3s ease infinite, pulse 2s infinite;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        text-transform: capitalize;
+        
     }
-    @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
+
     .order-status.pending {
-        background-image: linear-gradient(45deg, #f39c12, #ff9f00);
+        background: #f0ad4e;
     }
+
     .order-status.processing {
-        background-image: linear-gradient(45deg, #e67e22, #d35400);
+        background: #ec971f;
     }
+
     .order-status.shipped {
-        background-image: linear-gradient(45deg, #3498db, #2980b9);
+        background: #007185;
     }
+
     .order-status.delivered {
-        background-image: linear-gradient(45deg, #2ecc71, #27ae60);
+        background: #00a758;
     }
+
     .order-status.return-request {
-        background-image: linear-gradient(45deg, #ff9800, #ff5722);
+        background: #ff9800;
     }
+
     .order-status.returned {
-        background-image: linear-gradient(45deg, #a04b4b, #f58e6f);
+        background: #a04b4b;
     }
+
     .order-status.cancelled {
-        background-image: linear-gradient(45deg, #494848, #e7c2b7);
+        background: #888;
     }
-    .order-status.failed{
-          background-image: linear-gradient(45deg, #6e1b1b, #f03030);
+
+    .order-status.failed {
+        background: #d11507;
     }
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 20px;
+        border-top: 1px solid #e7e7e7;
+    }
+
+    .order-footer span {
+        font-size: 16px;
+        font-weight: 600;
+        color: #131921;
+    }
+
     .modal {
         display: none;
         position: fixed;
@@ -170,69 +231,128 @@
         justify-content: center;
         align-items: center;
     }
+
     .modal-content {
-        background: white;
+        background: #fff;
         padding: 30px;
-        border-radius: 10px;
-        width: 40%;
-        text-align: center;
-        position: relative;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         animation: fadeIn 0.3s ease-in-out;
     }
+
     .close-modal {
         position: absolute;
-        top: 10px;
+        top: 15px;
         right: 15px;
-        font-size: 18px;
+        font-size: 20px;
         cursor: pointer;
-        color: #333;
+        color: #565959;
     }
+
     .modal-content h2 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #131921;
         margin-bottom: 20px;
-        font-size: 24px;
-        color: #333;
     }
+
     .modal-content form {
         display: flex;
         flex-direction: column;
         gap: 15px;
     }
+
     .modal-content form label {
-        font-size: 16px;
-        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+        color: #131921;
         text-align: left;
     }
+
     .modal-content form textarea {
         width: 100%;
         padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        resize: none;
-    }
-    .modal-content form button {
-        padding: 10px 20px;
-        background: #f1c40f;
+        border: 1px solid #d5d9d9;
+        border-radius: 4px;
+        resize: vertical;
+        font-size: 14px;
         color: #333;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
+    }
+
+    .modal-content form button {
+        background: #ff9900;
+        border: 1px solid #f08804;
+        color: #111;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
         cursor: pointer;
-        transition: background 0.3s;
     }
+
     .modal-content form button:hover {
-        background: #d4ac0d;
+        background: #f08804;
     }
+
+    .swal2-popup-custom {
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .swal2-confirm-custom {
+        background: #ff9900 !important;
+        border: 1px solid #f08804 !important;
+        border-radius: 4px;
+        font-size: 14px;
+        padding: 10px 20px;
+        color: #111 !important;
+    }
+
+    .swal2-cancel-custom {
+        background: #fff !important;
+        border: 1px solid #d11507 !important;
+        color: #d11507 !important;
+        border-radius: 4px;
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+
+    .swal2-confirm-custom:hover {
+        background: #f08804 !important;
+    }
+
+    .swal2-cancel-custom:hover {
+        background: #d11507 !important;
+        color: #fff !important;
+    }
+
     @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.9); }
+        from { opacity: 0; transform: scale(0.95); }
         to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 768px) {
+      
+      
+        .main-content {
+            padding: 15px;
+        }
+        .product-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .product-item img {
+            width: 80px;
+            height: 80px;
+        }
     }
 </style>
 
-</head>
 <body>
+    <%- include('../../views/partials/user/aside.ejs') %>
     <div class="dashboard">
-        <%- include('../../views/partials/user/aside.ejs') %>
         <div class="main-content">
             <% if (order) { %>
                 <div class="order-header">
@@ -255,19 +375,17 @@
                     <p><strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
                     <p><strong>Discount:</strong> ₹<%= (order.totalAmount - order.finalAmount).toFixed(2) %></p>
                     <p><strong>Final Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
-                    <div style="width: 6cm;">
-                        <% 
-        let isFailed = order.status === 'Failed'; 
-        order.orderItems.forEach(item => {
-            if (item.status === 'Failed') isFailed = true;
-        });
-        if (isFailed) { 
-    %>
-        <button class="btn retry-btn" style="background-color: #46290f;" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
-    <% } %></div>
+                    <% 
+                        let isFailed = order.status === 'Failed'; 
+                        order.orderItems.forEach(item => {
+                            if (item.status === 'Failed') isFailed = true;
+                        });
+                        if (isFailed) { 
+                    %>
+                        <button class="btn btn-primary retry-btn" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
+                    <% } %>
                 </div>
 
-                
                 <h3>Items Ordered</h3>
                 <% if (order.orderItems && order.orderItems.length > 0) { %>
                     <div class="product-list">
@@ -282,16 +400,13 @@
                                             <span class="order-status <%= item.status.toLowerCase().replace(' ', '-') %>">
                                                 <%= item.status %>
                                             </span>
-                    
                                         </p>
                                         <% if (item.status === 'Pending' || item.status === 'Processing') { %>
-                                            <button class="btn cancel-btn" onclick="cancelItem('<%= order._id %>', '<%= item._id %>')">Cancel Item</button>
+                                            <button class="btn btn-cancel" onclick="cancelItem('<%= order._id %>', '<%= item._id %>')">Cancel Item</button>
                                         <% } %>
                                         <% if (item.status === 'Delivered') { %>
-                                            <button class="btn return-btn" onclick="openReturnModal('<%= order._id %>', '<%= item._id %>')">Return Item</button>
+                                            <button class="btn btn-return" onclick="openReturnModal('<%= order._id %>', '<%= item._id %>')">Return Item</button>
                                         <% } %>
-                                            
-                                     
                                     </div>
                                 <% } else { %>
                                     <p>Product details not available.</p>
@@ -304,10 +419,12 @@
                 <% } %>
                 <div class="order-footer">
                     <span><strong>Total:</strong> ₹<%= order.finalAmount.toFixed(2) %></span>
-                    <% if (order.status === 'Delivered') { %>
-                        <a href="/download-invoice/<%= order._id %>" class="btn">Download Invoice</a>
-                    <% } %>
-                    <a href="/order-history" class="btn">Back to Orders</a>
+                    <div>
+                        <% if (order.status === 'Delivered') { %>
+                            <a href="/download-invoice/<%= order._id %>" class="btn btn-primary">Download Invoice</a>
+                        <% } %>
+                        <a href="/order-history" class="btn btn-primary">Back to Orders</a>
+                    </div>
                 </div>
             <% } else { %>
                 <p>Order not found.</p>
@@ -327,7 +444,7 @@
                     <label for="returnReason">Reason for Return:</label>
                     <textarea id="returnReason" name="returnReason" rows="4" required></textarea>
                 </div>
-                <button type="submit" class="btn return-btn">Submit Return Request</button>
+                <button type="submit" class="btn">Submit Return Request</button>
             </form>
         </div>
     </div>
@@ -358,6 +475,10 @@
                     icon: 'error',
                     title: 'Oops...',
                     text: 'Please provide a reason for the return.',
+                    customClass: {
+                        popup: 'swal2-popup-custom',
+                        confirmButton: 'swal2-confirm-custom'
+                    }
                 });
                 return;
             }
@@ -378,6 +499,10 @@
                         icon: 'success',
                         title: 'Success',
                         text: result.message,
+                        customClass: {
+                            popup: 'swal2-popup-custom',
+                            confirmButton: 'swal2-confirm-custom'
+                        }
                     }).then(() => {
                         closeReturnModal();
                         location.reload();
@@ -387,6 +512,10 @@
                         icon: 'error',
                         title: 'Error',
                         text: result.message,
+                        customClass: {
+                            popup: 'swal2-popup-custom',
+                            confirmButton: 'swal2-confirm-custom'
+                        }
                     });
                 }
             } catch (error) {
@@ -395,6 +524,10 @@
                     icon: 'error',
                     title: 'Error',
                     text: 'Server error. Try again later.',
+                    customClass: {
+                        popup: 'swal2-popup-custom',
+                        confirmButton: 'swal2-confirm-custom'
+                    }
                 });
             }
         });
@@ -411,8 +544,8 @@
                             width: 100%; 
                             padding: 10px; 
                             font-size: 15px; 
-                            border-radius: 5px; 
-                            border: 1px solid #ccc; 
+                            border-radius: 4px; 
+                            border: 1px solid #d5d9d9; 
                             outline: none; 
                             background: #fff;
                             cursor: pointer;
@@ -458,91 +591,148 @@
                                 text: "Item canceled successfully.",
                                 icon: "success",
                                 confirmButtonText: "OK",
-                                customClass: { confirmButton: 'swal2-confirm-custom' }
+                                customClass: { 
+                                    popup: 'swal2-popup-custom',
+                                    confirmButton: 'swal2-confirm-custom' 
+                                }
                             }).then(() => {
                                 location.reload();
                             });
                         } else {
-                            Swal.fire("Error!", data.message, "error");
+                            Swal.fire({
+                                title: "Error!",
+                                text: data.message,
+                                icon: "error",
+                                customClass: {
+                                    popup: 'swal2-popup-custom',
+                                    confirmButton: 'swal2-confirm-custom'
+                                }
+                            });
                         }
                     })
                     .catch(error => {
-                        Swal.fire("Error!", "Something went wrong. Try again later.", "error");
+                        Swal.fire({
+                            title: "Error!",
+                            text: "Something went wrong. Try again later.",
+                            icon: "error",
+                            customClass: {
+                                popup: 'swal2-popup-custom',
+                                confirmButton: 'swal2-confirm-custom'
+                            }
+                        });
                     });
                 }
             });
         }
-        async function retryPayment(orderId, itemId) {
-    const result = await Swal.fire({
-        title: 'Retry Payment',
-        text: 'Do you want to retry payment for this order?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, Retry',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            confirmButton: 'swal2-confirm-custom',
-            cancelButton: 'swal2-cancel-custom'
-        }
-    });
 
-    if (result.isConfirmed) {
-        try {
-            // 1. Request backend to create a new Razorpay order for this item/order
-            const response = await fetch('/retry-razorpay-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderId, itemId })
+        async function retryPayment(orderId) {
+            const result = await Swal.fire({
+                title: 'Retry Payment',
+                text: 'Do you want to retry payment for this order?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Retry',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'swal2-popup-custom',
+                    confirmButton: 'swal2-confirm-custom',
+                    cancelButton: 'swal2-cancel-custom'
+                }
             });
-            const data = await response.json();
 
-            if (!data.success) {
-                Swal.fire('Error', data.message || 'Could not initiate payment.', 'error');
-                return;
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/retry-razorpay-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId })
+                    });
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Could not initiate payment.',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'swal2-popup-custom',
+                                confirmButton: 'swal2-confirm-custom'
+                            }
+                        });
+                        return;
+                    }
+
+                    const options = {
+                        key: data.razorpayKey,
+                        amount: data.razorpayOrder.amount,
+                        currency: data.razorpayOrder.currency,
+                        order_id: data.razorpayOrder.id,
+                        name: 'Noble Thread',
+                        description: 'Retry Payment',
+                        handler: async function (response) {
+                            const verifyRes = await fetch('/reverify-payment', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: data.razorpayOrder.amount / 100
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+                            if (verifyData.success) {
+                                Swal.fire({
+                                    title: 'Success',
+                                    text: 'Payment successful! Order updated.',
+                                    icon: 'success',
+                                    customClass: {
+                                        popup: 'swal2-popup-custom',
+                                        confirmButton: 'swal2-confirm-custom'
+                                    }
+                                }).then(() => location.reload());
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: verifyData.message || 'Payment verification failed.',
+                                    icon: 'error',
+                                    customClass: {
+                                        popup: 'swal2-popup-custom',
+                                        confirmButton: 'swal2-confirm-custom'
+                                    }
+                                });
+                            }
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                Swal.fire({
+                                    title: 'Info',
+                                    text: 'Payment was cancelled.',
+                                    icon: 'info',
+                                    customClass: {
+                                        popup: 'swal2-popup-custom',
+                                        confirmButton: 'swal2-confirm-custom'
+                                    }
+                                });
+                            }
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                } catch (err) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Something went wrong. Please try again.',
+                        icon: 'error',
+                        customClass: {
+                            popup: 'swal2-popup-custom',
+                            confirmButton: 'swal2-confirm-custom'
+                        }
+                    });
+                }
             }
-
-            // 2. Open Razorpay payment modal
-           // 2. Open Razorpay payment modal with backend data
-const options = {
-    key: data.razorpayKey,
-    amount: data.razorpayOrder.amount,
-    currency: data.razorpayOrder.currency,
-    order_id: data.razorpayOrder.id,
-    name: 'Noble Thread',
-    description: 'Retry Payment',
-    handler: async function (response) {
-        // Verify payment on backend
-        const verifyRes = await fetch('/reverify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-                amount: data.razorpayOrder.amount / 100 // or order.finalAmount, as needed
-            })
-        });
-        const verifyData = await verifyRes.json();
-        if (verifyData.success) {
-            Swal.fire('Success', 'Payment successful! Order updated.', 'success').then(() => location.reload());
-        } else {
-            Swal.fire('Error', verifyData.message || 'Payment verification failed.', 'error');
         }
-    },
-    modal: {
-        ondismiss: function () {
-            Swal.fire('Info', 'Payment was cancelled.', 'info');
-        }
-    }
-};
-
-            const rzp = new Razorpay(options);
-            rzp.open();
-        } catch (err) {
-            Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
-        }
-    }
-}
     </script>
 </body>
 </html>

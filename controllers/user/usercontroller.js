@@ -8,6 +8,7 @@ const products = require('../../models/productSchema');
 const Offer=require('../../models/offerSchema')
 let Cart=require('../../models/cartSchema')
 let mongoose=require('mongoose')
+const Review = require('../../models/reviewSchema');
 const loadHomePage = async (req, res) => {
     try {
         let userId = req.session.user;
@@ -186,29 +187,7 @@ const loadSignup = async (req, res) => {
     }
 };
 
-const loadContactPage = async (req, res) => {
-    try {
-        let userId = req.session.user;
-        let userdata = null;
-        const cartcount = await Cart.aggregate([
-            { $match: { userId: new mongoose.Types.ObjectId(userId) } },
-            { $unwind: '$items' }, 
-            { $group: {
-                _id: '$userId',
-                totalItems: { $sum: 1 },
-                totalQuantity: { $sum: '$items.quantity' } 
-              }
-            }
-          ]);
-        if (userId) {
-            userdata = await User.findOne({ _id: userId });
-        }
-        res.render('user/contact', { user: userdata, currentPage: 'contact' ,cartcount});
-    } catch (error) {
-        console.error('Error loading contact page:', error.message);
-        res.status(500).render('error', { message: 'Internal Server Error' });
-    }
-};
+
 
 function generateOtp() {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -513,7 +492,9 @@ const loadproduct = async (req, res) => {
         let productImages = product.productImage || []; 
         let allproduct = await products.find({category:product.category}) 
         console.log(allproduct)
-
+       let reviews = await Review.find({ product: productId })
+            .populate('user', 'name profileImage') 
+            .sort({ createdAt: -1 });
         let largestOffer = 0;
 
         if (productOffer) {
@@ -528,6 +509,10 @@ const loadproduct = async (req, res) => {
         if (largestOffer > 0) {
             discountedPrice = product.salePrice * (1 - largestOffer / 100);
         }
+         let rating=0
+          reviews.forEach(r =>{
+           rating= r.rating
+          })
         console.log('Largest Offer:', largestOffer);
 
         return res.render('user/product-details', {
@@ -539,7 +524,9 @@ const loadproduct = async (req, res) => {
             relatedProducts:'',
             allproduct,
             discountedPrice,
-            cartcount
+            cartcount,
+            reviews,
+            rating
         });
         
     } catch (error) {
@@ -552,7 +539,7 @@ const loadProductDetails = async (req, res) => {
     try {
         let userId = req.session.user;
         let userdata = userId ? await User.findById(userId) : null;
-
+     
         let productId = req.params.id || req.query.id;
         console.log("Requested Product ID:", productId);
         
@@ -560,6 +547,9 @@ const loadProductDetails = async (req, res) => {
         if (!product) {
             return res.status(404).send("Product not found");
         }
+         let reviews = await Review.find({ product: productId })
+            .populate('user', 'name profileImage') 
+            .sort({ createdAt: -1 });
         const cartcount = await Cart.aggregate([
             { $match: { userId: new mongoose.Types.ObjectId(userId) } },
             { $unwind: '$items' }, 
@@ -570,6 +560,10 @@ const loadProductDetails = async (req, res) => {
               }
             }
           ]);
+          let rating=0
+          reviews.forEach(r =>{
+           rating= r.rating
+          })
         let color = await products.distinct('color');
 
         let relatedProducts = await products.find({
@@ -588,7 +582,9 @@ const loadProductDetails = async (req, res) => {
             relatedProducts: relatedProducts || [], 
             currentPage: 'shop',
             allproduct,
-            cartcount
+            cartcount,
+            reviews ,
+            rating
         });
 
     } catch (error) {
@@ -751,6 +747,61 @@ let resendotpassword = async (req, res) => {
     }
 };
 
+
+
+let review = async (req, res) => {
+    try {
+        const { productId, rating, comment } = req.body;
+       let userId=req.session.user
+      console.log('rating=',rating)
+        if (!productId || !rating || !comment) {
+            return res.status(400).json({ success: false, message: "All fields are required." });
+        }
+
+        const existingReview = await Review.findOne({ product: productId, user: userId });
+        if (existingReview) {
+            return res.status(400).json({ success: false, message: "You have already reviewed this product." });
+        }
+
+        await Review.create({
+            user: userId,
+            product: productId,
+            rating,
+            comment
+        });
+
+        return res.status(200).json({ success: true, message: "Review submitted successfully." });
+
+    } catch (error) {
+        console.error("Review submit error:", error);
+        return res.status(500).json({ success: false, message: "Server error. Please try again later." });
+    }
+};
+const deleteReview = async (req, res) => {
+    try {
+        const { reviewId } = req.body;
+
+        if (!reviewId) {
+            return res.status(400).json({ success: false, message: 'Review ID is required' });
+        }
+
+        const review = await Review.findById(reviewId);
+        if (!review) {
+            return res.status(404).json({ success: false, message: 'Review not found' });
+        }
+
+      
+
+        await Review.findByIdAndDelete(reviewId);
+
+        return res.status(200).json({ success: true, message: 'Review deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting review:', error);
+        return res.status(500).json({ success: false, message: 'Server error. Please try again later.' });
+    }
+};
+
+
 module.exports = {
     loadSignup,
     loadHomePage,
@@ -761,11 +812,11 @@ module.exports = {
     resendotp,
     loadlogin,
     login,
-    loadContactPage,
+    review,
     googleCallback,
     logout,
     loadproduct,
-    
+    deleteReview,
     forgotemailpassword,
     verifyOtppass,
     updatepassword,

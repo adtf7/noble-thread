@@ -21,7 +21,6 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 });
 router.get('/login', userController.loadlogin);
 router.post('/login', userController.login);
-router.get('/contact', userauth, userController.loadContactPage);
 router.get('/logout', userauth, userController.logout);
 
 router.get('/product', userauth, userController.loadproduct);
@@ -30,6 +29,8 @@ router.get('/product/:id', userController.loadProductDetails);
 router.get('/forgotpasswordemail', userController.forgotemailpassword);
 router.post('/verify-otp4pass', userController.verifyOtppass);
 router.post('/resetpassword', userController.updatepassword);
+router.post('/submit-review',userauth ,userController.review);
+router.post('/delete-review',userauth,userController.deleteReview)
 
 router.get('/profile', userauth, userProfileController.userProfile);
 router.post('/update-profile', userauth, userProfileController.edituser);

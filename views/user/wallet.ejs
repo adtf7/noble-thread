@@ -3,292 +3,357 @@
 <style>
     /* MAIN LAYOUT STYLES */
     body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f4f5f7;
-        color: #444;
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f0f2f5 0%, #e6e9ef 100%);
+        color: #1a1a1a;
         margin: 0;
         padding: 0;
     }
-    
+
     .dashboard {
         display: flex;
         min-height: 100vh;
     }
-    
+
     /* SIDEBAR STYLES */
     .sidebar {
-        width: 250px;
-        background-color: #ffffff;
-        color: #444;
-        padding: 20px;
+        width: 260px;
+        background: #ffffff;
+        padding: 24px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
         position: sticky;
         top: 0;
         height: 100vh;
+        transition: transform 0.3s ease;
     }
-    
+
     .sidebar .profile-img {
-        width: 100px;
-        height: 100px;
+        width: 96px;
+        height: 96px;
         border-radius: 50%;
         object-fit: cover;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-bottom: 16px;
+        border: 3px solid #e6e9ef;
+        transition: transform 0.3s ease;
     }
-    
+
+    .sidebar .profile-img:hover {
+        transform: scale(1.05);
+    }
+
     .sidebar h3 {
-        margin: 10px 0 5px;
-        font-size: 20px;
-        font-weight: 600;
+        margin: 8px 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a1a;
         text-align: center;
     }
-    
+
     .sidebar p {
         font-size: 14px;
-        opacity: 0.85;
+        color: #6b7280;
         text-align: center;
-        margin: 0;
+        margin: 0 0 24px;
     }
-    
+
     .sidebar .nav-links {
         list-style: none;
         padding: 0;
-        margin-top: 20px;
         width: 100%;
     }
-    
+
     .sidebar .nav-links li {
-        width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
-    
+
     .sidebar .nav-links a {
-        display: block;
-        padding: 12px;
-        color: #444;
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        color: #1a1a1a;
         text-decoration: none;
-        transition: 0.3s;
         border-radius: 8px;
-        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
     }
-    
+
     .sidebar .nav-links a:hover {
-        background-color: #e5e5e7;
+        background: #f1f5f9;
+        transform: translateX(4px);
     }
-    
-    .nav-links a.active {
-        background-color: #3182ce;
+
+    .sidebar .nav-links a.active {
+        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
         color: white;
-        font-weight: bold;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+
     
-    /* MAIN CONTENT STYLES */
-    .main-content {
+    .main-wallet {
         flex: 1;
-        padding: 40px;
-        background-color: #ffffff;
-        border-radius: 10px;
-        margin: 20px;
-        box-shadow: 0px 6px 15px rgba(0,0,0,0.1);
+        padding: 32px 50px;
+        width: 27cm;
+        background: #ffffff;
+        border-radius: 16px;
+        margin: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         overflow-y: auto;
-        height: calc(100vh - 40px);
+        height: calc(100vh - 48px);
     }
-    
+
     /* WALLET SPECIFIC STYLES */
     .wallet-container {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 0 auto;
     }
-    
+
     .wallet-header {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 32px;
     }
-    
+
     .wallet-header h1 {
-        font-size: 32px;
-        color: #333;
-        margin-bottom: 10px;
+        font-size: 36px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
     }
-    
+
     .wallet-header p {
         font-size: 16px;
-        color: #777;
+        color: #6b7280;
     }
-    
+
     .wallet-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border-radius: 12px;
+        padding: 24px;
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 32px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease;
     }
-    
+
+    .wallet-info:hover {
+        transform: translateY(-4px);
+    }
+
     .wallet-info h2 {
         font-size: 48px;
-        color: #007bff;
-        margin-bottom: 10px;
+        font-weight: 700;
+        margin-bottom: 8px;
     }
-    
+
     .wallet-info p {
         font-size: 18px;
-        color: #555;
+        margin-bottom: 16px;
     }
-    
+
+    .add-funds-btn {
+        background: #ffffff;
+        color: #2563eb;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .add-funds-btn:hover {
+        background: #f1f5f9;
+        transform: scale(1.05);
+    }
+
     .transaction-history {
-        margin-top: 30px;
+        margin-top: 32px;
     }
-    
+
     .transaction-history h3 {
-        font-size: 24px;
-        color: #333;
-        margin-bottom: 20px;
+        font-size: 28px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 24px;
     }
-    
+
     .transaction-scroll-container {
-        max-height: 400px;
+        max-height: 450px;
         overflow-y: auto;
-        margin-top: 20px;
-        padding-right: 10px;
+        padding-right: 8px;
     }
-    
+
     .transaction-history table {
         width: 100%;
         border-collapse: collapse;
-        background-color: #fff;
-        border-radius: 10px;
+        background: #ffffff;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
-    
-    .transaction-history th, .transaction-history td {
-        padding: 15px;
+
+    .transaction-history th,
+    .transaction-history td {
+        padding: 16px;
         text-align: left;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #e6e9ef;
     }
-    
+
     .transaction-history th {
-        background-color: #007bff;
-        color: #fff;
-        font-weight: bold;
+        background: #2563eb;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
     }
-    
-    .transaction-history tr:hover {
-        background-color: #f1f1f1;
+
+    .transaction-history tr {
         transition: background-color 0.3s ease;
     }
-    
+
+    .transaction-history tr:hover {
+        background: #f8fafc;
+    }
+
     .transaction-history td {
-        color: #555;
+        color: #1a1a1a;
+        font-size: 14px;
     }
-    
+
     .status-completed {
-        color: #28a745;
-        font-weight: bold;
+        color: #22c55e;
+        font-weight: 600;
     }
-    
+
     .status-pending {
-        color: #ffc107;
-        font-weight: bold;
+        color: #f59e0b;
+        font-weight: 600;
     }
-    
-    .add-funds-btn {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    
-    .add-funds-btn:hover {
-        background-color: #0056b3;
-    }
-    
+
     .pagination {
         display: flex;
         justify-content: center;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 8px;
+        margin-top: 24px;
+        flex-wrap: wrap;
     }
-    
+
     .pagination a {
-        padding: 8px 16px;
-        background-color: #007bff;
+        padding: 10px 16px;
+        background: #2563eb;
         color: white;
-        border-radius: 4px;
+        border-radius: 8px;
         text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
     }
-    
+
     .pagination a.active {
-        background-color: #0056b3;
+        background: #1e40af;
+        font-weight: 600;
     }
-    
+
     .pagination a:hover:not(.active) {
-        background-color: #0069d9;
+        background: #3b82f6;
+        transform: scale(1.05);
     }
-    
-    /* Custom scrollbar styling */
+
+    /* Custom Scrollbar */
     .transaction-scroll-container::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
     }
-    
+
     .transaction-scroll-container::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
+        background: #f1f5f9;
+        border-radius: 12px;
     }
-    
+
     .transaction-scroll-container::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px;
+        background: #6b7280;
+        border-radius: 12px;
     }
-    
+
     .transaction-scroll-container::-webkit-scrollbar-thumb:hover {
-        background: #555;
+        background: #4b5563;
     }
-    
+
     /* SweetAlert Modal Styling */
     .swal2-popup {
-        font-family: 'Poppins', sans-serif !important;
-        width: 400px !important;
+        font-family: 'Inter', sans-serif !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     }
-    
-    .swal2-input, .swal2-file {
-        width: 100% !important;
+
+    .swal2-title {
+        font-size: 24px !important;
+        color: #1a1a1a !important;
     }
-    
-    .swal2-file {
-        border: 1px solid #ddd;
-        padding: 8px;
-        border-radius: 6px;
+
+    .swal2-input {
+        border-radius: 8px !important;
+        border: 1px solid #e6e9ef !important;
+        padding: 12px !important;
+        font-size: 16px !important;
+    }
+
+    .swal2-confirm {
+        background: #2563eb !important;
+        border-radius: 8px !important;
+        padding: 12px 24px !important;
+        font-size: 16px !important;
+    }
+
+    .swal2-cancel {
+        background: #dc2626 !important;
+        border-radius: 8px !important;
+        padding: 12px 24px !important;
+        font-size: 16px !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard {
+            flex-direction: column;
+        }
+
+       
+
+       
+
+        .wallet-info h2 {
+            font-size: 36px;
+        }
+
+        .pagination a {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
     }
 </style>
 
+<%- include('../../views/partials/user/aside.ejs') %>
 <div class="dashboard">
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-       
-        <ul class="nav-links">
-            <li><a href="/profile" class="<%= currentPage === 'profile' ? 'active' : '' %>">User Details</a></li>
-            <li><a href="/address" class="<%= currentPage === 'addresses' ? 'active' : '' %>">Manage Addresses</a></li>
-            <li><a href="/order-history" class="<%= currentPage === 'orders' ? 'active' : '' %>">Order History</a></li>
-            <li><a href="/wallet" class="<%= currentPage === 'wallet' ? 'active' : '' %>">Wallet</a></li>
-        </ul>
-    </aside>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-wallet">
         <div class="wallet-container">
             <!-- Wallet Header -->
             <div class="wallet-header">
-                <h1>Welcome To Your Wallet</h1>
+                <h1>Your Wallet</h1>
+                <p>Manage your balance and transactions with ease</p>
             </div>
 
             <!-- Wallet Info -->
             <div class="wallet-info">
                 <h2>₹<%= balance.toFixed(2) %></h2>
-                <p>Your current wallet balance.</p>
+                <p>Current Balance</p>
                 <button class="add-funds-btn" onclick="addFunds()">Add Funds</button>
             </div>
 
@@ -329,21 +394,28 @@
                 <!-- Pagination Controls -->
                 <div class="pagination">
                     <% if (page > 1) { %>
+                        <a href="/wallet?page=1&limit=<%= limit %>">First</a>
                         <a href="/wallet?page=<%= page - 1 %>&limit=<%= limit %>">Previous</a>
                     <% } %>
                     
-                    <% for (let i = 1; i <= totalPages; i++) { %>
+                    <% 
+                        const maxPagesToShow = 5;
+                        const startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
+                        const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                    %>
+                    <% for (let i = startPage; i <= endPage; i++) { %>
                         <a href="/wallet?page=<%= i %>&limit=<%= limit %>" class="<%= page === i ? 'active' : '' %>"><%= i %></a>
                     <% } %>
                     
                     <% if (page < totalPages) { %>
                         <a href="/wallet?page=<%= page + 1 %>&limit=<%= limit %>">Next</a>
+                        <a href="/wallet?page=<%= totalPages %>&limit=<%= limit %>">Last</a>
                     <% } %>
                 </div>
             </div>
         </div>
     </main>
-</div>
+</div></div>
 
 <!-- Footer Section -->
 <footer class="footer">
@@ -370,7 +442,7 @@
             </div>
             <div class="col-lg-2 col-md-3 col-sm-6">
                 <div class="footer__widget">
-                    <h6>Shopping</h6>
+                    <h6>Support</h6>
                     <ul>
                         <li><a href="/contact">Contact Us</a></li>
                         <li><a href="#">Payment Methods</a></li>
@@ -395,7 +467,7 @@
         <div class="row">
             <div class="col-lg-12 text-center">
                 <div class="footer__copyright__text">
-                    <p>&copy; <script>document.write(new Date().getFullYear());</script> All rights reserved  <i class="fa fa-heart-o" aria-hidden="true"></i>  <a href="#" class="brand" target="_blank">NOBLE THREADS</a></p>
+                    <p>© <script>document.write(new Date().getFullYear());</script> All rights reserved  <i class="fa fa-heart-o" aria-hidden="true"></i>  <a href="#" class="brand" target="_blank">NOBLE THREADS</a></p>
                 </div>
             </div>
         </div>
@@ -438,21 +510,12 @@
             showCancelButton: true,
             confirmButtonText: 'Add',
             cancelButtonText: 'Cancel',
-            confirmButtonColor: '#007bff',
-            cancelButtonColor: '#dc3545',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#dc2626',
             inputValidator: (value) => {
                 if (!value || value <= 0) {
                     return 'Please enter a valid amount!';
                 }
-            },
-            customClass: {
-                popup: 'custom-swal-popup',
-                title: 'custom-swal-title',
-                input: 'custom-swal-input',
-                confirmButton: 'custom-swal-confirm-button',
-                cancelButton: 'custom-swal-cancel-button',
-                actions: 'custom-swal-actions',
-                validationMessage: 'custom-swal-validation-message'
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -472,7 +535,7 @@
                         key: 'rzp_test_JQ4XKaeQP0R8PZ',
                         amount: order.amount,
                         currency: order.currency,
-                        name: 'NOBLE THREADs',
+                        name: 'NOBLE THREADS',
                         description: 'Add Funds to Wallet',
                         order_id: order.id,
                         handler: function (response) {
@@ -521,7 +584,7 @@
                             contact: '<%=user.phone%>',
                         },
                         theme: {
-                            color: '#007bff'
+                            color: '#2563eb'
                         }
                     };
                     const rzp = new Razorpay(options);
@@ -539,36 +602,3 @@
         });
     }
 </script>
-
-<style>
-    /* Custom SweetAlert styles */
-    .custom-swal-popup {
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .custom-swal-title {
-        font-size: 24px;
-        color: #333;
-    }
-    .custom-swal-input {
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        padding: 10px;
-        font-size: 16px;
-        width: 80%;
-        margin: 10px auto;
-        display: block;
-    }
-    .custom-swal-confirm-button {
-        background-color: #007bff;
-        border-radius: 5px;
-        padding: 10px 20px;
-        font-size: 16px;
-    }
-    .custom-swal-cancel-button {
-        background-color: #dc3545;
-        border-radius: 5px;
-        padding: 10px 20px;
-        font-size: 16px;
-    }
-</style>
