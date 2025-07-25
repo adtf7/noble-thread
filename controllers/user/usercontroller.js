@@ -15,11 +15,10 @@ const loadHomePage = async (req, res) => {
         console.log(userId);
         let userdata = null;
         let product = await products.find({});
-
         if (userId) {
             userdata = await User.findOne({ _id: userId });
         }
-
+        
         let cartcount = [];
         if (userId) {  
             cartcount = await Cart.aggregate([
@@ -32,6 +31,7 @@ const loadHomePage = async (req, res) => {
                 }}
             ]);
         }
+        console.log('product=',product)
 
         console.log('cartcount', cartcount);
         console.log('userdata=', userdata);
@@ -198,15 +198,14 @@ function generateOtp() {
 async function sendverificationemail(email, otp) {
     try {
         let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD
-            }
-        });
+  service: 'gmail',
+  auth: {
+    user: process.env.NODEMAILER_EMAIL,
+    pass: process.env.NODEMAILER_PASSWORD
+  }
+});
+console.log('Loaded Email:', process.env.NODEMAILER_EMAIL);
+    
         let info = await transporter.sendMail({
             from: process.env.NODEMAILER_EMAIL,
             to: email,
@@ -604,16 +603,14 @@ function generateOtpforforgot() {
 
 async function sendverificationemailforgotpass(email, otp) {
     try {
-        let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD
-            }
-        });
+       let transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.NODEMAILER_EMAIL,
+    pass: process.env.NODEMAILER_PASSWORD
+  }
+});
+
         let info = await transporter.sendMail({
             from: process.env.NODEMAILER_EMAIL,
             to: email,
