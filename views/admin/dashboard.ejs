@@ -130,7 +130,7 @@
 
     /* Orders Table */
     .orders-table {
-        background: white;
+          background: white;
         padding: 20px;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
@@ -230,18 +230,17 @@
             </div>
         </div>
 
-        <!-- Chart Section -->
-        <div class="chart-section">
-            <div class="chart-header">
-                <h2>Revenue Overview</h2>
-                <select class="filter-select" id="chartFilter" onchange="updateChart()">
-                    <option value="yearly">Yearly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="weekly">Weekly</option>
-                </select>
-            </div>
-            <canvas id="revenueChart" height="100"></canvas>
-        </div>
+     <div class="chart-section">
+    <div class="chart-header">
+        <h2>Revenue Overview</h2>
+        <select class="filter-select" id="chartFilter" onchange="updateChart()">
+            <option value="yearly">Yearly</option>
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+        </select>
+    </div>
+    <canvas id="revenueChart" height="100"></canvas>
+</div>
   
         <div class="table-section orders-table">
             <h2>Best Selling Products (Top 5)</h2>
@@ -323,73 +322,60 @@
         </div>
     </div>
 
-    <script>
-        // Sample data (replace with dynamic data from backend)
-        const revenueData = {
-            yearly: {
-                labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
-                data: [50000, 60000, 75000, 90000, 110000, 130000]
-            },
-            monthly: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                data: [10000, 12000, 15000, 13000, 14000, 16000, 18000, 17000, 19000, 20000, 21000, 22000]
-            },
-            weekly: {
-                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                data: [3000, 4500, 4000, 5000]
-            }
-        };
+  <script>
+    // Use dynamic data from backend
+    const revenueData = <%- revenueData %>;
 
-        // Initialize Chart
-        const ctx = document.getElementById('revenueChart').getContext('2d');
-        let revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: revenueData.yearly.labels,
-                datasets: [{
-                    label: 'Revenue (₹)',
-                    data: revenueData.yearly.data,
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Revenue (₹)', color: '#374151' },
-                        ticks: { color: '#6b7280' }
-                    },
-                    x: {
-                        title: { display: true, text: 'Time', color: '#374151' },
-                        ticks: { color: '#6b7280' }
-                    }
+    // Initialize Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    let revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: revenueData.yearly.labels,
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: revenueData.yearly.data,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Revenue (₹)', color: '#374151' },
+                    ticks: { color: '#6b7280' }
                 },
-                plugins: {
-                    legend: {
-                        labels: { color: '#374151' }
-                    }
+                x: {
+                    title: { display: true, text: 'Time', color: '#374151' },
+                    ticks: { color: '#6b7280' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#374151' }
                 }
             }
-        });
-
-        // Update Chart based on filter
-        function updateChart() {
-            const filter = document.getElementById('chartFilter').value;
-            const selectedData = revenueData[filter];
-
-            revenueChart.data.labels = selectedData.labels;
-            revenueChart.data.datasets[0].data = selectedData.data;
-            revenueChart.update();
         }
+    });
 
-        // Initial chart load
-        document.addEventListener('DOMContentLoaded', () => {
-            updateChart();
-        });
-    </script>
+    // Update Chart based on filter
+    function updateChart() {
+        const filter = document.getElementById('chartFilter').value;
+        const selectedData = revenueData[filter];
+
+        revenueChart.data.labels = selectedData.labels;
+        revenueChart.data.datasets[0].data = selectedData.data;
+        revenueChart.update();
+    }
+
+    // Initial chart load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateChart();
+    });
+</script>
 </body>
 </html>
