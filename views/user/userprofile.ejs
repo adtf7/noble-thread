@@ -1,36 +1,43 @@
 <%- include('../../views/partials/user/header.ejs') %>
-<%- include('../../views/partials/user/aside.ejs') %>
 
-<div class="main-content">
-    <!-- Profile Page (profile.ejs) -->
-      <h2>User Profile</h2>
-      <div class="profile-card">
-          <h3><%= user.name %></h3>
-          <p><strong>Emailllll:</strong> <%= user.email %></p>
-          <p><strong>Phone:</strong> <%= user.phone || "No Phone Number" %></p>
-          <button class="btn" onclick="openSwal()">Edit Profile</button>
-        <a href="/change-password"><button class="btn" >Change password</button></a>
-      </div>
-   
+<!-- Toggle button -->
+<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+<div class="dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <ul class="nav-links">
+      <li><a href="/profile" class="<%= currentPage === 'profile' ? 'active' : '' %>">User Details</a></li>
+      <li><a href="/address" class="<%= currentPage === 'addresses' ? 'active' : '' %>">Manage Addresses</a></li>
+      <li><a href="/order-history" class="<%= currentPage === 'orders' ? 'active' : '' %>">Order History</a></li>
+      <li><a href="/wallet" class="<%= currentPage === 'wallet' ? 'active' : '' %>">Wallet</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h2>User Profile</h2>
+    <div class="profile-card">
+      <h3><%= user.name %></h3>
+      <p><strong>Email:</strong> <%= user.email %></p>
+      <p><strong>Phone:</strong> <%= user.phone || "No Phone Number" %></p>
+      <button class="btn" onclick="openSwal()">Edit Profile</button>
+      <a href="/change-password"><button class="btn">Change Password</button></a>
     </div>
+  </div>
 </div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
- function openSwal() {
+  function openSwal() {
     Swal.fire({
       title: 'Edit Profile',
       html:
-        `<input id="swal-name" class="swal2-input" placeholder="Name" value="<%= (user.name) %>">` +
-        `<input id="swal-phone" class="swal2-input" placeholder="Phone" value="<%= (user.phone || '') %>">`,
+        `<input id="swal-name" class="swal2-input" placeholder="Name" value="<%= user.name %>">` +
+        `<input id="swal-phone" class="swal2-input" placeholder="Phone" value="<%= user.phone || '' %>">`,
       showCancelButton: true,
       confirmButtonText: 'Save Changes',
-      focusConfirm: false, // Prevent auto-focus on the confirm button
-      customClass: {
-        container: 'swal2-container', // Custom container class
-        popup: 'swal2-popup', // Custom popup class
-        input: 'swal2-input', // Custom input class
-      },
+      focusConfirm: false,
       preConfirm: () => {
         const name = document.getElementById('swal-name').value;
         const phone = document.getElementById('swal-phone').value;
@@ -43,7 +50,7 @@
         .then(data => {
           if (data.success) {
             Swal.fire('Updated!', 'Your profile has been updated.', 'success')
-            .then(() => location.reload());
+              .then(() => location.reload());
           } else {
             Swal.fire('Error!', data.error || 'Something went wrong.', 'error');
           }
@@ -55,39 +62,230 @@
     });
   }
 
+  const sidebar = document.getElementById("sidebar");
+  const toggleBtn = document.querySelector(".toggle-btn");
+
+  function toggleSidebar() {
+    sidebar.classList.toggle("hide");
+    sidebar.classList.toggle("show");
+  }
+
+  function handleResize() {
+    const width = window.innerWidth;
+    if (width > 1020) {
+      sidebar.classList.remove("hide", "show");
+      sidebar.style.display = "block";
+      toggleBtn.style.display = "none";
+    } else if (width > 780 && width <= 1020) {
+      sidebar.classList.add("hide");
+      sidebar.classList.remove("show");
+      sidebar.style.display = "block";
+      toggleBtn.style.display = "block";
+    } else {
+      sidebar.style.display = "none";
+      toggleBtn.style.display = "none";
+    }
+  }
+
+  // Close sidebar on nav click (mobile)
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 1020) {
+        sidebar.classList.add('hide');
+        sidebar.classList.remove('show');
+      }
+    });
+  });
+
+  window.addEventListener("load", handleResize);
+  window.addEventListener("resize", handleResize);
 </script>
 
 <style>
-      .swal2-input {
-    width: 100% !important; /* Ensure inputs take full width */
-    margin: 10px 0 !important; /* Add spacing between inputs */
-    padding: 10px !important; /* Add padding for better appearance */
-    border: 1px solid #ccc !important; /* Add a border */
-    border-radius: 5px !important; /* Rounded corners */
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
   }
 
-  /* Center the SweetAlert2 modal */
+  .dashboard {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .sidebar {
+    width: 250px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar .nav-links li {
+    margin-bottom: 10px;
+  }
+
+  .sidebar .nav-links a {
+    display: block;
+    padding: 12px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 8px;
+    text-align: center;
+    transition: 0.3s;
+  }
+
+  .sidebar .nav-links a:hover {
+    background-color: #e5e7eb;
+  }
+
+  .nav-links a.active {
+    background-color: #2563eb;
+    color: white;
+    font-weight: bold;
+  }
+
+  .sidebar.hide {
+    transform: translateX(-100%);
+    position: absolute;
+    z-index: 20;
+    height: 100%;
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .toggle-btn {
+    position: absolute;
+    top: 50px;
+    left: 20px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 30;
+    display: none;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 32px;
+    background: linear-gradient(135deg, #f0f2f5, #e6e9ef);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .main-content h2 {
+    font-size: 32px;
+    margin-bottom: 24px;
+  }
+
+  .profile-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  .profile-card h3 {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .profile-card p {
+    font-size: 16px;
+    color: #555;
+  }
+
+  .btn {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    color: #fff;
+    padding: 12px 20px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn:hover {
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    transform: scale(1.05);
+  }
+
   .swal2-popup {
-    width: 400px !important; /* Set a fixed width */
-    padding: 20px !important; /* Add padding inside the modal */
+    font-family: 'Inter', sans-serif !important;
+    border-radius: 12px !important;
+    width: 400px !important;
   }
 
-  /* Style the Save Changes button */
-  .swal2-confirm {
-    background-color: #4CAF50 !important; /* Green background */
-    border: none !important; /* Remove border */
-    padding: 10px 20px !important; /* Add padding */
-    border-radius: 5px !important; /* Rounded corners */
+  @media (max-width: 1020px) {
+    .sidebar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      z-index: 20;
+      transform: translateX(-100%);
+    }
+
+    .toggle-btn {
+      display: block;
+    }
+
+    .main-content {
+      padding: 20px;
+    }
+
+    .btn {
+      width: 100%;
+    }
   }
 
-  /* Style the Cancel button */
-  .swal2-cancel {
-    background-color: #f44336 !important; /* Red background */
-    border: none !important; /* Remove border */
-    padding: 10px 20px !important; /* Add padding */
-    border-radius: 5px !important; /* Rounded corners */
+ @media (max-width: 780px) {
+  .sidebar {
+    display: none !important; /* keep this if you want sidebar hidden by default */
   }
 
+  .toggle-btn {
+    display: block !important; /* <-- fix: make toggler visible */
+  }
+}
+
+
+  @media (max-width: 600px) {
+    .main-content h2 {
+      font-size: 24px;
+    }
+
+    .profile-card h3 {
+      font-size: 20px;
+    }
+
+    .profile-card p {
+      font-size: 14px;
+    }
+
+    .btn {
+      font-size: 14px;
+    }
+
+    .swal2-popup {
+      width: 90% !important;
+    }
+  }
 </style>
 
 <%- include('../../views/partials/user/footer.ejs') %>

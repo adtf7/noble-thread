@@ -1,346 +1,618 @@
+
 <%- include('../../views/partials/user/header.ejs') %>
 
-<style>
-    /* MAIN LAYOUT STYLES */
-    body {
-        font-family: 'Inter', sans-serif;
-        background: linear-gradient(135deg, #f0f2f5 0%, #e6e9ef 100%);
-        color: #1a1a1a;
-        margin: 0;
-        padding: 0;
-    }
+<style>/* MAIN LAYOUT STYLES */
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e6e9ef 100%);
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+}
 
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR STYLES */
+.sidebar {
+    width: 260px;
+    background: #ffffff;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transition: transform 0.3s ease;
+}
+
+
+.sidebar .profile-img:hover {
+    transform: scale(1.05);
+}
+
+.sidebar h3 {
+    margin: 8px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+.sidebar p {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    margin: 0 0 24px;
+}
+
+.sidebar .nav-links {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+.sidebar .nav-links li {
+    margin-bottom: 8px;
+}
+
+.sidebar .nav-links a {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: #1a1a1a;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-links a:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
+}
+
+.sidebar .nav-links a.active {
+    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.main-wallet {
+    flex: 1;
+    padding: 32px 50px;
+    background: #ffffff;
+    border-radius: 16px;
+    margin: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    height: calc(100vh - 48px);
+}
+
+/* WALLET SPECIFIC STYLES */
+.wallet-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%; /* Replaced min-width: 150vh to allow natural scaling */
+}
+
+.wallet-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.wallet-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+}
+
+.wallet-header p {
+    font-size: 16px;
+    color: #6b7280;
+}
+
+.wallet-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 32px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+}
+
+.wallet-info:hover {
+    transform: translateY(-4px);
+}
+
+.wallet-info h2 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.wallet-info p {
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+.add-funds-btn {
+    background: #ffffff;
+    color: #2563eb;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-funds-btn:hover {
+    background: #f1f5f9;
+    transform: scale(1.05);
+}
+
+.transaction-history {
+    margin-top: 32px;
+}
+
+.transaction-history h3 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 24px;
+}
+
+.transaction-scroll-container {
+    max-height: 450px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.transaction-history table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.transaction-history th,
+.transaction-history td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #e6e9ef;
+}
+
+.transaction-history th {
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.transaction-history tr {
+    transition: background-color 0.3s ease;
+}
+
+.transaction-history tr:hover {
+    background: #f8fafc;
+}
+
+.transaction-history td {
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.status-completed {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.status-pending {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.pagination a {
+    padding: 10px 16px;
+    background: #2563eb;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.pagination a.active {
+    background: #1e40af;
+    font-weight: 600;
+}
+
+.pagination a:hover:not(.active) {
+    background: #3b82f6;
+    transform: scale(1.05);
+}
+
+/* Custom Scrollbar */
+.transaction-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.transaction-scroll-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 12px;
+}
+
+.transaction-scroll-container::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border-radius: 12px;
+}
+
+.transaction-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #4b5563;
+}
+
+/* SweetAlert Modal Styling */
+.swal2-popup {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.swal2-title {
+    font-size: 24px !important;
+    color: #1a1a1a !important;
+}
+
+.swal2-input {
+    border-radius: 8px !important;
+    border: 1px solid #e6e9ef !important;
+    padding: 12px !important;
+    font-size: 16px !important;
+}
+
+.swal2-confirm {
+    background: #2563eb !important;
+    border-radius: 8px !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+}
+
+.swal2-cancel {
+    background: #dc2626 !important;
+    border-radius: 8px !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1020px) {
     .dashboard {
-        display: flex;
-        min-height: 100vh;
-    }
-
-    /* SIDEBAR STYLES */
-    .sidebar {
-        width: 260px;
-        background: #ffffff;
-        padding: 24px;
-        display: flex;
         flex-direction: column;
-        align-items: center;
-        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        transition: transform 0.3s ease;
     }
 
-    .sidebar .profile-img {
-        width: 96px;
-        height: 96px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 16px;
-        border: 3px solid #e6e9ef;
-        transition: transform 0.3s ease;
-    }
-
-    .sidebar .profile-img:hover {
-        transform: scale(1.05);
-    }
-
-    .sidebar h3 {
-        margin: 8px 0;
-        font-size: 22px;
-        font-weight: 700;
-        color: #1a1a1a;
-        text-align: center;
-    }
-
-    .sidebar p {
-        font-size: 14px;
-        color: #6b7280;
-        text-align: center;
-        margin: 0 0 24px;
-    }
-
-    .sidebar .nav-links {
-        list-style: none;
-        padding: 0;
+    .sidebar {
         width: 100%;
-    }
-
-    .sidebar .nav-links li {
-        margin-bottom: 8px;
-    }
-
-    .sidebar .nav-links a {
-        display: flex;
+        height: auto;
+        position: static;
+        box-shadow: none;
+        padding: 16px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
         align-items: center;
-        padding: 12px 16px;
-        color: #1a1a1a;
-        text-decoration: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .sidebar .nav-links a:hover {
-        background: #f1f5f9;
-        transform: translateX(4px);
-    }
-
-    .sidebar .nav-links a.active {
-        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     
-    .main-wallet {
-        flex: 1;
-        padding: 32px 50px;
-        width: 27cm;
-        background: #ffffff;
-        border-radius: 16px;
-        margin: 24px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        overflow-y: auto;
-        height: calc(100vh - 48px);
-    }
 
-    /* WALLET SPECIFIC STYLES */
-    .wallet-container {
-        max-width: 1100px;
-        margin: 0 auto;
-    }
-
-    .wallet-header {
-        text-align: center;
-        margin-bottom: 32px;
-    }
-
-    .wallet-header h1 {
-        font-size: 36px;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 8px;
-    }
-
-    .wallet-header p {
-        font-size: 16px;
-        color: #6b7280;
-    }
-
-    .wallet-info {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        border-radius: 12px;
-        padding: 24px;
-        text-align: center;
-        margin-bottom: 32px;
-        color: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: transform 0.3s ease;
-    }
-
-    .wallet-info:hover {
-        transform: translateY(-4px);
-    }
-
-    .wallet-info h2 {
-        font-size: 48px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-
-    .wallet-info p {
+    .sidebar h3 {
         font-size: 18px;
+    }
+
+    .sidebar p {
+        font-size: 12px;
         margin-bottom: 16px;
     }
 
-    .add-funds-btn {
-        background: #ffffff;
-        color: #2563eb;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 8px;
+    .sidebar .nav-links {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .sidebar .nav-links li {
+        margin-bottom: 0;
+    }
+
+    .sidebar .nav-links a {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+  
+
+    .wallet-header h1 {
+        font-size: 28px;
+    }
+
+    .wallet-header p {
+        font-size: 14px;
+    }
+
+    .wallet-info {
+        padding: 16px;
+    }
+
+    .wallet-info h2 {
+        font-size: 32px;
+    }
+
+    .wallet-info p {
         font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
     }
 
-    .add-funds-btn:hover {
-        background: #f1f5f9;
-        transform: scale(1.05);
-    }
-
-    .transaction-history {
-        margin-top: 32px;
+    .add-funds-btn {
+        font-size: 14px;
+        padding: 10px 20px;
     }
 
     .transaction-history h3 {
-        font-size: 28px;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-bottom: 24px;
-    }
-
-    .transaction-scroll-container {
-        max-height: 450px;
-        overflow-y: auto;
-        padding-right: 8px;
+        font-size: 24px;
     }
 
     .transaction-history table {
-        width: 100%;
-        border-collapse: collapse;
-        background: #ffffff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
 
     .transaction-history th,
     .transaction-history td {
-        padding: 16px;
-        text-align: left;
-        border-bottom: 1px solid #e6e9ef;
+        font-size: 12px;
+        padding: 12px;
     }
 
-    .transaction-history th {
-        background: #2563eb;
-        color: white;
-        font-weight: 600;
-        font-size: 14px;
-        text-transform: uppercase;
+    .pagination a {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 868px) {
+    .sidebar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .sidebar .nav-links {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .sidebar .nav-links a {
+        width: 100%;
+        text-align: center;
+    }
+
+    .main-wallet {
+        margin: 8px;
+        padding: 12px;
+    }
+
+    .wallet-header h1 {
+        font-size: 24px;
+    }
+
+    .wallet-info h2 {
+        font-size: 28px;
+    }
+
+    .transaction-history h3 {
+        font-size: 20px;
+    }
+
+    .transaction-history table {
+        display: table;
+    }
+
+    .transaction-history thead {
+        display: none;
     }
 
     .transaction-history tr {
-        transition: background-color 0.3s ease;
-    }
-
-    .transaction-history tr:hover {
-        background: #f8fafc;
+        display: block;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #e6e9ef;
     }
 
     .transaction-history td {
-        color: #1a1a1a;
-        font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 12px;
+        font-size: 12px;
+        text-align: right;
+        border-bottom: 1px solid #e6e9ef; /* Added for clarity */
     }
 
-    .status-completed {
-        color: #22c55e;
+    .transaction-history td:before {
+        content: attr(data-label);
         font-weight: 600;
+        color: #2563eb;
+        text-transform: uppercase;
+        flex: 1;
+        text-align: left;
+        margin-right: 8px;
     }
 
-    .status-pending {
-        color: #f59e0b;
+    .transaction-history td[data-label="Date"] {
         font-weight: 600;
     }
 
     .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 24px;
-        flex-wrap: wrap;
+        gap: 4px;
     }
 
     .pagination a {
-        padding: 10px 16px;
-        background: #2563eb;
-        color: white;
-        border-radius: 8px;
-        text-decoration: none;
+        padding: 6px 10px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar .profile-img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .sidebar h3 {
+        font-size: 16px;
+    }
+
+    .sidebar p {
+        font-size: 10px;
+    }
+
+    .wallet-header h1 {
+        font-size: 20px;
+    }
+
+    .wallet-info h2 {
+        font-size: 24px;
+    }
+
+    .add-funds-btn {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+
+    .transaction-history h3 {
+        font-size: 18px;
+    }
+
+    .transaction-history td {
+        font-size: 10px;
+        padding: 8px 10px;
+    }
+
+    .pagination a {
+        padding: 6px 8px;
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 360px) {
+    .sidebar {
+        padding: 12px;
+    }
+
+    .sidebar .profile-img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .sidebar h3 {
         font-size: 14px;
-        font-weight: 500;
-        transition: all 0.3s ease;
     }
 
-    .pagination a.active {
-        background: #1e40af;
-        font-weight: 600;
+    .sidebar p {
+        font-size: 9px;
     }
 
-    .pagination a:hover:not(.active) {
-        background: #3b82f6;
-        transform: scale(1.05);
+    .sidebar .nav-links a {
+        font-size: 12px;
+        padding: 6px 10px;
     }
 
-    /* Custom Scrollbar */
-    .transaction-scroll-container::-webkit-scrollbar {
-        width: 6px;
+    .main-wallet {
+        margin: 4px;
+        padding: 8px;
     }
 
-    .transaction-scroll-container::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 12px;
+    .wallet-header h1 {
+        font-size: 18px;
     }
 
-    .transaction-scroll-container::-webkit-scrollbar-thumb {
-        background: #6b7280;
-        border-radius: 12px;
+    .wallet-header p {
+        font-size: 12px;
     }
 
-    .transaction-scroll-container::-webkit-scrollbar-thumb:hover {
-        background: #4b5563;
+    .wallet-info {
+        padding: 12px;
     }
 
-    /* SweetAlert Modal Styling */
+    .wallet-info h2 {
+        font-size: 20px;
+    }
+
+    .wallet-info p {
+        font-size: 14px;
+    }
+
+    .add-funds-btn {
+        font-size: 10px;
+        padding: 6px 12px;
+    }
+
+    .transaction-history h3 {
+        font-size: 16px;
+    }
+
+    .transaction-history td {
+        font-size: 9px;
+        padding: 6px 8px;
+    }
+
+    .pagination a {
+        padding: 4px 6px;
+        font-size: 8px;
+    }
+
     .swal2-popup {
-        font-family: 'Inter', sans-serif !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        width: 90% !important;
+        padding: 12px !important;
     }
 
     .swal2-title {
-        font-size: 24px !important;
-        color: #1a1a1a !important;
+        font-size: 18px !important;
     }
 
     .swal2-input {
-        border-radius: 8px !important;
-        border: 1px solid #e6e9ef !important;
-        padding: 12px !important;
-        font-size: 16px !important;
+        font-size: 14px !important;
+        padding: 8px !important;
     }
 
-    .swal2-confirm {
-        background: #2563eb !important;
-        border-radius: 8px !important;
-        padding: 12px 24px !important;
-        font-size: 16px !important;
-    }
-
+    .swal2-confirm,
     .swal2-cancel {
-        background: #dc2626 !important;
-        border-radius: 8px !important;
-        padding: 12px 24px !important;
-        font-size: 16px !important;
+        font-size: 12px !important;
+        padding: 8px 16px !important;
     }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .dashboard {
-            flex-direction: column;
-        }
-
-       
-
-       
-
-        .wallet-info h2 {
-            font-size: 36px;
-        }
-
-        .pagination a {
-            padding: 8px 12px;
-            font-size: 12px;
-        }
-    }
+}
 </style>
 
 <%- include('../../views/partials/user/aside.ejs') %>
 <div class="dashboard">
-
     <!-- Main Content -->
     <main class="main-wallet">
         <div class="wallet-container">
@@ -374,17 +646,17 @@
                         <tbody>
                             <% transactions.forEach(transaction => { %>
                                 <tr>
-                                    <td><%= transaction.date.toLocaleDateString('en-US', { 
+                                    <td data-label="Date"><%= transaction.date.toLocaleDateString('en-US', { 
                                         year: 'numeric', 
                                         month: 'short', 
                                         day: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     }) %></td>
-                                    <td><%= transaction.description %></td>
-                                    <td>₹<%= transaction.amount.toFixed(2) %></td>
-                                    <td><%= transaction.type %></td>
-                                    <td class="status-<%= transaction.status.toLowerCase() %>"><%= transaction.status %></td>
+                                    <td data-label="Description"><%= transaction.description %></td>
+                                    <td data-label="Amount">₹<%= transaction.amount.toFixed(2) %></td>
+                                    <td data-label="Type"><%= transaction.type %></td>
+                                    <td data-label="Status" class="status-<%= transaction.status.toLowerCase() %>"><%= transaction.status %></td>
                                 </tr>
                             <% }) %>
                         </tbody>
@@ -415,75 +687,8 @@
             </div>
         </div>
     </main>
-</div></div>
-
-<!-- Footer Section -->
-<footer class="footer">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="footer__about">
-                    <div class="footer__logo">
-                        <a href="/" class="brand footer-brand" style="color: white;">NOBLE THREADS</a>
-                    </div>
-                    <p>The customer is at the heart of our unique business model, which includes design.</p>
-                    <a href="#"><img src="/img/payment.png" alt="Payment Methods"></a>
-                </div>
-            </div>
-            <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
-                <div class="footer__widget">
-                    <h6>Shopping</h6>
-                    <ul>
-                        <li><a href="#">Clothing Store</a></li>
-                        <li><a href="#">Trending Shoes</a></li>
-                        <li><a href="#">Sale</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-3 col-sm-6">
-                <div class="footer__widget">
-                    <h6>Support</h6>
-                    <ul>
-                        <li><a href="/contact">Contact Us</a></li>
-                        <li><a href="#">Payment Methods</a></li>
-                        <li><a href="#">Delivery</a></li>
-                        <li><a href="#">Return & Exchanges</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
-                <div class="footer__widget">
-                    <h6 class="brand">NOBLE THREADS</h6>
-                    <div class="footer__newsletter">
-                        <p>Be the first to know about new arrivals, look books, sales & promos!</p>
-                        <form action="#">
-                            <input type="text" placeholder="Your email">
-                            <button type="submit"><span class="icon_mail_alt"></span></button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12 text-center">
-                <div class="footer__copyright__text">
-                    <p>© <script>document.write(new Date().getFullYear());</script> All rights reserved  <i class="fa fa-heart-o" aria-hidden="true"></i>  <a href="#" class="brand" target="_blank">NOBLE THREADS</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-
-<!-- Search Begin -->
-<div class="search-model">
-    <div class="h-100 d-flex align-items-center justify-content-center">
-        <div class="search-close-switch">+</div>
-        <form class="search-model-form">
-            <input type="text" id="search-input" placeholder="Search here.....">
-        </form>
-    </div>
 </div>
-<!-- Search End -->
+
 
 <!-- Js Plugins -->
 <script src="/js/jquery-3.3.1.min.js"></script>
@@ -602,3 +807,6 @@
         });
     }
 </script>
+   
+
+<%- include('../../views/partials/user/footer.ejs') %>

@@ -195,4 +195,35 @@
     </header>
     <!-- Header Section End -->
 </body>
+<style>
+    /* Center logo text on small screens */
+@media (max-width: 767px) {
+    .header__logo {
+        text-align: center;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .header .row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header__menu,
+    .header__nav__option {
+        text-align: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .header__nav__option {
+        margin-top: 10px;
+    }
+}
+.brand {
+    display: inline-block;
+}
+
+</style>
 </html>
