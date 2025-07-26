@@ -18,7 +18,7 @@ router.get("/admin-login", adminControllers.loadlogin);
 router.post("/loginverify", adminControllers.loginAdmin);
 router.get("/pageerror", adminControllers.pageerror);
 router.get("/logout", adminControllers.logout);
-router.use(adminauth)
+router.use('/admin',adminauth)
 router.get("/dashboard",  dashboardControllers.loadDashboard);
 
 router.get("/customers",  userControllers.customer);
