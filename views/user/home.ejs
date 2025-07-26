@@ -1,24 +1,4 @@
-Error caught by errorHandler middleware: TypeError: C:\Users\adhil\OneDrive\Desktop\e-commerce application\views\user\home.ejs:127
-    125|                     <div class="product__item">
-    126|                         <div class="product__item__pic">
- >> 127|                             <a href="/product?id=<%= product[i]._id %>">
-    128|                             <img src="<%= product[i].productImage[0] %>" alt="Product Image" style="width:100%; height:auto;">
-    129|                            </a>
-    130|                             <ul class="product__hover">
 
-Cannot read properties of undefined (reading '_id')
-    at eval (eval at compile (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\ejs\lib\ejs.js:673:12), <anonymous>:18:37)      
-    at home (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\ejs\lib\ejs.js:703:17)
-    at tryHandleCache (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\ejs\lib\ejs.js:274:36)
-    at exports.renderFile [as engine] (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\ejs\lib\ejs.js:491:10)
-    at View.render (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\express\lib\view.js:135:8)
-    at tryRender (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\express\lib\application.js:657:10)
-    at Function.render (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\express\lib\application.js:609:3)
-    at ServerResponse.render (C:\Users\adhil\OneDrive\Desktop\e-commerce application\node_modules\express\lib\response.js:1049:7)
-    at loadHomePage (C:\Users\adhil\OneDrive\Desktop\e-commerce application\controllers\user\usercontroller.js:39:13)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
-  path: 'C:\\Users\\adhil\\OneDrive\\Desktop\\e-commerce application\\views\\user\\home.ejs'
-}
 
 <%- include('../../views/partials/user/header.ejs')%>
 <style>
