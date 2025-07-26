@@ -3,7 +3,6 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userschema');
 let env = require('dotenv').config();
 
-    console.log( process.env.GOOGLE_CALLBACK_URL)
 
 
 passport.use(new GoogleStrategy({
