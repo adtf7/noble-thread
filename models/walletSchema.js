@@ -17,7 +17,7 @@ const walletSchema = new mongoose.Schema({
       order: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Order",
-        required: true,
+        required: false,
       },
       description: {
         type: String,

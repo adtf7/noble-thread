@@ -776,28 +776,41 @@ let createRazorpayOrd = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-const walletsave = async (user, amount) => {
+const walletsave = async (user, amount, description = "Added fund to wallet") => {
   try {
     const userData = await User.findById(user);
-    let Wallet = await wallet.findOne({ user: user });
     if (!userData) {
       throw new Error("User not found");
     }
+
+    let Wallet = await wallet.findOne({ user: user });
     if (!Wallet) {
       Wallet = new wallet({
-        user: user.id,
+        user: user,
         balance: 0,
       });
     }
-    console.log("amount", amount);
-    userData.Wallet += parseFloat(amount);
-    Wallet.balance += parseFloat(amount);
 
-    let usersaved = await userData.save();
+    const amt = parseFloat(amount);
+    userData.Wallet += amt;
+    Wallet.balance += amt;
+
+    Wallet.transactions.push({
+      order: null, 
+      description: description,
+      amount: amt,
+      status: "completed", 
+      type: "credit", 
+    });
+
+    // Save both user and wallet
+    const usersaved = await userData.save();
+    const walletsaved = await Wallet.save();
+
     console.log("usersaved", usersaved);
-    let walletsaved = await Wallet.save();
     console.log("walletsaved", walletsaved);
-    return { success: true, message: "Wallet balance updated successfully" };
+
+    return { success: true, message: "Wallet balance and transaction updated successfully" };
   } catch (error) {
     console.error("Error updating wallet balance:", error);
     throw new Error("Failed to update wallet balance");
