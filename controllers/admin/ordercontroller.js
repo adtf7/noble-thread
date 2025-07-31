@@ -2,6 +2,7 @@ const Order = require('../../models/orderSchema');
 const users = require('../../models/userschema');
 const product = require("../../models/productSchema");
 let wallet=require('../../models/walletSchema')
+let env = require("dotenv").config();
 
 const listOrders = async (req, res) => {
     try {

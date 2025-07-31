@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 let adminRouter=require('./routes/adminRouter') 
 const errorHandler = require('./middlewares/errorHandler');
 const {DeleteExpiredCoupon,changeProductOffer,changeCategoryOffer} = require('./cron/deleteExpiredCoupons');
+const { userauth, adminauth } = require("./middlewares/auth");
 
 dotenv.config();
 
@@ -50,7 +51,9 @@ app.use('/', userRouter);
 app.use('/auth', authRoutes);
 app.use('/admin',adminRouter)
 app.use(errorHandler);
-
+app.use((req, res) => {
+  res.status(404).redirect("/pagenotfound");
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

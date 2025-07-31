@@ -11,10 +11,11 @@ const Wallet = require("../../models/walletSchema");
 const Coupon = require("../../models/couponSchema");
 const Offer = require("../../models/offerSchema");
 const axios = require("axios");
+let env = require("dotenv").config();
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_JQ4XKaeQP0R8PZ",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "Nw9O0gxxhJwU0yGeA7pBM0oU",
+  key_id: process.env.RAZRON_KEY_ID ,
+  key_secret: process.env.RAZRON_KEY_SECRET,
 });
 
 const addToCart = async (req, res) => {
@@ -746,7 +747,7 @@ const createRazorpayOrder = async (req, res) => {
         currency: razorpayOrder.currency,
         receipt: razorpayOrder.receipt,
       },
-      razorpayKey: process.env.RAZORPAY_KEY_ID || "rzp_test_JQ4XKaeQP0R8PZ",
+      razorpayKey: process.env.RAZRON_KEY_ID,
     });
   } catch (error) {
     console.error("Error creating Razorpay order:", error);
@@ -865,7 +866,8 @@ const handleRazorpayPaymentSuccess = async (req, res) => {
     const generatedSignature = crypto
       .createHmac(
         "sha256",
-        process.env.RAZORPAY_KEY_SECRET || "Nw9O0gxxhJwU0yGeA7pBM0oU"
+        process.env.RAZRON_KEY_SECRET=Nw9O0gxxhJwU0yGeA7pBM0oU
+
       )
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");

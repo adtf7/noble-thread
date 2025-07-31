@@ -12,6 +12,7 @@ let Cart = require("../../models/cartSchema");
 let mongoose = require("mongoose");
 const PDFDocument = require("pdfkit");
 const product = require("../../models/productSchema");
+let env = require("dotenv").config();
 
 const userProfile = async (req, res) => {
   if (!req.session.user) {
@@ -756,8 +757,8 @@ const loadwallet = async (req, res) => {
   }
 };
 const razorpay = new Razorpay({
-  key_id: "rzp_test_JQ4XKaeQP0R8PZ",
-  key_secret: "Nw9O0gxxhJwU0yGeA7pBM0oU",
+  key_id: process.env.RAZRON_KEY_ID ,
+  key_secret:process.env.RAZRON_KEY_SECRET,
 });
 
 let createRazorpayOrd = async (req, res) => {
@@ -1100,7 +1101,7 @@ const retryRazorpayOrder = async (req, res) => {
     res.json({
       success: true,
       razorpayOrder,
-      razorpayKey: process.env.RAZORPAY_KEY_ID || "rzp_test_JQ4XKaeQP0R8PZ",
+      razorpayKey: process.env.RAZRON_KEY_ID  
     });
   } catch (error) {
     console.error("Error creating retry Razorpay order:", error);
