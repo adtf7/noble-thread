@@ -67,7 +67,7 @@ let addProduct = async (req, res)    => {
             await newproducts.save();
             return res.redirect('/admin/product');
         } else {
-            return res.status(400).json('product already exists');
+            return res.status(404).json({ status: false, message: "Product already exist" });
         }
     } catch (error) {
         console.log('Error adding products ', error);

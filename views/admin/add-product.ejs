@@ -72,7 +72,7 @@
         <h1 class="text-3xl font-bold text-center mb-6">Add New Product</h1>
 
         <div class="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto">
-            <form id="addProductForm" action="/admin/productadd" method="POST" enctype="multipart/form-data" onsubmit="validateAndSubmit(event)">                <div class="mb-4">
+            <form id="addProductForm"  enctype="multipart/form-data" onsubmit="validateAndSubmit(event)">                <div class="mb-4">
                     <label for="product_name" class="block text-gray-700 font-bold mb-2">Product Name</label>
                     <input type="text" placeholder="Type here" name="productName" class="form-control border w-full px-3 py-2" id="product_name">
                     <div id="productName-error" class="error-message"></div>
@@ -311,6 +311,59 @@
     function clearErrorMessages() {
         document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
     }
-    </script>
+    
+    document.getElementById('addProductForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+        try {
+            const response = await fetch('/admin/productadd', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: result.message || 'Product added successfully'
+                });
+                form.reset();
+            } else {
+                // Show field-level validation errors
+                if (result.errors) {
+                    for (const [key, message] of Object.entries(result.errors)) {
+                        const errorElement = document.getElementById(`${key}-error`);
+                        if (errorElement) {
+                            errorElement.textContent = message;
+                        }
+                    }
+                }
+
+                // Show general error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'Something went wrong'
+                });
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong while submitting the form.'
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
