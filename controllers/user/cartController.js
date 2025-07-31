@@ -866,7 +866,7 @@ const handleRazorpayPaymentSuccess = async (req, res) => {
     const generatedSignature = crypto
       .createHmac(
         "sha256",
-        process.env.RAZRON_KEY_SECRET=Nw9O0gxxhJwU0yGeA7pBM0oU
+        process.env.RAZRON_KEY_SECRET
 
       )
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
