@@ -21,6 +21,7 @@ passport.use(
           name: profile.displayName,
           email: profile.emails[0].value,
           googleId: profile.id,
+          referralCode:Math.floor(10000000 + Math.random() * 900000).toString()
         });
 
         await newUser.save();
