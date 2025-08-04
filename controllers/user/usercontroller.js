@@ -373,6 +373,7 @@ let verifyOtp = async (req, res) => {
         email: userData.email,
         phone: userData.phone,
         password: passwordhash,
+        referralCode:Math.floor(10000000 + Math.random() * 900000).toString()
       });
 
       await saveuserdata.save();

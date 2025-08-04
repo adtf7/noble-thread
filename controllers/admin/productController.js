@@ -15,7 +15,8 @@ let productaddpage = async (req, res) => {
         let productData = await products.find().populate('category');
         res.render('admin/add-product', { currentPage: 'add-product', categories: cat, products: productData });}
         else{
-           return redirect('/admin/admin-login')
+           return res.redirect('/admin/admin-login');
+
         }
     } catch (error) {
         console.log('Error loading products page', error);
@@ -262,19 +263,23 @@ const deleteimage = async (req, res) => {
         }
 
 
-        if (product.productImage[0] === imageNameToServer) {
-            return res.status(400).json({ status: false, error: "Cannot delete the 0th image" });
+        if (product.productImage.length<=1) {
+            return res.status(400).json({ status: false, error: "Cannot delete the last image" });
         }
 
     
-        const updatedProduct = await products.findByIdAndUpdate(
-            productIdToServer,
-            { $pull: { productImage: imageNameToServer } },
-            { new: true }
-        );
+      const fullImagePath = `/uploads/product-image/${imageNameToServer}`;
 
+const updatedProduct = await products.findByIdAndUpdate(
+  productIdToServer,
+  { $pull: { productImage: fullImagePath } },
+  { new: true }
+);
+
+        console.log('updatedProduct',updatedProduct)
+console.log('imageNameToServer',imageNameToServer)
     
-        const imagePath = path.join(__dirname, '../public/uploads/product-image', imageNameToServer);
+        const imagePath = path.join('C:/Users/adhil/OneDrive/Desktop/e-commerce application/public/uploads/product-image', imageNameToServer);
 
         console.log(`Deleting Image: ${imagePath}`);
 

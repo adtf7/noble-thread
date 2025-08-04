@@ -12,7 +12,10 @@ let Cart = require("../../models/cartSchema");
 let mongoose = require("mongoose");
 const PDFDocument = require("pdfkit");
 const product = require("../../models/productSchema");
+const Wallet = require("../../models/walletSchema");
 let env = require("dotenv").config();
+
+
 
 const userProfile = async (req, res) => {
   if (!req.session.user) {
@@ -1066,24 +1069,48 @@ const retryRazorpayOrder = async (req, res) => {
     const userId = req.session.user;
 
     if (!orderId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Order ID is required." });
+      return res.status(400).json({ success: false, message: "Order ID is required." });
     }
 
     const order = await Order.findOne({
       _id: orderId,
       userId,
       status: "Failed",
-    });
+    }).populate("orderItems.product");
+
     if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Failed order not found." });
+      return res.status(404).json({ success: false, message: "Failed order not found." });
+    }
+
+    const outOfStockItems = [];
+
+    for (const item of order.orderItems) {
+      const product = item.product;
+      const requiredQty = item.quantity;
+
+      if (!product || product.quantity === undefined) {
+        outOfStockItems.push({ name: "Unknown Product", reason: "Product not found." });
+        continue;
+      }
+
+      if (product.quantity < requiredQty) {
+        outOfStockItems.push({
+          name: product.name,
+          available: product.stock,
+          required: requiredQty,
+        });
+      }
+    }
+
+    if (outOfStockItems.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "Some items are out of stock.",
+        outOfStockItems,
+      });
     }
 
     const amount = Math.round(order.finalAmount * 100);
-
     const shortOrderId = order._id.toString().slice(-8);
     const receipt = `retry_${shortOrderId}_${Date.now()}`.slice(0, 40);
 
@@ -1094,25 +1121,125 @@ const retryRazorpayOrder = async (req, res) => {
     };
 
     const razorpayOrder = await razorpay.orders.create(options);
-
     order.razorpayOrderId = razorpayOrder.id;
-    let saved = await order.save();
-    console.log("saved", saved);
+    await order.save();
+
     res.json({
       success: true,
       razorpayOrder,
-      razorpayKey: process.env.RAZRON_KEY_ID  
+      razorpayKey: process.env.RAZRON_KEY_ID,
     });
   } catch (error) {
     console.error("Error creating retry Razorpay order:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while creating retry order.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while creating retry order.",
+    });
   }
 };
+
+const retrywallet = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const userId = req.session.user;
+    const ObjectId = mongoose.Types.ObjectId;
+    
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
+    
+    let wallet = await Wallet.findOne({ user: new ObjectId(userId) });
+    console.log('wallet',wallet)
+    // Find the order
+    const order = await Order.findOne({
+      _id: orderId,
+      userId,
+      status: 'Failed',
+    }).populate('orderItems.product');
+
+    if (!order) {
+      return res.status(400).json({ success: false, message: 'Order not found or not eligible for retry' });
+    }
+
+    // Check product availability
+    const outOfStockItems = [];
+    for (const item of order.orderItems) {
+      const product = item.product;
+      const requiredQty = item.quantity;
+
+      if (!product || product.quantity === undefined) {
+        outOfStockItems.push({ name: 'Unknown Product', reason: 'Product not found' });
+        continue;
+      }
+
+      if (product.quantity < requiredQty) {
+        outOfStockItems.push({ name: product.productName, reason: `Only ${product.quantity} items available` });
+      }
+    }
+
+    if (outOfStockItems.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Some items are out of stock',
+        outOfStockItems,
+      });
+    }
+
+    // Find user and check wallet balance
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'User not found' });
+    }
+
+    if (wallet.balance < order.finalAmount) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient wallet balance.`,
+      });
+    }
+
+    // Deduct amount from wallet
+    wallet.balance -= order.finalAmount;
+    wallet.transactions.forEach(or=>{
+      or.order=orderId;
+      or.description=`Order payment (Order ID:${orderId})`;
+      or.amount=order.finalAmount;
+     or.status="completed";
+     or.type='debit'
+    })
+    await wallet.save();
+
+    // Update order status
+    order.status = 'Pending'; // Or appropriate status (e.g., 'Processing')
+    order.orderItems.forEach(item => {
+      if (item.status === 'Failed') {
+        item.status = 'Pending';
+        order.shoppingMethod='Wallet'
+      }
+    });
+    await order.save();
+
+    // Optionally, update product quantities
+    for (const item of order.orderItems) {
+      const product = item.product;
+      product.quantity -= item.quantity;
+      await product.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Payment successful using Wallet',
+    });
+  } catch (error) {
+    console.error('Error in retrywallet:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error. Please try again later.',
+    });
+  }
+};
+
 const reverifyPayment = async (req, res) => {
   try {
     const {
@@ -1208,4 +1335,5 @@ module.exports = {
   downloadInvoice,
   retryRazorpayOrder,
   reverifyPayment,
+  retrywallet
 };

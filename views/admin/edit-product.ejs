@@ -97,16 +97,129 @@
         box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
     }
 
+   .image-cropper {
+    display: none;
+    width: 100%;
+    max-width: 600px; /* Consistent with previous update */
+    height: 450px; /* Increased to accommodate buttons */
+    margin: 15px 0;
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: visible; /* Changed from hidden to allow button visibility */
+}
+
+/* Ensure the cropper canvas fits within the container */
+.image-cropper img {
+    max-width: 100%;
+    max-height: 350px; /* Reserve space for buttons */
+    display: block;
+}
+
+/* Style Cropper.js canvas */
+.cropper-container {
+    width: 100% !important;
+    height: 350px !important; /* Match image height */
+    border-radius: 6px;
+    position: relative;
+    z-index: 1; /* Ensure canvas is behind buttons */
+}
+
+/* Button container */
+.image-cropper .flex {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Increased for better spacing */
+    position: relative;
+    z-index: 2; /* Ensure buttons are above canvas */
+}
+
+/* Button styles */
+.btn-primary, .btn-secondary {
+    padding: 12px 24px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    min-width: 100px; /* Ensure buttons are wide enough */
+}
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .image-cropper {
-        display: none;
-        width: 100%;
-        max-width: 300px;
-        height: 200px;
-        margin: 10px 0;
-        background: #f1f1f1;
-        border-radius: 6px;
-        padding: 10px;
+        max-width: 100%;
+        height: 400px; /* Slightly smaller for mobile */
     }
+    .image-cropper img, .cropper-container {
+        max-height: 300px; /* Adjust for mobile */
+    }
+    .image-cropper .flex {
+        flex-direction: column;
+        gap: 10px;
+        padding-bottom: 10px;
+    }
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+/* Thumbnail and delete icon styles (unchanged) */
+.thumbnail img {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
+}
+.delete-image-icon {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    cursor: pointer;
+    color: #dc3545;
+    font-size: 20px;
+    background: white;
+    border-radius: 50%;
+    padding: 3px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+}
+.delete-image-icon:hover {
+    transform: scale(1.2);
+}
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
 
     .btn {
         border-radius: 6px;
@@ -184,8 +297,7 @@
         <div class="content-header">
             <h2 class="content-title">Edit Product</h2>
         </div>
-        <div class="col-lg-6">
-            <div class="card mb-4">
+        <div class="col-lg-6"> <div class="card mb-4">
                 <div class="card-body">
                     <form id="editProductForm" method="post" enctype="multipart/form-data" onsubmit="validateAndSubmit(event, '<%= product._id %>')">
                         <div class="mb-4">
@@ -242,55 +354,64 @@
                             </select>
                             <div id="category-error" class="error-message"></div>
                         </div>
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h4>Choose Images</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="thumbnails-container">
-                                    <% for (let i = 0; i < product.productImage.length; i++) { %>
-                                        <div class="thumbnail">
-                                            <img src="http://localhost:3835/<%= product.productImage[i] %>" alt="Product Image">
-                                            <i onclick="deleteSingleImage('<%= encodeURIComponent(product.productImage[i]) %>', '<%= product._id %>')" class="fa-solid fa-circle-xmark delete-image-icon"></i>
-                                        </div>
-                                    <% } %>
-                                </div>
-                                <div class="mb-4">
-                                    <input class="form-control" type="file" name="productImage" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage1(event); viewImage(event, 1)">
-                                    <img src="" alt="" id="imgView1" style="max-width: 100px; display: none; margin-top: 10px;">
-                                    <div class="image-cropper">
-                                        <img src="" id="croppedImg1" alt="">
-                                        <button type="button" id="saveButton1" class="btn btn-primary">Save</button>
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <input class="form-control" type="file" name="productImage" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage2(event); viewImage(event, 2)">
-                                    <img src="" alt="" id="imgView2" style="max-width: 100px; display: none; margin-top: 10px;">
-                                    <div class="image-cropper">
-                                        <img src="" id="croppedImg2" alt="">
-                                        <button type="button" id="saveButton2" class="btn btn-primary">Save</button>
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <input class="form-control" type="file" name="productImage" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage3(event); viewImage(event, 3)">
-                                    <img src="" alt="" id="imgView3" style="max-width: 100px; display: none; margin-top: 10px;">
-                                    <div class="image-cropper">
-                                        <img src="" id="croppedImg3" alt="">
-                                        <button type="button" id="saveButton3" class="btn btn-primary">Save</button>
-                                    </div>
-                                </div>
-                                <div id="images-error" class="error-message"></div>
-                            </div>
-                        </div>
-                        <button class="btn" id="updatebtn" type="submit">Update</button>
-                    </form>
+                
+           <div class="card mb-4">
+    <div class="card-header">
+        <h4>Choose Images</h4>
+    </div>
+    <div class="card-body">
+        <div class="thumbnails-container">
+            <% for (let i = 0; i < product.productImage.length; i++) { %>
+                <div class="thumbnail">
+                    <img src="http://localhost:3835/uploads/product-image/<%= product.productImage[i].split('/').pop() %>" alt="Product Image">
+                    <i onclick="deleteSingleImage('<%= encodeURIComponent(product.productImage[i]) %>', '<%= product._id %>')" class="fa-solid fa-circle-xmark delete-image-icon"></i>
+                </div>
+            <% } %>
+        </div>
+        <div class="mb-4">
+            <input class="form-control" type="file" name="productImage" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 1)">
+            <img src="" alt="Preview" id="imgView1" style="max-width: 100px; display: none; margin-top: 10px;">
+            <div class="image-cropper">
+                <img src="" id="croppedImg1" alt="">
+                <div class="flex space-x-2">
+                    <button type="button" id="saveButton1" class="btn btn-primary">Save</button>
+                    <button type="button" id="cancelButton1" class="btn btn-secondary">Cancel</button>
                 </div>
             </div>
         </div>
+        <div class="mb-4">
+            <input class="form-control" type="file" name="productImage" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 2)">
+            <img src="" alt="Preview" id="imgView2" style="max-width: 100px; display: none; margin-top: 10px;">
+            <div class="image-cropper">
+                <img src="" id="croppedImg2" alt="">
+                <div class="flex space-x-2">
+                    <button type="button" id="saveButton2" class="btn btn-primary">Save</button>
+                    <button type="button" id="cancelButton2" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <input class="form-control" type="file" name="productImage" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 3)">
+            <img src="" alt="Preview" id="imgView3" style="max-width: 100px; display: none; margin-top: 10px;">
+            <div class="image-cropper">
+                <img src="" id="croppedImg3" alt="">
+                <div class="flex space-x-2">
+                    <button type="button" id="saveButton3" class="btn btn-primary">Save</button>
+                    <button type="button" id="cancelButton3" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div id="images-error" class="error-message"></div>
+    </div>
+     <button class="btn" id="updatebtn" type="submit">Update</button>
+</div>
+        </div>
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
     <script>
     async function validateAndSubmit(event, id) {
         event.preventDefault();
@@ -468,67 +589,157 @@
         document.getElementById('imgView3').src = URL.createObjectURL(event.target.files[0]);
     }
 
-    let croppers = {};
-    function viewImage(event, index) {
-        let input = event.target;
-        let file = input.files[0];
-        const validImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+   
+ let croppers = {};
 
-        // Check if the uploaded file is a valid image
-        if (!validImageTypes.includes(file.type)) {
+function viewImage(event, index) {
+    console.log(`viewImage called for index ${index}`, event.target.files);
+    let input = event.target;
+    let file = input.files[0];
+    const validImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+
+    if (!file) {
+        console.error('No file selected');
+        return;
+    }
+
+    if (!validImageTypes.includes(file.type)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid File',
+            text: 'Only JPEG, PNG, or JPG files are allowed.',
+            confirmButtonColor: '#d33'
+        });
+        input.value = '';
+        return;
+    }
+
+    let reader = new FileReader();
+    reader.onload = function() {
+        console.log(`FileReader loaded for index ${index}`);
+        let dataURL = reader.result;
+        let image = document.getElementById('imgView' + index);
+        let croppedImage = document.getElementById('croppedImg' + index);
+        if (!image || !croppedImage) {
+            console.error(`Image elements imgView${index} or croppedImg${index} not found`);
+            return;
+        }
+        image.src = dataURL;
+        image.style.display = 'block';
+        croppedImage.src = dataURL;
+
+        if (typeof Cropper !== 'function') {
+            console.error('Cropper.js not loaded or not a constructor:', typeof Cropper, Cropper);
             Swal.fire({
-                icon: "error",
-                title: "Invalid File",
-                text: "Only JPEG, PNG, or JPG files are allowed.",
-                confirmButtonColor: '#d33'
+                icon: 'error',
+                title: 'Cropper Error',
+                text: 'Image cropping library failed to load.'
             });
-            input.value = ""; // Reset the file input
             return;
         }
 
-        let reader = new FileReader();
+        if (croppers[index]) {
+            console.log(`Destroying existing cropper for index ${index}`);
+            croppers[index].destroy();
+            croppers[index] = null;
+        }
 
-        reader.onload = function() {
-            let dataURL = reader.result;
-            let image = document.getElementById("imgView" + index);
-            image.src = dataURL;
-
-            if (croppers[index]) croppers[index].destroy();
-
-            croppers[index] = new Cropper(image, {
+        try {
+            croppers[index] = new Cropper(croppedImage, {
                 aspectRatio: 1,
                 viewMode: 1,
                 guides: true,
                 background: false,
                 autoCropArea: 1,
-                zoomable: true
+                zoomable: true,
+                ready: function() {
+                    console.log(`Cropper initialized for index ${index}`);
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Crop Image',
+                        text: 'Adjust the crop area and click Save to confirm.',
+                        confirmButtonText: 'OK'
+                    });
+                }
             });
+        } catch (error) {
+            console.error('Error initializing Cropper:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Cropper Error',
+                text: 'Failed to initialize image cropper.'
+            });
+            return;
+        }
 
-            let cropperContainer = document.querySelector("#croppedImg" + index).parentNode;
-            cropperContainer.style.display = "block";
+        let cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
+        if (!cropperContainer) {
+            console.error(`Cropper container for croppedImg${index} not found`);
+            return;
+        }
+        cropperContainer.style.display = 'block';
 
-            let saveButton = document.querySelector("#saveButton" + index);
-            saveButton.onclick = function() {
-                let croppedCanvas = croppers[index].getCroppedCanvas();
-                let croppedImage = document.getElementById("croppedImg" + index);
-                croppedImage.src = croppedCanvas.toDataURL("image/jpeg", 1.0);
+        let saveButton = document.querySelector('#saveButton' + index);
+        if (!saveButton) {
+            console.error(`Save button saveButton${index} not found`);
+            return;
+        }
+        saveButton.onclick = function() {
+            console.log(`Save button clicked for index ${index}`);
+            let croppedCanvas = croppers[index].getCroppedCanvas();
+            if (!croppedCanvas) {
+                console.error('Failed to get cropped canvas');
+                return;
+            }
+            croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
+            image.src = croppedCanvas.toDataURL('image/jpeg', 1.0); // Update preview
+            image.style.display = 'block';
 
-                croppedCanvas.toBlob(blob => {
-                    let fileName = `cropped-img-${Date.now()}-${index}.jpg`;
-                    let imgFile = new File([blob], fileName, { type: "image/jpeg" });
-                    const fileList = new DataTransfer();
-                    fileList.items.add(imgFile);
-                    document.getElementById("input" + index).files = fileList.files;
-                });
+            croppedCanvas.toBlob(blob => {
+                let fileName = `cropped-img-${Date.now()}-${index}.jpg`;
+                console.log(`Saving cropped image as ${fileName}`);
+                let imgFile = new File([blob], fileName, { type: 'image/jpeg' });
+                const fileList = new DataTransfer();
+                fileList.items.add(imgFile);
+                document.getElementById('input' + index).files = fileList.files;
+                console.log(`Updated input${index} files`, document.getElementById('input' + index).files);
+            }, 'image/jpeg', 1.0);
 
-                cropperContainer.style.display = "none";
-            };
+            cropperContainer.style.display = 'none';
+            croppers[index].destroy();
+            croppers[index] = null;
         };
-        reader.readAsDataURL(file);
-    }
 
+        let cancelButton = document.querySelector('#cancelButton' + index);
+        if (cancelButton) {
+            cancelButton.onclick = function() {
+                console.log(`Cancel button clicked for index ${index}`);
+                document.getElementById('input' + index).value = '';
+                document.getElementById('imgView' + index).style.display = 'none';
+                croppedImage.src = '';
+                cropperContainer.style.display = 'none';
+                if (croppers[index]) {
+                    croppers[index].destroy();
+                    croppers[index] = null;
+                }
+            };
+        }
+    };
+
+    reader.onerror = function(error) {
+        console.error('FileReader error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'File Error',
+            text: 'Failed to read the image file.'
+        });
+    };
+
+    reader.readAsDataURL(file);
+}
     function deleteSingleImage(encodedImagePath, productId) {
         const imageName = decodeURIComponent(encodedImagePath).split('/').pop();
+        console.log('imageName',imageName)
         $.ajax({
             url: '/admin/deleteimage',
             method: 'POST',
@@ -543,6 +754,7 @@
                         text: "Image deleted successfully."
                     });
                 }
+                window.location.href =`http://localhost:3835/admin/editproduct/?id=${productId}`
             },
             error: (xhr, status, error) => {
                 console.error('Error deleting image:', error);
@@ -554,6 +766,7 @@
             }
         });
     }
+    
     </script>
 </body>
 </html>

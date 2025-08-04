@@ -3,7 +3,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
     * {
-      
         box-sizing: border-box;
         font-family: 'Arial', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
@@ -19,12 +18,8 @@
         display: flex;
         width: 100%;
         max-width: 1400px;
-     
-       
         padding: 0 20px;
     }
-
-
 
     .main-content {
         flex: 1;
@@ -144,7 +139,7 @@
         background: #f35f5f;
         border: 1px solid #f35f5f;
         color: #3f1b1b;
-        font-size: bolder;
+        font-weight: bold;
     }
 
     .btn-cancel:hover {
@@ -170,7 +165,6 @@
         font-weight: 600;
         color: #fff;
         text-transform: capitalize;
-        
     }
 
     .order-status.pending {
@@ -334,8 +328,6 @@
     }
 
     @media (max-width: 768px) {
-      
-      
         .main-content {
             padding: 15px;
         }
@@ -382,7 +374,7 @@
                         });
                         if (isFailed) { 
                     %>
-                        <button class="btn btn-primary retry-btn" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
+                        <button class="btn btn-primary retry-btn" data-order-id="<%= order._id %>">Retry Payment</button>
                     <% } %>
                 </div>
 
@@ -454,6 +446,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+        console.log('Script loaded, retryPayment function defined');
+
         function openReturnModal(orderId, itemId) {
             document.getElementById('returnOrderId').value = orderId;
             document.getElementById('returnItemId').value = itemId;
@@ -626,113 +620,195 @@
         }
 
         async function retryPayment(orderId) {
+            // Step 1: Show SweetAlert2 modal for payment method selection
             const result = await Swal.fire({
-                title: 'Retry Payment',
-                text: 'Do you want to retry payment for this order?',
-                icon: 'question',
+                title: 'Select Payment Method',
+                html: `
+                    <div style="text-align: left;">
+                        <label for="paymentMethod" style="display: block; font-size: 16px; font-weight: 500; margin-bottom: 5px;">
+                            Choose a payment method:
+                        </label>
+                        <select id="paymentMethod" class="swal2-select" style="
+                            width: 100%; 
+                            padding: 10px; 
+                            font-size: 15px; 
+                            border-radius: 4px; 
+                            border: 1px solid #d5d9d9; 
+                            outline: none; 
+                            background: #fff;
+                            cursor: pointer;
+                        ">
+                            <option value="" disabled selected>-- Select Payment Method --</option>
+                            <option value="razorpay">Razorpay</option>
+                            <option value="wallet">Wallet</option>
+                        </select>
+                    </div>
+                `,
                 showCancelButton: true,
-                confirmButtonText: 'Yes, Retry',
+                confirmButtonText: 'Proceed',
                 cancelButtonText: 'Cancel',
                 customClass: {
                     popup: 'swal2-popup-custom',
                     confirmButton: 'swal2-confirm-custom',
                     cancelButton: 'swal2-cancel-custom'
+                },
+                preConfirm: () => {
+                    const paymentMethod = document.getElementById('paymentMethod').value;
+                    if (!paymentMethod) {
+                        Swal.showValidationMessage('Please select a payment method!');
+                    }
+                    return paymentMethod;
                 }
             });
 
             if (result.isConfirmed) {
-                try {
-                    const response = await fetch('/retry-razorpay-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderId })
-                    });
-                    const data = await response.json();
+                const paymentMethod = result.value;
 
-                    if (!data.success) {
+                if (paymentMethod === 'razorpay') {
+                    // Step 2: Handle Razorpay payment
+                    try {
+                        const response = await fetch('/retry-razorpay-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId })
+                        });
+                        const data = await response.json();
+
+                        if (!data.success) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'Could not initiate payment.',
+                                icon: 'error',
+                                customClass: {
+                                    popup: 'swal2-popup-custom',
+                                    confirmButton: 'swal2-confirm-custom'
+                                }
+                            });
+                            return;
+                        }
+
+                        const options = {
+                            key: data.razorpayKey,
+                            amount: data.razorpayOrder.amount,
+                            currency: data.razorpayOrder.currency,
+                            order_id: data.razorpayOrder.id,
+                            name: 'Noble Thread',
+                            description: 'Retry Payment',
+                            handler: async function (response) {
+                                const verifyRes = await fetch('/reverify-payment', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        amount: data.razorpayOrder.amount / 100
+                                    })
+                                });
+                                const verifyData = await verifyRes.json();
+                                if (verifyData.success) {
+                                    Swal.fire({
+                                        title: 'Success',
+                                        text: 'Payment successful! Order updated.',
+                                        icon: 'success',
+                                        customClass: {
+                                            popup: 'swal2-popup-custom',
+                                            confirmButton: 'swal2-confirm-custom'
+                                        }
+                                    }).then(() => location.reload());
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: verifyData.message || 'Payment verification failed.',
+                                        icon: 'error',
+                                        customClass: {
+                                            popup: 'swal2-popup-custom',
+                                            confirmButton: 'swal2-confirm-custom'
+                                        }
+                                    });
+                                }
+                            },
+                            modal: {
+                                ondismiss: function () {
+                                    Swal.fire({
+                                        title: 'Info',
+                                        text: 'Payment was cancelled.',
+                                        icon: 'info',
+                                        customClass: {
+                                            popup: 'swal2-popup-custom',
+                                            confirmButton: 'swal2-confirm-custom'
+                                        }
+                                    });
+                                }
+                            }
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.open();
+                    } catch (err) {
                         Swal.fire({
                             title: 'Error',
-                            text: data.message || 'Could not initiate payment.',
+                            text: 'Something went wrong. Please try again.',
                             icon: 'error',
                             customClass: {
                                 popup: 'swal2-popup-custom',
                                 confirmButton: 'swal2-confirm-custom'
                             }
                         });
-                        return;
                     }
+                } else if (paymentMethod === 'wallet') {
+                    // Step 3: Handle Wallet payment
+                    try {
+                        const response = await fetch('/retry-wallet-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId })
+                        });
+                        const data = await response.json();
 
-                    const options = {
-                        key: data.razorpayKey,
-                        amount: data.razorpayOrder.amount,
-                        currency: data.razorpayOrder.currency,
-                        order_id: data.razorpayOrder.id,
-                        name: 'Noble Thread',
-                        description: 'Retry Payment',
-                        handler: async function (response) {
-                            const verifyRes = await fetch('/reverify-payment', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    amount: data.razorpayOrder.amount / 100
-                                })
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success',
+                                text: 'Payment successful using Wallet! Order updated.',
+                                icon: 'success',
+                                customClass: {
+                                    popup: 'swal2-popup-custom',
+                                    confirmButton: 'swal2-confirm-custom'
+                                }
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'Insufficient wallet balance or payment failed.',
+                                icon: 'error',
+                                customClass: {
+                                    popup: 'swal2-popup-custom',
+                                    confirmButton: 'swal2-confirm-custom'
+                                }
                             });
-                            const verifyData = await verifyRes.json();
-                            if (verifyData.success) {
-                                Swal.fire({
-                                    title: 'Success',
-                                    text: 'Payment successful! Order updated.',
-                                    icon: 'success',
-                                    customClass: {
-                                        popup: 'swal2-popup-custom',
-                                        confirmButton: 'swal2-confirm-custom'
-                                    }
-                                }).then(() => location.reload());
-                            } else {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: verifyData.message || 'Payment verification failed.',
-                                    icon: 'error',
-                                    customClass: {
-                                        popup: 'swal2-popup-custom',
-                                        confirmButton: 'swal2-confirm-custom'
-                                    }
-                                });
-                            }
-                        },
-                        modal: {
-                            ondismiss: function () {
-                                Swal.fire({
-                                    title: 'Info',
-                                    text: 'Payment was cancelled.',
-                                    icon: 'info',
-                                    customClass: {
-                                        popup: 'swal2-popup-custom',
-                                        confirmButton: 'swal2-confirm-custom'
-                                    }
-                                });
-                            }
                         }
-                    };
-
-                    const rzp = new Razorpay(options);
-                    rzp.open();
-                } catch (err) {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Something went wrong. Please try again.',
-                        icon: 'error',
-                        customClass: {
-                            popup: 'swal2-popup-custom',
-                            confirmButton: 'swal2-confirm-custom'
-                        }
-                    });
+                    } catch (err) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Something went wrong with wallet payment. Please try again.',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'swal2-popup-custom',
+                                confirmButton: 'swal2-confirm-custom'
+                            }
+                        });
+                    }
                 }
             }
         }
+
+        // Event delegation for Retry Payment button
+        document.querySelectorAll('.retry-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const orderId = button.getAttribute('data-order-id');
+                retryPayment(orderId);
+            });
+        });
     </script>
 </body>
 </html>

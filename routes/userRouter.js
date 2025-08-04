@@ -72,6 +72,7 @@ router.post("/resend-otpforgot", userController.resendotpassword);
 router.post("/update-cart-item", userauth, cartController.updateCartItem);
 router.post("/remove-cart-item", userauth, cartController.removeCartItem);
 router.get("/checkout", userauth, cartController.loadcheckout);
+router.post('/checkout',userauth,cartController.postCheckoutValidation)
 router.get("/order-success", userauth, cartController.orderSuccess);
 router.get("/order-failed", userauth, cartController.orderFailed);
 router.post("/place-order", userauth, cartController.placeOrder);
@@ -118,6 +119,7 @@ router.post(
   userauth,
   userProfileController.retryRazorpayOrder
 );
+router.post('/retry-wallet-order',userauth,userProfileController.retrywallet)
 router.post(
   "/reverify-payment",
   userauth,

@@ -18,12 +18,15 @@
   <div class="main-content">
     <h2>User Profile</h2>
     <div class="profile-card">
-      <h3><%= user.name %></h3>
-      <p><strong>Email:</strong> <%= user.email %></p>
-      <p><strong>Phone:</strong> <%= user.phone || "No Phone Number" %></p>
-      <button class="btn" onclick="openSwal()">Edit Profile</button>
-      <a href="/change-password"><button class="btn">Change Password</button></a>
-    </div>
+  <h3><%= user.name %></h3>
+  <p><strong>Email:</strong> <%= user.email %></p>
+  <p><strong>Phone:</strong> <%= user.phone || "No Phone Number" %></p>
+  <p><strong>Referral Code:</strong> <span id="referralCode"><%= user.referralCode || "Not Available" %></span>
+    
+  </p>
+  <button class="btn" onclick="openSwal()">Edit Profile</button>
+  <a href="/change-password"><button class="btn">Change Password</button></a>
+</div>
   </div>
 </div>
 
@@ -204,9 +207,35 @@
   }
 
   .profile-card p {
-    font-size: 16px;
-    color: #555;
-  }
+  font-size: 16px;
+  color: #555;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Space between text and button */
+}
+.btn-copy {
+  background: linear-gradient(90deg, #10b981, #059669); /* Green gradient for distinction */
+  color: #fff;
+  padding: 8px 16px; /* Smaller than main buttons */
+  margin: 0;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.btn-copy:hover {
+  background: linear-gradient(90deg, #059669, #047857);
+  transform: scale(1.05);
+}
+
+#referralCode {
+  font-weight: 600;
+  color: #1e40af; /* Matches active link color for consistency */
+}
 
   .btn {
     background: linear-gradient(90deg, #3b82f6, #2563eb);
@@ -275,8 +304,20 @@
     }
 
     .profile-card p {
-      font-size: 14px;
-    }
+    font-size: 14px;
+    flex-direction: column; /* Stack on mobile */
+    align-items: center;
+    gap: 5px;
+  }
+
+  .btn-copy {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  #referralCode {
+    font-size: 14px;
+  }
 
     .btn {
       font-size: 14px;

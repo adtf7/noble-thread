@@ -37,7 +37,7 @@
                       <div class="quantity">
                         <div class="pro-qty-2">
                           
-                          <input type="text" value="<%= item.quantity %>">
+                          <input type="text" id="is" value="<%= item.quantity %>">
                           
                         </div>
                       </div>
@@ -81,7 +81,7 @@
             <li>Subtotal <span id="subtotal">₹ <%= totalSum.toFixed(2) %></span></li>
             <li>Total <span id="total">₹ <%= totalSum.toFixed(2) %></span></li>
           </ul>
-          <a href="/checkout" id="checkoutBtn" class="primary-btn">Proceed to checkout</a>
+          <a href="#" id="checkoutBtn" class="primary-btn">Proceed to checkout</a>
         </div>
       </div>
     </div>
@@ -91,14 +91,13 @@
 <%- include('../../views/partials/user/footer.ejs')%>
 
 
-<script>
-const cartData = <%- JSON.stringify(cart) %>;
+<script>const cartData = <%- JSON.stringify(cart) %>;
 
 document.addEventListener("DOMContentLoaded", function () {
   // State to track ongoing updates to prevent duplicates
   let isUpdating = false;
 
-  // Update overall cart summary
+  // Update overall cart summary and return total
   function updateCartSummary() {
     let totalSum = 0;
     const rows = document.querySelectorAll("tbody tr[data-product-id]");
@@ -114,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (subtotalElem) subtotalElem.textContent = "₹ " + totalSum.toFixed(2);
     if (totalElem) totalElem.textContent = "₹ " + totalSum.toFixed(2);
     console.log(`Cart summary updated: ₹${totalSum.toFixed(2)}`);
+    return totalSum * 100; // Convert to paise for backend
   }
 
   // Function to update cart quantity on the backend
@@ -293,10 +293,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  updateCartSummary();
-});
-
-document.addEventListener("DOMContentLoaded", function () {
+  // Checkout button logic
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', async function (e) {
@@ -306,6 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
       let canProceed = true;
       let errorMessage = '';
 
+      // Validate cart
       if (!cartData || !cartData.items || cartData.items.length === 0) {
         canProceed = false;
         errorMessage = 'Your cart is empty.';
@@ -324,24 +322,44 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           if (isBlocked) {
             canProceed = false;
-            errorMessage = `The product "${item.productId.productName}" is currently blocked, please wait for unblock or remove product from cart.`;
+            errorMessage = `The product "${item.productId.productName}" is currently blocked. Please remove it from the cart.`;
             break;
           }
           if (!isListed) {
             canProceed = false;
-            errorMessage = `The product "${item.productId.productName}" category is not listed, please wait for listing or remove product from cart.`;
+            errorMessage = `The category for "${item.productId.productName}" is not listed. Please remove it from the cart.`;
             break;
           }
           if (productStock < cartQuantity) {
             canProceed = false;
-            errorMessage = `The product "${item.productId.productName}" has insufficient stock. Reduce the quantity in your cart or wait for to add more stock.`;
+            errorMessage = `The product "${item.productId.productName}" has insufficient stock (${productStock} available). Please reduce the quantity.`;
             break;
           }
         }
       }
 
       if (canProceed) {
-        window.location.href = "/checkout";
+        try {
+          const amount = updateCartSummary(); // Get total in paise
+          const response = await fetch('/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount }) // Send amount in paise
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            window.location.href = "/checkout"; // Redirect to checkout page
+          } else {
+            Swal.fire({ icon: 'error', title: 'Checkout Failed', text: data.message });
+            checkoutBtn.disabled = false;
+          }
+        } catch (error) {
+          console.error('Checkout error:', error);
+          Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong during checkout.' });
+          checkoutBtn.disabled = false;
+        }
       } else {
         Swal.fire({
           icon: 'error',
@@ -352,6 +370,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-});
-</script>
-```
+
+  // Initialize cart summary
+  updateCartSummary();
+});</script>
