@@ -9,6 +9,7 @@ const Offer = require("../../models/offerSchema");
 let Cart = require("../../models/cartSchema");
 let mongoose = require("mongoose");
 const Review = require("../../models/reviewSchema");
+const Wallet=require('../../models/walletSchema')
 const loadHomePage = async (req, res) => {
   try {
     let userId = req.session.user;
@@ -383,7 +384,7 @@ let verifyOtp = async (req, res) => {
       req.session.otpExpires = null;
       req.session.userdata = null;
 
-      return res.json({ success: true, redirectUrl: "/" });
+      return res.json({ success: true, redirectUrl: "/referralCodepage" });
     } else {
       console.log("OTP did not match");
       return res
@@ -400,6 +401,109 @@ let verifyOtp = async (req, res) => {
       });
   }
 };
+
+let referralCodepage=async (req,res)=>{
+  try {
+    return res.render("user/referralCode.ejs", { message: "" });
+  } catch (error) {
+     console.error("Error on referralCodepage", error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "An error occurred referral Code page",
+      });
+  }
+}
+
+const submitreferral = async (req, res) => {
+  try {
+    let { referralCode } = req.body;
+    let userId = req.session.user;
+    console.log('Referral Code:', referralCode);
+
+    if (!referralCode) {
+      return res.status(400).json({ success: false, message: 'Referral code is required.' });
+    }
+
+    let referuser = await User.findOne({ referralCode: referralCode });
+
+    if (!referuser) {
+      return res.status(400).json({ success: false, message: 'Invalid Referral Code' });
+    }
+
+    const currentUser = await User.findById(userId);
+    if (currentUser.referralCode && currentUser.referralCode.includes(referralCode)) {
+      return res.status(400).json({ success: false, message: 'Referral code already used.' });
+    }
+
+    const rewardAmount = 200; 
+    await User.updateOne({ _id: userId }, { $inc: { walletBalance: rewardAmount } });
+
+    let currentWalletData = await Wallet.findOne({ user: new mongoose.Types.ObjectId(userId) });
+    if (!currentWalletData) {
+      currentWalletData = new Wallet({
+        user: new mongoose.Types.ObjectId(userId),
+        balance: rewardAmount,
+        transactions: []
+      });
+      await currentWalletData.save();
+    } else {
+      await Wallet.updateOne({ user: new mongoose.Types.ObjectId(userId) }, { $inc: { balance: rewardAmount } });
+    }
+
+    currentWalletData.transactions.push({
+      order: null,
+      description: 'Referral Code reward',
+      amount: rewardAmount,
+      status: 'completed',
+      type: 'credit',
+    });
+    await currentWalletData.save();
+
+    const referredRewardAmount = 500;
+    await User.updateOne({ _id: referuser._id }, {
+      $set: { referralCode: 'Claimed' }, 
+      $inc: { walletBalance: referredRewardAmount }, 
+    });
+
+    let referredWalletData = await Wallet.findOne({ user: new mongoose.Types.ObjectId(referuser._id) });
+    if (!referredWalletData) {
+      referredWalletData = new Wallet({
+        user: new mongoose.Types.ObjectId(referuser._id),
+        balance: referredRewardAmount,
+        transactions: []
+      });
+      await referredWalletData.save();
+    } else {
+      await Wallet.updateOne({ user: new mongoose.Types.ObjectId(referuser._id) }, { $inc: { balance: referredRewardAmount } });
+    }
+
+    referredWalletData.transactions.push({
+      order: null,
+      description: 'Referral Code reward',
+      amount: referredRewardAmount,
+      status: 'completed',
+      type: 'credit',
+    });
+    await referredWalletData.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Referral code ${referralCode} successfully applied! You received ${rewardAmount} wallet money.`,
+      redirectUrl: '/' 
+    });
+
+  } catch (error) {
+    console.error('Error in submitreferral:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong, please try again later.',
+    });
+  }
+};
+
+
 
 let resendotp = async (req, res) => {
   try {
@@ -495,7 +599,7 @@ const googleCallback = async (req, res) => {
     console.log("Google User:", req.user);
     console.log("Session:", req.session);
 
-    res.redirect("/");
+    res.redirect("/referralCodepage");
   } catch (error) {
     console.error("Error during Google callback:", error.message);
     res.status(500).send("Internal Server Error");
@@ -924,4 +1028,6 @@ module.exports = {
   updatepassword,
   loadProductDetails,
   resendotpassword,
+  referralCodepage,
+  submitreferral
 };

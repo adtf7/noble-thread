@@ -24,6 +24,10 @@ const userProfile = async (req, res) => {
 
   try {
     let userId = req.session.user;
+
+  //   let updatereferral=await User.findByIdAndUpdate(userId,{
+  //  referralCode:Math.floor(10000000 + Math.random() * 900000).toString()
+  //   })
     let userdata = await User.findById(userId);
     const cartcount = await Cart.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId) } },

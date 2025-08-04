@@ -18,6 +18,8 @@ router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
+router.get('/referralCodepage',userController.referralCodepage)
+router.post('/submitreferral',userController.submitreferral)
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/signup" }),
