@@ -162,7 +162,7 @@ const updateOrderStatus = async (req, res) => {
                     );
                 } else if (newStatus === 'Returned' && item.status !== 'Returned') {
                     const refundAmount = item.price * item.quantity;
-                    order.finalAmount -= refundAmount;
+                    
                     await product.updateOne(
                         { _id: item.product },
                         { $inc: { quantity: item.quantity } }
@@ -361,18 +361,28 @@ const singlehandleReturnRequest = async (req, res) => {
             return res.status(400).json({ success: false, message: "No return request found for this item." });
         }
 
+        let refundAmount;
+
+        if (order.discount && order.discount > 0) {
+            const totalOrderPrice = order.orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+            
+            const itemTotalPrice = item.price * item.quantity;
+            const discountShare = (order.discount / totalOrderPrice) * itemTotalPrice;
+            
+            refundAmount = itemTotalPrice - discountShare;
+        } else {
+            refundAmount = item.price * item.quantity;
+        }
+
         if (action === 'approve') {
             item.status = 'Returned';
-            const refundAmount = item.price * item.quantity;
-            
-         
+
             await product.updateOne(
                 { _id: item.product },
                 { $inc: { quantity: item.quantity } }
             );
 
-            // Add to wallet
-            await wallet.updateOne(
+           await wallet.updateOne(
                 { user: order.userId._id },
                 {
                     $inc: { balance: refundAmount },
@@ -391,28 +401,25 @@ const singlehandleReturnRequest = async (req, res) => {
                 { upsert: true }
             );
 
-          
             await users.updateOne(
                 { _id: order.userId._id },
                 { $inc: { Wallet: refundAmount } }
             );
-
-           
         } else if (action === 'reject') {
             item.status = 'Delivered';
+            refundAmount = 0; 
         } else {
             return res.status(400).json({ success: false, message: "Invalid action." });
         }
 
-    
         await updateOrderStatusBasedOnItems(order);
 
         await order.save();
 
-        return res.json({ 
-            success: true, 
+        return res.json({
+            success: true,
             message: `Return request ${action}ed successfully for the item.`,
-            refundAmount: action === 'approve' ? item.price * item.quantity : 0
+            refundAmount
         });
     } catch (error) {
         console.error("Error handling return request:", error);

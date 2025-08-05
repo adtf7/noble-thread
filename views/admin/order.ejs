@@ -171,7 +171,7 @@ function handleReturnRequest(orderId, action) {
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`/admin/handle-return-request`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -313,7 +313,7 @@ function viewOrder(orderId) {
 
                 // Send AJAX request to update status
                 fetch(`/admin/update-status`, {
-                    method: "POST",
+                    method: "PUT",
                     headers: {
                         "Content-Type": "application/json"
                     },

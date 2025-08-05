@@ -550,7 +550,7 @@ html, body {
       cancelButtonText: 'No, cancel!'
     }).then(result => {
       if (result.isConfirmed) {
-        fetch(`/addressesdelete/${id}`, { method: 'POST' })
+        fetch(`/addressesdelete/${id}`, { method: 'DELETE' })
           .then(response => {
             if (!response.ok) throw new Error('Failed to delete address');
             return response.json();

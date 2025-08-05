@@ -21,7 +21,8 @@
   <h3><%= user.name %></h3>
   <p><strong>Email:</strong> <%= user.email %></p>
   <p><strong>Phone:</strong> <%= user.phone || "No Phone Number" %></p>
-  <p><strong>Referral Code:</strong> <span id="referralCode"><%= user.referralCode || "Not Available" %></span>
+  <p><strong>Referral Code:</strong> <span id="referralCode"><%= user.referralCode 
+     %></span>
     
   </p>
   <button class="btn" onclick="openSwal()">Edit Profile</button>
@@ -45,7 +46,7 @@
         const name = document.getElementById('swal-name').value;
         const phone = document.getElementById('swal-phone').value;
         return fetch('/update-profile', {
-          method: 'POST',
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, phone })
         })

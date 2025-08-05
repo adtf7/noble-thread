@@ -421,7 +421,7 @@
 
             try {
                 let response = await fetch(`/admin/editproduct/${id}`, {
-                    method: "POST",
+                    method: "Put",
                     body: formData
                 });
                 let result = await response.json();
@@ -742,7 +742,7 @@ function viewImage(event, index) {
         console.log('imageName',imageName)
         $.ajax({
             url: '/admin/deleteimage',
-            method: 'POST',
+            method: 'Delete',
             data: { imageNameToServer: imageName, productIdToServer: productId },
             success: (response) => {
                 if (response.status === true) {

@@ -58,7 +58,7 @@ router.get("/product", productControllers.productPage);
 router.get("/productsblock", productControllers.blockproduct);
 router.get("/productsunblock", productControllers.unblockproduct);
 router.get("/editproduct", productControllers.editproduct);
-router.post(
+router.put(
   "/editproduct/:id",
 
   upload.array("productImage", 3),
@@ -72,8 +72,8 @@ router.post(
     productControllers.seteditproduct(req, res);
   }
 );
-router.post("/deleteimage", productControllers.deleteimage);
-router.post(
+router.delete("/deleteimage", productControllers.deleteimage);
+router.put(
   "/add-product-offer/:productId",
 
   productControllers.addProductOffer
@@ -86,18 +86,18 @@ router.delete(
 
 router.get("/orders", orderControllers.listOrders);
 router.get("/orders/:id", orderControllers.viewOrder);
-router.post("/update-status", orderControllers.updateOrderStatus);
-router.post(
+router.put("/update-status", orderControllers.updateOrderStatus);
+router.put(
   "/handle-return-request",
 
   orderControllers.handleReturnRequest
 );
-router.post(
+router.put(
   "/singlehandle-return-request",
 
   orderControllers.singlehandleReturnRequest
 );
-router.post(
+router.put(
   "/update-item-status",
 
   orderControllers.updateItemStatus
@@ -105,9 +105,9 @@ router.post(
 
 router.get("/coupon", couponControllers.loadCoupon);
 router.post("/add-coupon", couponControllers.addCoupon);
-router.post("/unlist-coupon/:id", couponControllers.unlistCoupon);
-router.post("/list-coupon/:id", couponControllers.listCoupon);
-router.post("/edit-coupon/:id", couponControllers.editCoupon);
+router.patch("/unlist-coupon/:id", couponControllers.unlistCoupon);
+router.patch("/list-coupon/:id", couponControllers.listCoupon);
+router.put("/edit-coupon/:id", couponControllers.editCoupon);
 router.delete("/delete-coupon/:id", couponControllers.deleteCoupon);
 
 router.get("/salesreport", salesreportControllers.loadsalesreport);

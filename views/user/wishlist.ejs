@@ -190,7 +190,7 @@ function removeFromWishlist(id){
     }).then((result) => {
         if(result.isConfirmed){
             fetch('/remove-wishlist', {
-                method: 'POST',
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -229,7 +229,7 @@ function removeFromWishlist(id){
 function addToCart(id){
     console.log('productId',id);
     fetch('/addtocartwishlist', {
-        method: 'POST',
+        method: 'PUT',
         headers: {  
             'Content-Type':'application/json',
         },

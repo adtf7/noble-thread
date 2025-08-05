@@ -81,7 +81,7 @@
             <li>Subtotal <span id="subtotal">₹ <%= totalSum.toFixed(2) %></span></li>
             <li>Total <span id="total">₹ <%= totalSum.toFixed(2) %></span></li>
           </ul>
-          <a href="#" id="checkoutBtn" class="primary-btn">Proceed to checkout</a>
+          <a href="/update-cart-item" id="checkoutBtn" class="primary-btn">Proceed to checkout</a>
         </div>
       </div>
     </div>
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const productId = row.getAttribute("data-product-id");
     console.log(`Updating quantity for product ${productId} to ${newQuantity}`);
     return fetch('/update-cart-item', {
-      method: 'POST',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId, quantity: newQuantity })
     })

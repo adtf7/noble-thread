@@ -310,7 +310,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch('/admin/update-item-status', {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ orderId, itemId, status: newStatus })
                 })
@@ -366,7 +366,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch('/admin/singlehandle-return-request', {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ orderId, itemId, action })
                 })

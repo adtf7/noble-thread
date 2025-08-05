@@ -645,7 +645,17 @@ const cancelorder = async (req, res) => {
 
     let refundAmount = 0;
     if (order.shoppingMethod !== "COD") {
-      refundAmount = item.price * item.quantity;
+  
+      if (order.discount && order.discount > 0) {
+        const totalOrderPrice = order.orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+        
+        const itemTotalPrice = item.price * item.quantity;
+        const discountShare = (order.discount / totalOrderPrice) * itemTotalPrice;
+        
+        refundAmount = itemTotalPrice - discountShare;
+      } else {
+        refundAmount = item.price * item.quantity;
+      }
     }
 
     const updateFields = {
@@ -665,7 +675,7 @@ const cancelorder = async (req, res) => {
     );
 
     if (refundAmount > 0) {
-      let cancel = await wallet.updateOne(
+      await wallet.updateOne(
         { user: order.userId },
         {
           $inc: { balance: refundAmount },
@@ -684,10 +694,13 @@ const cancelorder = async (req, res) => {
         },
         { upsert: true }
       );
-      console.log(cancel);
     }
 
-    return res.json({ success: true, message: "Item canceled successfully." });
+    return res.json({
+      success: true,
+      message: "Item canceled successfully.",
+      refundAmount
+    });
   } catch (error) {
     console.error("Error handling item cancel request:", error);
     res
@@ -811,7 +824,7 @@ const walletsave = async (user, amount, description = "Added fund to wallet") =>
       type: "credit", 
     });
 
-    // Save both user and wallet
+    
     const usersaved = await userData.save();
     const walletsaved = await Wallet.save();
 

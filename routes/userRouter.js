@@ -39,12 +39,12 @@ router.get("/forgotpasswordemail", userController.forgotemailpassword);
 router.post("/verify-otp4pass", userController.verifyOtppass);
 router.post("/resetpassword", userController.updatepassword);
 router.post("/submit-review", userauth, userController.review);
-router.post("/delete-review", userauth, userController.deleteReview);
+router.delete("/delete-review", userauth, userController.deleteReview);
 
 router.get("/profile", userauth, userProfileController.userProfile);
-router.post("/update-profile", userauth, userProfileController.edituser);
+router.put("/update-profile", userauth, userProfileController.edituser);
 router.get("/change-password", userauth, userProfileController.changepassword);
-router.post(
+router.put(
   "/change-password",
   userauth,
   userProfileController.changenewpassword
@@ -57,7 +57,7 @@ router.get(
   userauth,
   userProfileController.seteditAddress
 );
-router.post(
+router.delete(
   "/addressesdelete/:id",
   userauth,
   userProfileController.deleteAddress
@@ -71,7 +71,7 @@ router.get(
 router.post("/add-to-cart", userauth, cartController.addToCart);
 router.get("/cart", userauth, cartController.loadcart);
 router.post("/resend-otpforgot", userController.resendotpassword);
-router.post("/update-cart-item", userauth, cartController.updateCartItem);
+router.patch("/update-cart-item", userauth, cartController.updateCartItem);
 router.post("/remove-cart-item", userauth, cartController.removeCartItem);
 router.get("/checkout", userauth, cartController.loadcheckout);
 router.post('/checkout',userauth,cartController.postCheckoutValidation)
@@ -109,8 +109,8 @@ router.post(
 router.post("/verify-payment", userauth, userProfileController.verifypayment);
 router.post("/addwishlist", userauth, wishlistController.addwishlist);
 router.get("/wishlist", userauth, wishlistController.loadwishlist);
-router.post("/remove-wishlist", userauth, wishlistController.removewishlist);
-router.post(
+router.delete("/remove-wishlist", userauth, wishlistController.removewishlist);
+router.put(
   "/addtocartwishlist",
   userauth,
   wishlistController.addtocartwishlist

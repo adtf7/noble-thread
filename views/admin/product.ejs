@@ -224,7 +224,7 @@ function addProductOffer(productId) {
             const { discountPercentage, startDate, endDate } = result.value;
 
             fetch(`/admin/add-product-offer/${productId}`, {
-                method: 'POST',
+                method: 'Put',
                 headers: {
                     'Content-Type': 'application/json'
                 },

@@ -957,7 +957,7 @@ product._id.toString()); relatedProducts = relatedProducts.slice(0, 3); %>
           if (result.isConfirmed) {
               try {
                   const response = await fetch('/delete-review', {
-                      method: 'POST',
+                      method: 'DELETE',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ reviewId })
                   });

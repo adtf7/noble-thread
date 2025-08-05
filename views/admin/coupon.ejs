@@ -278,7 +278,7 @@
             if (result.isConfirmed) {
                 const couponData = result.value;
                 fetch(`/admin/edit-coupon/${couponId}`, {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -313,7 +313,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch(`/admin/unlist-coupon/${couponId}`, {
-                    method: 'POST'
+                    method: 'PATCH'
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -344,7 +344,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch(`/admin/list-coupon/${couponId}`, {
-                    method: 'POST'
+                    method: 'PATCH'
                 })
                 .then(response => response.json())
                 .then(data => {
