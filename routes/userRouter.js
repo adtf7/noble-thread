@@ -25,7 +25,7 @@ router.get(
   passport.authenticate("google", { failureRedirect: "/signup" }),
   (req, res) => {
     req.session.user = req.user.id;
-    res.redirect("/");
+    res.redirect("/referralCodepage");
   }
 );
 router.get("/login", userController.loadlogin);
