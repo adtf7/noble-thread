@@ -14,6 +14,7 @@ passport.use(
       try {
         let existingUser = await User.findOne({ googleId: profile.id });
         if (existingUser) {
+          existingUser._isNewUser = false;
           return done(null, existingUser);
         }
 
@@ -25,6 +26,7 @@ passport.use(
         });
 
         await newUser.save();
+         newUser._isNewUser = true;
         done(null, newUser);
       } catch (error) {
         done(error, false);
