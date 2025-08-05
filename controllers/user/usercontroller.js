@@ -599,7 +599,7 @@ const googleCallback = async (req, res) => {
     console.log("Google User:", req.user);
     console.log("Session:", req.session);
 
-    res.redirect("/referralCodepage");
+    res.redirect("/");
   } catch (error) {
     console.error("Error during Google callback:", error.message);
     res.status(500).send("Internal Server Error");
