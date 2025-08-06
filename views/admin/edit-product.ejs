@@ -363,7 +363,7 @@
         <div class="thumbnails-container">
             <% for (let i = 0; i < product.productImage.length; i++) { %>
                 <div class="thumbnail">
-                    <img src="http://localhost:3835/uploads/product-image/<%= product.productImage[i].split('/').pop() %>" alt="Product Image">
+                    <img src="http://noblethreads.3utilities.com/uploads/product-image/<%= product.productImage[i].split('/').pop() %>" alt="Product Image">
                     <i onclick="deleteSingleImage('<%= encodeURIComponent(product.productImage[i]) %>', '<%= product._id %>')" class="fa-solid fa-circle-xmark delete-image-icon"></i>
                 </div>
             <% } %>
@@ -754,7 +754,7 @@ function viewImage(event, index) {
                         text: "Image deleted successfully."
                     });
                 }
-                window.location.href =`http://localhost:3835/admin/editproduct/?id=${productId}`
+                window.location.href =`/admin/editproduct/?id=${productId}`
             },
             error: (xhr, status, error) => {
                 console.error('Error deleting image:', error);
