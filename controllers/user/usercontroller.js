@@ -643,7 +643,7 @@ const loadproduct = async (req, res) => {
     console.log("Product Data:", product);
 
     if (!product) {
-      return res.status(404).send("Product not found");
+       return res.redirect('/pagenotfound');
     }
     let productCategory = product.category;
 
