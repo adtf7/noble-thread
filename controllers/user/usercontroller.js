@@ -705,7 +705,7 @@ const loadProductDetails = async (req, res) => {
 
     let product = await products.findById(productId);
     if (!product) {
-      return res.status(404).send("Product not found");
+      return res.redirect('/pagenotfound');
     }
     let reviews = await Review.find({ product: productId })
       .populate("user", "name profileImage")
