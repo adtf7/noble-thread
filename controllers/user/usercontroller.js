@@ -638,7 +638,9 @@ const loadproduct = async (req, res) => {
     ]);
     let productId = req.query.id;
     console.log("Requested Product ID:", productId);
-
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.redirect('/pagenotfound');
+    }
     let product = await products.findById(productId).populate("category");
     console.log("Product Data:", product);
 
@@ -702,6 +704,10 @@ const loadProductDetails = async (req, res) => {
 
     let productId = req.params.id || req.query.id;
     console.log("Requested Product ID:", productId);
+
+     if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.redirect('/pagenotfound');
+    }
 
     let product = await products.findById(productId);
     if (!product) {
