@@ -1168,7 +1168,7 @@ const retrywallet = async (req, res) => {
     
     let wallet = await Wallet.findOne({ user: new ObjectId(userId) });
     console.log('wallet',wallet)
-    // Find the order
+    
     const order = await Order.findOne({
       _id: orderId,
       userId,
@@ -1179,7 +1179,7 @@ const retrywallet = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Order not found or not eligible for retry' });
     }
 
-    // Check product availability
+   
     const outOfStockItems = [];
     for (const item of order.orderItems) {
       const product = item.product;

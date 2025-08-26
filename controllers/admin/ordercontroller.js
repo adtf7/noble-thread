@@ -95,7 +95,7 @@ const viewOrder = async (req, res) => {
             .populate('address')
             .populate('orderItems.product');
         if (!order) {
-            return res.status(404).send('Order not found');
+           return res.redirect('/pagenotfound');
         }
 
         return res.render('admin/orderDetails', { order, currentPage: 'orders' });
